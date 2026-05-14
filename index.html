@@ -16,7 +16,7 @@
   --text: #F5F3FF;
   --text-2: #C4B5FD;
   --text-3: #8B7AB8;
-  --accent: #A78BFA;
+  --accent: #7C3AED;
   --accent-soft: rgba(139, 92, 246, 0.18);
   --accent-2: #EC4899;
   --accent-2-soft: rgba(236, 72, 153, 0.18);
@@ -34,11 +34,63 @@
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(124, 58, 237, 0.08);
   --shadow-md: 0 8px 24px rgba(124, 58, 237, 0.15);
 }
+
+/* ============ LIGHT MODE ============ */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #F8F7FB;
+  --surface: #FFFFFF;
+  --surface-2: #F1EEFC;
+  --surface-3: #E5E0F5;
+  --border: rgba(124, 58, 237, 0.12);
+  --border-strong: rgba(124, 58, 237, 0.22);
+  --text: #1F1837;
+  --text-2: #5B4B7C;
+  --text-3: #8B7AB8;
+  --accent: #6D28D9;
+  --accent-soft: rgba(124, 58, 237, 0.10);
+  --accent-2: #BE185D;
+  --accent-2-soft: rgba(190, 24, 93, 0.10);
+  --success: #059669;
+  --success-soft: rgba(5, 150, 105, 0.10);
+  --warn: #D97706;
+  --warn-soft: rgba(217, 119, 6, 0.10);
+  --danger: #DC2626;
+  --danger-soft: rgba(220, 38, 38, 0.10);
+  --info: #2563EB;
+  --info-soft: rgba(37, 99, 235, 0.10);
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.10);
+}
+:root[data-theme="light"] body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124, 58, 237, 0.06), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 100%, rgba(236, 72, 153, 0.04), transparent 60%);
+}
+:root[data-theme="light"] .sidebar {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(241, 238, 252, 0.95) 100%);
+}
+:root[data-theme="light"] .sidebar-logo-text {
+  background: linear-gradient(135deg, #1F1837, #6D28D9, #BE185D);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+:root[data-theme="light"] .chat-msg.bot { background: var(--surface-2); color: var(--text); }
+
+/* THEME TOGGLE BUTTON */
+.theme-toggle {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 6px 12px;
+  cursor: pointer; font-size: 12px; color: var(--text-2);
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: 0.15s;
+}
+.theme-toggle:hover { background: var(--surface-3); color: var(--text); }
 body {
   background-image:
     radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124, 58, 237, 0.15), transparent 60%),
     radial-gradient(ellipse 70% 50% at 80% 100%, rgba(236, 72, 153, 0.10), transparent 60%);
   background-attachment: fixed;
+  transition: background-color 0.3s ease;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -714,7 +766,13 @@ body.domain-agent .sales-only { display: none !important; }
 
   <div class="sidebar-footer">
     <div style="margin-bottom: 8px;">Connecté : <strong id="sb-user" style="color: var(--accent);">arnaud@pixeeplay.com</strong></div>
-    <a href="#" onclick="sessionStorage.removeItem('pixee_auth_v1'); location.reload(); return false;">↪ Déconnexion</a>
+    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+      <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle-btn" title="Mode jour / nuit">
+        <span id="theme-icon">🌙</span>
+        <span id="theme-label">Nuit</span>
+      </button>
+      <a href="#" onclick="sessionStorage.removeItem('pixee_auth_v1'); location.reload(); return false;" style="font-size: 11px;">↪ Déconnexion</a>
+    </div>
   </div>
 </aside>
 
@@ -5085,6 +5143,27 @@ async function doSync(direction) {
   }
 }
 
+/* === LIGHT/DARK MODE TOGGLE === */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('pixee_theme', theme);
+  const icon = document.getElementById('theme-icon');
+  const label = document.getElementById('theme-label');
+  if (icon) icon.textContent = theme === 'light' ? '☀️' : '🌙';
+  if (label) label.textContent = theme === 'light' ? 'Jour' : 'Nuit';
+  // Re-render chart si présent (les couleurs changent)
+  setTimeout(() => { try { drawChart(); if (typeof renderProjections === 'function' && document.getElementById('view-projections').classList.contains('active')) renderProjections(); } catch(e){} }, 100);
+}
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+// Init theme depuis localStorage
+(function initTheme() {
+  const saved = localStorage.getItem('pixee_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
 function setDomainOverride(val) {
   if (val) localStorage.setItem('pixee_domain_override', val);
   else localStorage.removeItem('pixee_domain_override');
@@ -5993,6 +6072,11 @@ if (!state.log.length) {
 // Resume autopilot if was on
 if (state.autopilotOn && state.geminiKey) startAutopilot();
 if (state.branding && state.branding.logoBase64) setTimeout(applyLogoEverywhere, 100);
+// Refresh theme toggle button label
+setTimeout(() => {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current);
+}, 100);
 
 // Restore mode toggle + domain override
 setTimeout(() => {
