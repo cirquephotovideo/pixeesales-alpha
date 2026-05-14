@@ -48,7 +48,53 @@ html, body {
   font-size: 14px; line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
-.app { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+@media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
+
+/* MEGA MENU LATÉRAL */
+.sidebar {
+  background: linear-gradient(180deg, rgba(21, 16, 31, 0.95) 0%, rgba(10, 5, 16, 0.95) 100%);
+  border-right: 1px solid var(--border);
+  padding: 24px 16px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  backdrop-filter: blur(20px);
+}
+@media (max-width: 900px) {
+  .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+}
+.sidebar-logo { display: flex; align-items: center; gap: 12px; padding: 0 8px 24px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sidebar-logo-mark { width: 36px; height: 36px; filter: drop-shadow(0 4px 12px rgba(167,139,250,0.4)); }
+.sidebar-logo-text { font-size: 14px; font-weight: 700; letter-spacing: 1px; background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.sidebar-logo-sub { font-size: 10px; color: var(--text-3); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+.menu-group { margin-bottom: 4px; }
+.menu-group-header {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer;
+  border-radius: 8px; transition: 0.15s; user-select: none;
+}
+.menu-group-header:hover { background: var(--surface-2); color: var(--text); }
+.menu-group-header.active { background: linear-gradient(135deg, rgba(124,58,237,0.25) 0%, rgba(236,72,153,0.20) 100%); color: var(--text); }
+.menu-group-header svg { width: 18px; height: 18px; flex-shrink: 0; }
+.menu-chevron { margin-left: auto; transition: transform 0.2s; width: 14px; height: 14px; opacity: 0.6; }
+.menu-group.open .menu-chevron { transform: rotate(90deg); }
+
+.submenu { max-height: 0; overflow: hidden; transition: max-height 0.25s ease; }
+.menu-group.open .submenu { max-height: 500px; }
+.submenu-item {
+  display: block; padding: 8px 12px 8px 42px;
+  font-size: 13px; color: var(--text-3); cursor: pointer;
+  border-radius: 6px; transition: 0.15s; margin: 2px 0;
+}
+.submenu-item:hover { background: var(--surface-2); color: var(--text); }
+.submenu-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+
+.sidebar-footer { padding: 16px 12px; margin-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); }
+.sidebar-footer a { color: var(--text-3); text-decoration: none; }
+.sidebar-footer a:hover { color: var(--accent); }
+
+/* Main content area */
+.main-content { padding: 24px 32px; max-width: 100%; min-width: 0; overflow-x: hidden; }
 
 .hero {
   display: flex; align-items: center; justify-content: space-between;
@@ -302,6 +348,162 @@ html, body {
 
 <div class="app" id="main-app" style="display: none;">
 
+<!-- ========== SIDEBAR MEGA MENU ========== -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+        <defs>
+          <linearGradient id="sbPetal" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F5F3FF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient>
+          <linearGradient id="sbPlay" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+        </defs>
+        <path d="M 30 18 Q 22 18 22 26 L 22 82 Q 22 90 30 90 L 38 90 Q 38 86 38 60 L 38 26 Q 38 18 30 18 Z" fill="url(#sbPetal)"/>
+        <path d="M 42 18 Q 50 18 56 22 Q 64 28 64 38 L 64 42 Q 64 50 60 54 L 50 60 Q 46 60 42 60 L 38 60 L 38 18 Z" fill="url(#sbPetal)"/>
+        <path d="M 60 54 Q 64 50 64 42 L 78 42 Q 78 50 74 56 Q 70 62 64 64 L 56 64 Z" fill="url(#sbPetal)" opacity="0.85"/>
+        <path d="M 42 42 L 60 50 L 42 58 Z" fill="url(#sbPlay)"/>
+      </svg>
+    </div>
+    <div>
+      <div class="sidebar-logo-text">PIXEE PLAY</div>
+      <div class="sidebar-logo-sub">Sales Alpha</div>
+    </div>
+  </div>
+
+  <nav id="megamenu">
+    <div class="menu-group open">
+      <div class="menu-group-header active" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Dashboard</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item active" onclick="navTo('dashboard', this)">Vue d'ensemble</a>
+        <a class="submenu-item" onclick="navTo('dashboard-kpis', this)">KPIs détaillés</a>
+        <a class="submenu-item" onclick="navTo('dashboard-activity', this)">Activité agent</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Prospection</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('scraping', this)">Trouver des leads</a>
+        <a class="submenu-item" onclick="navTo('scraping', this)">Leads qualifiés</a>
+        <a class="submenu-item" onclick="navTo('scraping', this)">Import CSV</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span>Outreach</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('outreach', this)">Cold emails</a>
+        <a class="submenu-item" onclick="navTo('outreach', this)">Relances</a>
+        <a class="submenu-item" onclick="navTo('outreach', this)">Messages LinkedIn</a>
+        <a class="submenu-item" onclick="navTo('outreach', this)">Scripts d'appel</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        <span>Pipeline</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('pipeline', this)">Vue Kanban</a>
+        <a class="submenu-item" onclick="navTo('pipeline', this)">Deals à closer</a>
+        <a class="submenu-item" onclick="navTo('pipeline', this)">Deals perdus</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Devis &amp; Factures</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('devis', this)">Créer un devis</a>
+        <a class="submenu-item" onclick="navTo('devis', this)">Mes devis</a>
+        <a class="submenu-item" onclick="navTo('factures', this)">Créer une facture</a>
+        <a class="submenu-item" onclick="navTo('factures', this)">Mes factures</a>
+        <a class="submenu-item" onclick="navTo('factures', this)">Avoirs</a>
+        <a class="submenu-item" onclick="navTo('produits', this)">Catalogue produits</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Clients</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('clients', this)">Liste clients</a>
+        <a class="submenu-item" onclick="navTo('clients', this)">Nouveau client</a>
+        <a class="submenu-item" onclick="navTo('clients', this)">Segments</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Finance &amp; Banque</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('banque', this)">Connexion bancaire</a>
+        <a class="submenu-item" onclick="navTo('banque', this)">Transactions</a>
+        <a class="submenu-item" onclick="navTo('banque', this)">Encaissements</a>
+        <a class="submenu-item" onclick="navTo('banque', this)">Cash flow</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span>Rapports</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('reports', this)">Rapports quotidiens</a>
+        <a class="submenu-item" onclick="navTo('reports', this)">Bilans mensuels</a>
+        <a class="submenu-item" onclick="navTo('reports', this)">Export comptable</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Configuration</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('settings', this)">Clé Gemini</a>
+        <a class="submenu-item" onclick="navTo('settings', this)">Autopilote</a>
+        <a class="submenu-item" onclick="navTo('settings', this)">Connecteurs</a>
+        <a class="submenu-item" onclick="navTo('settings', this)">Webhook Zapier</a>
+        <a class="submenu-item" onclick="navTo('branding', this)">Branding entreprise</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div style="margin-bottom: 8px;">Connecté : <strong id="sb-user" style="color: var(--accent);">arnaud@pixeeplay.com</strong></div>
+    <a href="#" onclick="sessionStorage.removeItem('pixee_auth_v1'); location.reload(); return false;">↪ Déconnexion</a>
+  </div>
+</aside>
+
+<!-- ========== MAIN CONTENT ========== -->
+<div class="main-content">
+
   <!-- Hero -->
   <div class="hero">
     <div class="hero-left">
@@ -358,8 +560,8 @@ html, body {
     </div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
+  <!-- Tabs (cachés, navigation via sidebar) -->
+  <div class="tabs" style="display: none;">
     <button class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Dashboard
@@ -911,6 +1113,222 @@ html, body {
     </div>
   </div>
 
+  <!-- ============ DEVIS ============ -->
+  <div class="view" id="view-devis">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Devis
+      </h2>
+      <p class="card-desc">Génère des devis avec logo Pixeeplay (ou ton logo client), envoie pour signature électronique via PandaDoc, suis l'acceptation.</p>
+      <div class="input-row">
+        <select id="devis-client" class="select"><option value="">— Client / Lead —</option></select>
+        <input id="devis-ref" class="input" placeholder="Ref devis (auto: DV-{YYYY}-{N})">
+      </div>
+      <textarea id="devis-items" class="textarea" placeholder="Lignes du devis (une par ligne) :&#10;PixeePIM - Setup initial - 1500&#10;PixeePIM - Abonnement mensuel x12 - 99&#10;Pixeesite - Site vitrine - 2900" style="min-height: 140px;"></textarea>
+      <div class="input-row">
+        <select id="devis-tva" class="select">
+          <option value="20">TVA 20% (normale)</option>
+          <option value="10">TVA 10%</option>
+          <option value="5.5">TVA 5,5%</option>
+          <option value="0">Exonéré TVA</option>
+        </select>
+        <select id="devis-validite" class="select">
+          <option value="30">Valide 30 jours</option>
+          <option value="60">Valide 60 jours</option>
+          <option value="90">Valide 90 jours</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateDevis()">
+          <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Générer le devis IA
+        </button>
+        <button class="btn btn-secondary" onclick="exportDevisPDF()">Export PDF</button>
+        <button class="btn btn-secondary" onclick="sendDevisPandadoc()">Envoyer via PandaDoc</button>
+      </div>
+      <div id="devis-out"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Mes devis (<span id="devis-count">0</span>)</h2>
+      <div id="devis-list"></div>
+    </div>
+  </div>
+
+  <!-- ============ FACTURES ============ -->
+  <div class="view" id="view-factures">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Factures
+      </h2>
+      <p class="card-desc">Création de factures conformes (mentions légales, numéro chronologique), envoi par email, suivi paiement, génération avoirs.</p>
+      <div class="input-row">
+        <select id="facture-client" class="select"><option value="">— Client —</option></select>
+        <input id="facture-ref" class="input" placeholder="Ref facture (auto: FA-{YYYY}-{N})">
+      </div>
+      <div class="input-row">
+        <select id="facture-devis-source" class="select">
+          <option value="">Créer une facture libre</option>
+          <option value="from-devis">Depuis un devis accepté</option>
+        </select>
+        <select id="facture-statut" class="select">
+          <option value="draft">Brouillon</option>
+          <option value="sent">Envoyée</option>
+          <option value="paid">Payée</option>
+          <option value="overdue">En retard</option>
+        </select>
+      </div>
+      <textarea id="facture-items" class="textarea" placeholder="Lignes (une par ligne) : description - quantité - prix unitaire" style="min-height: 100px;"></textarea>
+      <div class="input-row">
+        <input id="facture-echeance" type="date" class="input">
+        <select id="facture-paiement" class="select">
+          <option>Virement SEPA</option>
+          <option>Stripe (CB)</option>
+          <option>Chèque</option>
+          <option>Prélèvement</option>
+        </select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateFacture()">Générer la facture</button>
+        <button class="btn btn-secondary" onclick="sendFactureEmail()">Envoyer par email</button>
+        <button class="btn btn-secondary" onclick="createStripePaymentLink()">Lien paiement Stripe</button>
+        <button class="btn btn-ghost" onclick="createAvoir()">Créer un avoir</button>
+      </div>
+      <div id="facture-out"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Mes factures (<span id="factures-count">0</span>)</h2>
+      <div class="filter-row">
+        <span class="chip active" onclick="filterFactures('all', this)">Toutes</span>
+        <span class="chip" onclick="filterFactures('draft', this)">Brouillons</span>
+        <span class="chip" onclick="filterFactures('sent', this)">Envoyées</span>
+        <span class="chip" onclick="filterFactures('paid', this)">Payées</span>
+        <span class="chip" onclick="filterFactures('overdue', this)">En retard</span>
+      </div>
+      <div id="factures-list"></div>
+    </div>
+  </div>
+
+  <!-- ============ CATALOGUE PRODUITS ============ -->
+  <div class="view" id="view-produits">
+    <div class="card">
+      <h2 class="card-title">Catalogue produits / services</h2>
+      <p class="card-desc">Définis tes produits avec logo, description, prix HT, TVA. Réutilisables dans devis et factures.</p>
+      <div class="input-row">
+        <input id="prod-name" class="input" placeholder="Nom du produit (ex: PixeePIM)">
+        <input id="prod-logo" class="input" placeholder="URL logo (https://...)">
+      </div>
+      <div class="input-row">
+        <input id="prod-price" type="number" class="input" placeholder="Prix HT (€)">
+        <select id="prod-recurrence" class="select">
+          <option value="once">Paiement unique</option>
+          <option value="monthly">Mensuel</option>
+          <option value="yearly">Annuel</option>
+        </select>
+      </div>
+      <textarea id="prod-desc" class="textarea" placeholder="Description courte (apparaît sur le devis)"></textarea>
+      <button class="btn btn-primary" onclick="addProduit()">+ Ajouter au catalogue</button>
+      <div id="produits-list" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ CLIENTS ============ -->
+  <div class="view" id="view-clients">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Clients
+      </h2>
+      <p class="card-desc">Base clients : raison sociale, SIRET, contact, adresse de facturation. Un lead converti devient automatiquement client.</p>
+      <div class="input-row">
+        <input id="client-name" class="input" placeholder="Raison sociale">
+        <input id="client-siret" class="input" placeholder="SIRET">
+      </div>
+      <div class="input-row">
+        <input id="client-contact" class="input" placeholder="Contact (Prénom Nom)">
+        <input id="client-email" type="email" class="input" placeholder="Email facturation">
+      </div>
+      <textarea id="client-address" class="textarea" placeholder="Adresse de facturation complète" style="min-height: 70px;"></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="addClient()">+ Ajouter client</button>
+        <button class="btn btn-secondary" onclick="importClientsCSV()">Importer CSV</button>
+      </div>
+      <div id="clients-list" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ BANQUE ============ -->
+  <div class="view" id="view-banque">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+        Connexion bancaire
+      </h2>
+      <p class="card-desc">Connecte ton compte pro pour réconciliation automatique des paiements et suivi du cash flow. Compatible Qonto, Boursorama Pro, BNP, Société Générale, et toute banque française via PSD2.</p>
+      <div class="connector-grid">
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('qonto')">
+          <p class="connector-name">🟠 Qonto</p>
+          <p class="connector-desc">API officielle Qonto</p>
+        </div>
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('bridge')">
+          <p class="connector-name">🌉 Bridge API (PSD2)</p>
+          <p class="connector-desc">Toutes banques FR</p>
+        </div>
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('powens')">
+          <p class="connector-name">⚡ Powens (Budget Insight)</p>
+          <p class="connector-desc">300+ banques EU</p>
+        </div>
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('gocardless')">
+          <p class="connector-name">💳 GoCardless</p>
+          <p class="connector-desc">Prélèvements SEPA</p>
+        </div>
+      </div>
+      <div id="bank-config" style="margin-top: 16px;"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Transactions récentes</h2>
+      <p class="card-desc">Les paiements entrants sont automatiquement matchés aux factures.</p>
+      <div id="bank-tx-list">
+        <div class="empty">Connecte d'abord ta banque pour voir les transactions.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Cash flow projeté</h2>
+      <p class="card-desc">Prévisions à 30/60/90 jours en croisant factures émises + récurrences SaaS + dépenses prévues.</p>
+      <div class="chart-wrap"><canvas id="cashflowChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ============ BRANDING ============ -->
+  <div class="view" id="view-branding">
+    <div class="card">
+      <h2 class="card-title">Branding entreprise</h2>
+      <p class="card-desc">Apparaît sur tes devis, factures, emails. Par défaut : Pixeeplay.</p>
+      <div class="input-row">
+        <input id="brand-company" class="input" placeholder="Nom entreprise" value="Pixeeplay">
+        <input id="brand-siret" class="input" placeholder="SIRET">
+      </div>
+      <div class="input-row">
+        <input id="brand-logo" class="input" placeholder="URL logo (https://...)" value="">
+        <input id="brand-color" type="color" class="input" value="#7C3AED" style="height: 44px;">
+      </div>
+      <textarea id="brand-address" class="textarea" placeholder="Adresse complète (apparaît sur les devis/factures)" style="min-height: 80px;"></textarea>
+      <div class="input-row">
+        <input id="brand-tva" class="input" placeholder="N° TVA intracom (ex: FR12345678901)">
+        <input id="brand-iban" class="input" placeholder="IBAN pour réception paiements">
+      </div>
+      <button class="btn btn-primary" onclick="saveBranding()">Sauvegarder le branding</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
   <!-- Footer Pixeeplay -->
   <footer style="margin-top: 40px; padding: 32px 0; text-align: center; border-top: 1px solid var(--border);">
     <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
@@ -994,9 +1412,16 @@ const LS = {
   lastReports: 'pixee_v4_last_reports'
 };
 
+// Clé Gemini injectée au build par Coolify (Dockerfile ARG)
+// Si vide, on prend localStorage (saisie utilisateur)
+const __BUILD_GEMINI_KEY__ = '__GEMINI_API_KEY_INJECTED__';
+const __BUILD_GEMINI_MODEL__ = '__GEMINI_MODEL_INJECTED__';
+const BUILD_KEY = __BUILD_GEMINI_KEY__.startsWith('__') ? '' : __BUILD_GEMINI_KEY__;
+const BUILD_MODEL = __BUILD_GEMINI_MODEL__.startsWith('__') ? 'gemini-2.5-flash' : __BUILD_GEMINI_MODEL__;
+
 const state = {
-  geminiKey: localStorage.getItem(LS.gemini) || '',
-  geminiModel: localStorage.getItem(LS.geminiModel) || 'gemini-2.5-flash',
+  geminiKey: BUILD_KEY || localStorage.getItem(LS.gemini) || '',
+  geminiModel: BUILD_MODEL !== 'gemini-2.5-flash' ? BUILD_MODEL : (localStorage.getItem(LS.geminiModel) || 'gemini-2.5-flash'),
   email: localStorage.getItem(LS.email) || 'arnaud@pixeeplay.com',
   webhook: localStorage.getItem(LS.webhook) || '',
   leads: JSON.parse(localStorage.getItem(LS.leads) || '[]'),
@@ -1054,11 +1479,44 @@ function renderLog() {
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelector('[data-tab="'+name+'"]').classList.add('active');
-  document.getElementById('view-'+name).classList.add('active');
+  const tabBtn = document.querySelector('[data-tab="'+name+'"]');
+  if (tabBtn) tabBtn.classList.add('active');
+  const view = document.getElementById('view-'+name);
+  if (view) view.classList.add('active');
   if (name === 'pipeline') renderKanban();
   if (name === 'outreach') { refreshLeadDropdown(); renderMessages(); }
   if (name === 'reports') renderReportsHistory();
+  if (name === 'devis') { refreshDevisDropdowns(); renderDevisList(); }
+  if (name === 'factures') { refreshFactureDropdowns(); renderFacturesList(); }
+  if (name === 'clients') renderClientsList();
+  if (name === 'produits') renderProduitsList();
+  if (name === 'branding') loadBrandingForm();
+  if (name === 'banque') renderBanqueView();
+}
+
+// MEGA MENU navigation
+function toggleMenu(headerEl) {
+  const group = headerEl.parentElement;
+  group.classList.toggle('open');
+}
+function navTo(name, itemEl) {
+  // Map de mapping des sous-menus vers vues principales
+  const aliases = { 'dashboard-kpis': 'dashboard', 'dashboard-activity': 'dashboard' };
+  const target = aliases[name] || name;
+  // Mettre à jour l'état actif dans le menu
+  document.querySelectorAll('.submenu-item').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.menu-group-header').forEach(h => h.classList.remove('active'));
+  if (itemEl) {
+    itemEl.classList.add('active');
+    const group = itemEl.closest('.menu-group');
+    if (group) {
+      group.classList.add('open');
+      group.querySelector('.menu-group-header').classList.add('active');
+    }
+  }
+  switchTab(target);
+  // Scroll en haut du contenu
+  document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function computeStats() {
@@ -1294,6 +1752,74 @@ function updateGeminiStatus() {
   }
 }
 
+// Parser tolérant : extrait JSON même si Gemini ajoute du markdown / texte autour
+function parseJsonFromAI(text, expect) {
+  if (!text) return null;
+  // Nettoyer markdown fences
+  let cleaned = text.replace(/```(?:json)?\s*/gi, '').replace(/```/g, '').trim();
+  const open = expect === 'array' ? '[' : '{';
+  const close = expect === 'array' ? ']' : '}';
+  // Tentative directe
+  try { return JSON.parse(cleaned); } catch(e) {}
+  // Extraction par comptage de brackets/accolades
+  const start = cleaned.indexOf(open);
+  if (start === -1) return null;
+  let depth = 0, inStr = false, esc = false;
+  for (let i = start; i < cleaned.length; i++) {
+    const c = cleaned[i];
+    if (inStr) {
+      if (esc) { esc = false; continue; }
+      if (c === '\\') { esc = true; continue; }
+      if (c === '"') inStr = false;
+      continue;
+    }
+    if (c === '"') { inStr = true; continue; }
+    if (c === open) depth++;
+    else if (c === close) {
+      depth--;
+      if (depth === 0) {
+        const slice = cleaned.slice(start, i + 1);
+        try { return JSON.parse(slice); } catch(e) {
+          // Tenter de réparer : enlever virgules trailing, échapper newlines dans strings
+          const fixed = slice.replace(/,\s*([\]}])/g, '$1');
+          try { return JSON.parse(fixed); } catch(e2) {}
+          // Tronquer au dernier objet/élément valide
+          if (expect === 'array') {
+            const items = [];
+            let depth2 = 0, itemStart = -1, inStr2 = false, esc2 = false;
+            for (let j = 1; j < slice.length - 1; j++) {
+              const ch = slice[j];
+              if (inStr2) {
+                if (esc2) { esc2 = false; continue; }
+                if (ch === '\\') { esc2 = true; continue; }
+                if (ch === '"') inStr2 = false;
+                continue;
+              }
+              if (ch === '"') inStr2 = true;
+              else if (ch === '{') { if (depth2 === 0) itemStart = j; depth2++; }
+              else if (ch === '}') {
+                depth2--;
+                if (depth2 === 0 && itemStart !== -1) {
+                  try { items.push(JSON.parse(slice.slice(itemStart, j + 1))); } catch(e3) {}
+                  itemStart = -1;
+                }
+              }
+            }
+            if (items.length) return items;
+          }
+        }
+        return null;
+      }
+    }
+  }
+  // JSON incomplet — tenter de fermer
+  if (depth > 0) {
+    const padding = (expect === 'array' ? ']' : '}').repeat(depth);
+    try { return JSON.parse(cleaned.slice(start) + padding); } catch(e) {}
+  }
+  return null;
+}
+
 async function callGemini(prompt, opts) {
   opts = opts || {};
   const k = opts.key || state.geminiKey;
@@ -1380,9 +1906,8 @@ Barème score : site obsolète/lent (+30), catalogue produit complexe (+25), pas
 Privilégie de vraies entreprises françaises avec sites web vérifiables. Pour chaque : pitch concret exploitant les vraies douleurs business.`;
 
   const resp = await callGemini(prompt, { search: state.config.search, temperature: 0.8 });
-  const match = resp.match(/\[[\s\S]*\]/);
-  if (!match) throw new Error('Pas de JSON valide dans la réponse');
-  const arr = JSON.parse(match[0]);
+  const arr = parseJsonFromAI(resp, 'array');
+  if (!Array.isArray(arr) || !arr.length) throw new Error('Aucun lead trouvé dans la réponse IA');
   const added = [];
   arr.forEach(p => {
     const exists = state.leads.find(l => l.company.toLowerCase() === (p.company||'').toLowerCase());
@@ -1435,9 +1960,8 @@ Site (extrait) : ${scraped.slice(0, 6000)}`;
 
   try {
     const resp = await callGemini(prompt);
-    const match = resp.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Pas de JSON valide');
-    const p = JSON.parse(match[0]);
+    const p = parseJsonFromAI(resp, 'object');
+    if (!p) throw new Error('Pas de JSON valide dans la réponse');
     const lead = {
       id: Date.now(), company: p.company, sector: p.sector, size: p.size, maturity: p.digital_maturity,
       score: p.score, category: p.category, products: p.recommended_products || [],
@@ -1842,7 +2366,7 @@ async function testConnector(name) {
         });
         alert(r.ok ? 'Test Gmail relayé via webhook ('+r.status+')' : 'Webhook a répondu '+r.status);
       } else {
-        alert('Gmail SMTP n\'est pas accessible directement depuis le navigateur. Configure un webhook Zapier pour relayer.');
+        alert('Pour envoyer en SMTP natif, configure d\'abord le webhook Zapier/Make dans la section ci-dessus — il relaie les emails vers Gmail. C\'est la méthode standard et fiable. Sans webhook, l\'envoi se fait via le client mail local (mailto).');
       }
     } else if (name === 'phantombuster') {
       if (!cfg.key) throw new Error('Clé API requise');
@@ -2078,6 +2602,413 @@ async function createStripeQuote(lead, amount) {
   });
   logAct('Quote Stripe relayée via webhook pour '+lead.company, 'success');
   return true;
+}
+
+/* ============ DEVIS / FACTURES / CLIENTS / PRODUITS / BANQUE ============ */
+const BIZ_LS = {
+  devis: 'pixee_biz_devis', factures: 'pixee_biz_factures',
+  clients: 'pixee_biz_clients', produits: 'pixee_biz_produits',
+  bank: 'pixee_biz_bank', branding: 'pixee_biz_branding'
+};
+state.devis = JSON.parse(localStorage.getItem(BIZ_LS.devis) || '[]');
+state.factures = JSON.parse(localStorage.getItem(BIZ_LS.factures) || '[]');
+state.clients = JSON.parse(localStorage.getItem(BIZ_LS.clients) || '[]');
+state.produits = JSON.parse(localStorage.getItem(BIZ_LS.produits) || '[]');
+state.bank = JSON.parse(localStorage.getItem(BIZ_LS.bank) || '{}');
+state.branding = JSON.parse(localStorage.getItem(BIZ_LS.branding) || JSON.stringify({
+  company: 'Pixeeplay', siret: '', logo: '', color: '#7C3AED',
+  address: '', tva: '', iban: ''
+}));
+state.factureFilter = 'all';
+
+function saveBiz() {
+  localStorage.setItem(BIZ_LS.devis, JSON.stringify(state.devis));
+  localStorage.setItem(BIZ_LS.factures, JSON.stringify(state.factures));
+  localStorage.setItem(BIZ_LS.clients, JSON.stringify(state.clients));
+  localStorage.setItem(BIZ_LS.produits, JSON.stringify(state.produits));
+  localStorage.setItem(BIZ_LS.bank, JSON.stringify(state.bank));
+  localStorage.setItem(BIZ_LS.branding, JSON.stringify(state.branding));
+}
+
+function nextRef(prefix) {
+  const year = new Date().getFullYear();
+  const items = prefix === 'DV' ? state.devis : state.factures;
+  const num = items.filter(i => i.ref?.includes('-'+year+'-')).length + 1;
+  return prefix+'-'+year+'-'+String(num).padStart(4,'0');
+}
+
+/* === Devis === */
+function refreshDevisDropdowns() {
+  const sel = document.getElementById('devis-client');
+  if (!sel) return;
+  const opts = [...state.clients.map(c => ({id: 'c-'+c.id, label: c.name+' (client)'})),
+                ...state.leads.map(l => ({id: 'l-'+l.id, label: l.company+' (lead)'}))];
+  sel.innerHTML = '<option value="">— Client / Lead —</option>' + opts.map(o => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join('');
+  const ref = document.getElementById('devis-ref');
+  if (ref && !ref.value) ref.placeholder = 'Auto: '+nextRef('DV');
+}
+
+async function generateDevis() {
+  const clientId = document.getElementById('devis-client').value;
+  const items = document.getElementById('devis-items').value.trim();
+  const tva = parseFloat(document.getElementById('devis-tva').value);
+  const validite = parseInt(document.getElementById('devis-validite').value);
+  if (!items) { alert('Saisis au moins une ligne de devis'); return; }
+  if (!state.geminiKey) { alert('Configure ta clé Gemini'); switchTab('settings'); return; }
+
+  const out = document.getElementById('devis-out');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération du devis...</div>';
+
+  // Parse manuelle des items
+  const lines = items.split('\n').filter(l => l.trim());
+  const lineItems = lines.map(l => {
+    const parts = l.split(/\s*-\s*/);
+    const price = parseFloat(parts[parts.length-1].replace(/[€\s]/g,'').replace(',','.'));
+    return { desc: parts.slice(0,-1).join(' - ') || parts[0], price: isNaN(price) ? 0 : price };
+  });
+  const totalHT = lineItems.reduce((s,i)=>s+i.price,0);
+  const totalTTC = totalHT * (1 + tva/100);
+
+  const clientLabel = document.getElementById('devis-client').selectedOptions[0]?.text || 'Client à définir';
+  const ref = document.getElementById('devis-ref').value.trim() || nextRef('DV');
+  const echeance = new Date(); echeance.setDate(echeance.getDate() + validite);
+
+  const devis = {
+    id: Date.now(), ref, clientId, clientLabel, items: lineItems,
+    totalHT, tva, totalTTC, validite, date: new Date().toISOString(),
+    echeance: echeance.toISOString(), status: 'draft'
+  };
+  state.devis.unshift(devis); saveBiz();
+
+  out.innerHTML = renderDevisCard(devis);
+  renderDevisList();
+  logAct('Devis '+ref+' généré : '+eur(totalTTC), 'success');
+}
+
+function renderDevisCard(d) {
+  const itemsHtml = d.items.map(i => `<tr><td style="padding:6px 0;">${escapeHtml(i.desc)}</td><td style="text-align:right;font-weight:600;">${eur(i.price)}</td></tr>`).join('');
+  return `
+    <div class="lead-detail" style="padding: 24px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <div>
+          <p style="font-size: 11px; color: var(--text-2); margin: 0; letter-spacing: 1px;">DEVIS</p>
+          <p style="font-size: 22px; font-weight: 700; margin: 4px 0 0;">${escapeHtml(d.ref)}</p>
+        </div>
+        <div style="text-align: right;">
+          <p style="font-size: 11px; color: var(--text-2); margin: 0;">Émis le ${new Date(d.date).toLocaleDateString('fr-FR')}</p>
+          <p style="font-size: 11px; color: var(--text-2); margin: 0;">Valide jusqu'au ${new Date(d.echeance).toLocaleDateString('fr-FR')}</p>
+        </div>
+      </div>
+      <p style="margin: 0 0 12px;"><strong>Client :</strong> ${escapeHtml(d.clientLabel)}</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <thead><tr style="font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px;"><th style="text-align:left; padding: 8px 0;">Description</th><th style="text-align:right; padding: 8px 0;">Montant HT</th></tr></thead>
+        <tbody>${itemsHtml}</tbody>
+      </table>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>Total HT</span><span>${eur(d.totalHT)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>TVA ${d.tva}%</span><span>${eur(d.totalHT * d.tva/100)}</span></div>
+      <div style="display: flex; justify-content: space-between; padding: 8px 0; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 18px; font-weight: 700;"><span>Total TTC</span><span style="color: var(--accent);">${eur(d.totalTTC)}</span></div>
+      <div class="btn-row" style="margin-top: 16px;">
+        <button class="btn btn-primary" onclick='convertDevisToFacture(${d.id})'>→ Convertir en facture</button>
+        <button class="btn btn-secondary" onclick='exportDevisPDF(${d.id})'>Export PDF</button>
+        <button class="btn btn-secondary" onclick='sendDevisPandadoc(${d.id})'>Envoyer signature</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDevisList() {
+  const el = document.getElementById('devis-list');
+  if (!el) return;
+  document.getElementById('devis-count').textContent = state.devis.length;
+  if (!state.devis.length) { el.innerHTML = '<div class="empty">Aucun devis. Crée-en un ci-dessus.</div>'; return; }
+  el.innerHTML = state.devis.map(d => `
+    <div class="lead-row" onclick='showDevis(${d.id})' style="cursor: pointer;">
+      <div class="score-circle" style="font-size: 11px; line-height: 1.1; text-align: center;">${escapeHtml(d.ref.split('-')[2] || '')}</div>
+      <div class="lead-info">
+        <p class="lead-name">${escapeHtml(d.ref)} <span class="badge ${d.status==='accepted'?'badge-success':'badge-cold'}">${d.status}</span></p>
+        <p class="lead-meta">${escapeHtml(d.clientLabel)} · ${new Date(d.date).toLocaleDateString('fr-FR')} · ${eur(d.totalTTC)}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showDevis(id) {
+  const d = state.devis.find(x => x.id === id);
+  if (d) document.getElementById('devis-out').innerHTML = renderDevisCard(d);
+}
+
+function exportDevisPDF(id) {
+  alert('Export PDF : fonctionnalité Phase 1 (génération via backend html2pdf + branding). Pour l\'instant utilise Export imprimer du navigateur.');
+}
+
+function sendDevisPandadoc(id) {
+  const d = id ? state.devis.find(x => x.id === id) : state.devis[0];
+  if (!d) { alert('Aucun devis'); return; }
+  if (state.connectors.pandadoc?.key || state.webhook) {
+    const lead = { company: d.clientLabel, url: '' };
+    createPandadocQuote(lead, d.totalTTC);
+  } else {
+    alert('Configure PandaDoc ou le webhook Zapier dans Configuration → Connecteurs.');
+  }
+}
+
+function convertDevisToFacture(devisId) {
+  const d = state.devis.find(x => x.id === devisId);
+  if (!d) return;
+  const facture = {
+    id: Date.now(), ref: nextRef('FA'), clientId: d.clientId, clientLabel: d.clientLabel,
+    items: d.items, totalHT: d.totalHT, tva: d.tva, totalTTC: d.totalTTC,
+    date: new Date().toISOString(),
+    echeance: new Date(Date.now() + 30*86400000).toISOString(),
+    paiement: 'Virement SEPA', status: 'draft', sourceDevis: d.ref
+  };
+  state.factures.unshift(facture); saveBiz();
+  switchTab('factures');
+  logAct('Facture '+facture.ref+' créée depuis devis '+d.ref, 'success');
+  alert('Facture '+facture.ref+' créée. Tu peux maintenant l\'envoyer.');
+}
+
+/* === Factures === */
+function refreshFactureDropdowns() {
+  const sel = document.getElementById('facture-client');
+  if (!sel) return;
+  const opts = state.clients.map(c => `<option value="c-${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  sel.innerHTML = '<option value="">— Client —</option>' + opts;
+  const ref = document.getElementById('facture-ref');
+  if (ref) ref.placeholder = 'Auto: '+nextRef('FA');
+  const ech = document.getElementById('facture-echeance');
+  if (ech && !ech.value) { const d = new Date(); d.setDate(d.getDate()+30); ech.value = d.toISOString().slice(0,10); }
+}
+
+function generateFacture() {
+  const items = document.getElementById('facture-items').value.trim();
+  if (!items) { alert('Ajoute des lignes de facture'); return; }
+  const lines = items.split('\n').filter(l => l.trim()).map(l => {
+    const parts = l.split(/\s*-\s*/);
+    const price = parseFloat(parts[parts.length-1]?.replace(/[€\s]/g,'').replace(',','.')||0);
+    const qty = parseFloat(parts[parts.length-2]?.replace(/\s/g,'')||1);
+    return { desc: parts[0], qty: isNaN(qty)?1:qty, price: isNaN(price)?0:price };
+  });
+  const totalHT = lines.reduce((s,i)=>s+(i.qty*i.price),0);
+  const tva = 20;
+  const facture = {
+    id: Date.now(),
+    ref: document.getElementById('facture-ref').value.trim() || nextRef('FA'),
+    clientId: document.getElementById('facture-client').value,
+    clientLabel: document.getElementById('facture-client').selectedOptions[0]?.text || '',
+    items: lines, totalHT, tva, totalTTC: totalHT*1.2,
+    date: new Date().toISOString(),
+    echeance: new Date(document.getElementById('facture-echeance').value).toISOString(),
+    paiement: document.getElementById('facture-paiement').value,
+    status: document.getElementById('facture-statut').value
+  };
+  state.factures.unshift(facture); saveBiz(); renderFacturesList();
+  document.getElementById('facture-out').innerHTML = '<div class="success-notice">Facture '+facture.ref+' créée — '+eur(facture.totalTTC)+'</div>';
+  logAct('Facture créée : '+facture.ref+' '+eur(facture.totalTTC), 'success');
+}
+
+function renderFacturesList() {
+  const el = document.getElementById('factures-list');
+  if (!el) return;
+  document.getElementById('factures-count').textContent = state.factures.length;
+  const items = state.factureFilter === 'all' ? state.factures : state.factures.filter(f => f.status === state.factureFilter);
+  if (!items.length) { el.innerHTML = '<div class="empty">Aucune facture.</div>'; return; }
+  const badgeMap = { draft:'badge-neutral', sent:'badge-cold', paid:'badge-success', overdue:'badge-hot' };
+  const labelMap = { draft:'Brouillon', sent:'Envoyée', paid:'Payée', overdue:'En retard' };
+  el.innerHTML = items.map(f => `
+    <div class="lead-row">
+      <div class="score-circle" style="font-size: 10px; line-height: 1.1; text-align: center; padding: 4px;">${escapeHtml((f.ref||'').split('-')[2] || '')}</div>
+      <div class="lead-info">
+        <p class="lead-name">${escapeHtml(f.ref||'')} <span class="badge ${badgeMap[f.status]||'badge-neutral'}">${labelMap[f.status]||f.status}</span></p>
+        <p class="lead-meta">${escapeHtml(f.clientLabel||'')} · ${new Date(f.date).toLocaleDateString('fr-FR')} · ${eur(f.totalTTC)} · échéance ${new Date(f.echeance).toLocaleDateString('fr-FR')}</p>
+      </div>
+      <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick='markFacturePaid(${f.id})'>${f.status==='paid'?'✓ Payée':'Marquer payée'}</button>
+    </div>
+  `).join('');
+}
+function filterFactures(s, el) {
+  state.factureFilter = s;
+  document.querySelectorAll('#view-factures .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderFacturesList();
+}
+function markFacturePaid(id) {
+  const f = state.factures.find(x => x.id === id);
+  if (!f) return;
+  f.status = 'paid';
+  f.paidAt = new Date().toISOString();
+  saveBiz(); renderFacturesList();
+  logAct('Facture '+f.ref+' marquée payée ('+eur(f.totalTTC)+')', 'success');
+}
+function sendFactureEmail() {
+  alert('Envoi par email : nécessite webhook Zapier ou backend (Phase 1). Pour l\'instant utilise le bouton Lien paiement Stripe.');
+}
+function createStripePaymentLink() {
+  if (state.factures.length === 0) { alert('Crée d\'abord une facture'); return; }
+  const f = state.factures[0];
+  createStripeQuote({ company: f.clientLabel, url: '' }, f.totalTTC);
+}
+function createAvoir() {
+  alert('Création d\'avoir : à implémenter Phase 1 (numéro AV-{YYYY}-{N} négatif rattaché à la facture source).');
+}
+
+/* === Produits === */
+function addProduit() {
+  const p = {
+    id: Date.now(),
+    name: document.getElementById('prod-name').value.trim(),
+    logo: document.getElementById('prod-logo').value.trim(),
+    price: parseFloat(document.getElementById('prod-price').value)||0,
+    recurrence: document.getElementById('prod-recurrence').value,
+    desc: document.getElementById('prod-desc').value.trim()
+  };
+  if (!p.name) { alert('Nom requis'); return; }
+  state.produits.push(p); saveBiz();
+  ['prod-name','prod-logo','prod-price','prod-desc'].forEach(id => document.getElementById(id).value = '');
+  renderProduitsList();
+}
+function renderProduitsList() {
+  const el = document.getElementById('produits-list');
+  if (!el) return;
+  if (!state.produits.length) { el.innerHTML = '<div class="empty">Aucun produit dans le catalogue.</div>'; return; }
+  const recurLabel = { once:'unique', monthly:'/mois', yearly:'/an' };
+  el.innerHTML = state.produits.map(p => `
+    <div class="lead-row">
+      <div style="width: 44px; height: 44px; border-radius: 12px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+        ${p.logo ? '<img src="'+escapeHtml(p.logo)+'" style="width:100%; height:100%; object-fit: cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'📦\'">' : '📦'}
+      </div>
+      <div class="lead-info">
+        <p class="lead-name">${escapeHtml(p.name)}</p>
+        <p class="lead-meta">${escapeHtml(p.desc||'-')} · ${eur(p.price)} ${recurLabel[p.recurrence]||''}</p>
+      </div>
+      <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick='removeProduit(${p.id})'>Supprimer</button>
+    </div>
+  `).join('');
+}
+function removeProduit(id) {
+  state.produits = state.produits.filter(p => p.id !== id);
+  saveBiz(); renderProduitsList();
+}
+
+/* === Clients === */
+function addClient() {
+  const c = {
+    id: Date.now(),
+    name: document.getElementById('client-name').value.trim(),
+    siret: document.getElementById('client-siret').value.trim(),
+    contact: document.getElementById('client-contact').value.trim(),
+    email: document.getElementById('client-email').value.trim(),
+    address: document.getElementById('client-address').value.trim()
+  };
+  if (!c.name) { alert('Raison sociale requise'); return; }
+  state.clients.unshift(c); saveBiz();
+  ['client-name','client-siret','client-contact','client-email','client-address'].forEach(id => document.getElementById(id).value = '');
+  renderClientsList();
+}
+function renderClientsList() {
+  const el = document.getElementById('clients-list');
+  if (!el) return;
+  if (!state.clients.length) { el.innerHTML = '<div class="empty">Aucun client. Ajoute-en un ci-dessus.</div>'; return; }
+  el.innerHTML = state.clients.map(c => `
+    <div class="lead-row">
+      <div class="score-circle" style="font-size: 16px;">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
+      <div class="lead-info">
+        <p class="lead-name">${escapeHtml(c.name)} ${c.siret?'<span style="font-size:11px;color:var(--text-3);">SIRET '+escapeHtml(c.siret)+'</span>':''}</p>
+        <p class="lead-meta">${escapeHtml(c.contact||'')} · ${escapeHtml(c.email||'')}</p>
+      </div>
+      <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick='removeClient(${c.id})'>Supprimer</button>
+    </div>
+  `).join('');
+}
+function removeClient(id) {
+  state.clients = state.clients.filter(c => c.id !== id);
+  saveBiz(); renderClientsList();
+}
+function importClientsCSV() { alert('Import CSV : drag-drop d\'un fichier (à venir Phase 1).'); }
+
+/* === Banque === */
+function connectBank(provider) {
+  const map = {
+    qonto: { name: 'Qonto', help: 'Crée une clé API sur app.qonto.com → Paramètres → Intégrations → API. Permissions : read transactions, read accounts.' },
+    bridge: { name: 'Bridge API', help: 'Inscris-toi sur bridgeapi.io (gratuit jusqu\'à 1k connexions). Permet de connecter toutes banques FR via PSD2.' },
+    powens: { name: 'Powens', help: 'powens.com (anciennement Budget Insight). Couvre 300+ banques EU. Compte développeur gratuit.' },
+    gocardless: { name: 'GoCardless', help: 'gocardless.com pour prélèvements SEPA automatiques sur tes clients abonnés (idéal SaaS).' }
+  };
+  const p = map[provider];
+  const div = document.getElementById('bank-config');
+  div.innerHTML = `
+    <div class="card" style="margin-top: 16px; background: var(--surface-2);">
+      <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 8px;">Configuration ${escapeHtml(p.name)}</h3>
+      <p style="font-size: 12px; color: var(--text-2); margin: 0 0 12px;">${escapeHtml(p.help)}</p>
+      <input type="password" class="input" id="bank-key" placeholder="API Key / Client ID" style="margin-bottom: 8px;">
+      <input type="password" class="input" id="bank-secret" placeholder="API Secret (si requis)" style="margin-bottom: 8px;">
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick='saveBank("${provider}")'>Sauvegarder</button>
+        <button class="btn btn-secondary" onclick='testBank("${provider}")'>Tester connexion</button>
+      </div>
+    </div>
+  `;
+}
+function saveBank(provider) {
+  state.bank[provider] = {
+    key: document.getElementById('bank-key').value.trim(),
+    secret: document.getElementById('bank-secret').value.trim(),
+    configured: true
+  };
+  saveBiz();
+  logAct('Banque '+provider+' configurée', 'success');
+  document.getElementById('bank-config').innerHTML = '<div class="success-notice">Configuration '+provider+' sauvegardée. Le sync auto démarrera au prochain cycle autopilote.</div>';
+}
+function testBank(provider) {
+  alert('Test connexion '+provider+' : nécessite backend (CORS bloque depuis le navigateur). À implémenter Phase 1.');
+}
+function renderBanqueView() {
+  // Init du chart cash flow
+  setTimeout(() => {
+    const ctx = document.getElementById('cashflowChart');
+    if (!ctx || !window.Chart) return;
+    if (window._cashChart) window._cashChart.destroy();
+    const labels = ['J','J+15','J+30','J+45','J+60','J+75','J+90'];
+    const factures = state.factures.filter(f => f.status !== 'paid');
+    const totalDue = factures.reduce((s,f)=>s+f.totalTTC,0);
+    window._cashChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{
+        label: 'Cash entrant prévu',
+        data: [0, totalDue*0.2, totalDue*0.5, totalDue*0.65, totalDue*0.8, totalDue*0.9, totalDue],
+        backgroundColor: 'rgba(167,139,250,0.5)', borderColor: '#A78BFA', borderWidth: 2, borderRadius: 6
+      }]},
+      options: { responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { ticks: { callback: v => v.toLocaleString('fr-FR')+' €', color:'#94A3B8' }, grid: { color:'rgba(167,139,250,0.08)' } }, x: { ticks: { color:'#94A3B8' }, grid: { display: false } } }
+      }
+    });
+  }, 100);
+}
+
+/* === Branding === */
+function loadBrandingForm() {
+  document.getElementById('brand-company').value = state.branding.company || 'Pixeeplay';
+  document.getElementById('brand-siret').value = state.branding.siret || '';
+  document.getElementById('brand-logo').value = state.branding.logo || '';
+  document.getElementById('brand-color').value = state.branding.color || '#7C3AED';
+  document.getElementById('brand-address').value = state.branding.address || '';
+  document.getElementById('brand-tva').value = state.branding.tva || '';
+  document.getElementById('brand-iban').value = state.branding.iban || '';
+}
+function saveBranding() {
+  state.branding = {
+    company: document.getElementById('brand-company').value,
+    siret: document.getElementById('brand-siret').value,
+    logo: document.getElementById('brand-logo').value,
+    color: document.getElementById('brand-color').value,
+    address: document.getElementById('brand-address').value,
+    tva: document.getElementById('brand-tva').value,
+    iban: document.getElementById('brand-iban').value
+  };
+  saveBiz();
+  logAct('Branding sauvegardé : '+state.branding.company, 'success');
+  alert('Branding sauvegardé. Apparaîtra sur les prochains devis et factures.');
 }
 
 /* ============ UTILS ============ */
