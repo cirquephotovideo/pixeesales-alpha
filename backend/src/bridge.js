@@ -5,15 +5,27 @@ import fetch from 'node-fetch';
 const BRIDGE_BASE = 'https://api.bridgeapi.io';
 const BRIDGE_VERSION = '2025-01-15';
 
-function getCfg() {
+function getCfg(env = 'sandbox') {
+  // Bridge utilise la même URL — la séparation sandbox/prod se fait sur les credentials
+  if (env === 'production') {
+    return {
+      clientId: process.env.BRIDGE_PROD_CLIENT_ID || process.env.BRIDGE_CLIENT_ID,
+      clientSecret: process.env.BRIDGE_PROD_CLIENT_SECRET || process.env.BRIDGE_CLIENT_SECRET
+    };
+  }
   return {
     clientId: process.env.BRIDGE_CLIENT_ID,
     clientSecret: process.env.BRIDGE_CLIENT_SECRET
   };
 }
 
-function headers() {
-  const cfg = getCfg();
+function headers(env) {
+  const cfg = getCfg(env);
+  if (!cfg.clientId || !cfg.clientSecret) {
+    const err = new Error('BRIDGE_CLIENT_ID / BRIDGE_CLIENT_SECRET non configurés sur le backend (env=' + env + ')');
+    err.status = 500;
+    throw err;
+  }
   return {
     'Content-Type': 'application/json',
     'Bridge-Version': BRIDGE_VERSION,
@@ -22,11 +34,11 @@ function headers() {
   };
 }
 
-async function bridgeRequest(path, options = {}) {
+async function bridgeRequest(path, options = {}, env = 'sandbox') {
   const url = BRIDGE_BASE + path;
   const res = await fetch(url, {
     ...options,
-    headers: { ...headers(), ...(options.headers||{}) }
+    headers: { ...headers(env), ...(options.headers||{}) }
   });
   const text = await res.text();
   let data; try { data = JSON.parse(text); } catch { data = { raw: text }; }
@@ -44,7 +56,8 @@ export function bridgeRoutes(db) {
   // Crée ou récupère un user Bridge + access token
   r.post('/connect', async (req, res) => {
     try {
-      const { external_user_id } = req.body;
+      const { external_user_id, env: reqEnv } = req.body;
+      const env = (reqEnv === 'production') ? 'production' : 'sandbox';
       if (!external_user_id) return res.status(400).json({ error: 'external_user_id required' });
 
       // Récup user existant
@@ -56,11 +69,11 @@ export function bridgeRoutes(db) {
           const user = await bridgeRequest('/v2/users', {
             method: 'POST',
             body: JSON.stringify({ external_user_id })
-          });
+          }, env);
           bridgeUuid = user.uuid;
         } catch(e) {
           if (e.data?.error_code === 'user_already_exists') {
-            const list = await bridgeRequest(`/v2/users?external_user_id=${encodeURIComponent(external_user_id)}`);
+            const list = await bridgeRequest(`/v2/users?external_user_id=${encodeURIComponent(external_user_id)}`, {}, env);
             bridgeUuid = list.resources?.[0]?.uuid;
           } else throw e;
         }
@@ -70,7 +83,7 @@ export function bridgeRoutes(db) {
       const token = await bridgeRequest('/v3/aggregation/authorization/token', {
         method: 'POST',
         body: JSON.stringify({ user_uuid: bridgeUuid })
-      });
+      }, env);
 
       const expiresAt = Date.now() + (token.expires_at ? new Date(token.expires_at).getTime() - Date.now() : 2*3600*1000);
       db.prepare(`INSERT INTO bridge_users (external_user_id, bridge_uuid, access_token, token_expires_at)
@@ -83,11 +96,11 @@ export function bridgeRoutes(db) {
         method: 'POST',
         headers: { 'Authorization': 'Bearer ' + token.access_token },
         body: JSON.stringify({ user_email: req.body.email || 'user@pixeeplay.com', country_code: 'fr' })
-      });
+      }, env);
 
-      res.json({ bridge_uuid: bridgeUuid, connect_url: session.url, expires_at: expiresAt });
+      res.json({ bridge_uuid: bridgeUuid, connect_url: session.url, expires_at: expiresAt, env });
     } catch(e) {
-      res.status(500).json({ error: e.message, detail: e.data });
+      res.status(e.status || 500).json({ error: e.message, detail: e.data });
     }
   });
 
