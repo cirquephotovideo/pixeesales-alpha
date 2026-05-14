@@ -129,6 +129,23 @@ export function initDB(dbPath) {
       snooze_until INTEGER,
       processed_at INTEGER
     );
+    CREATE TABLE IF NOT EXISTS dev_plans (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      plan_id TEXT UNIQUE,
+      title TEXT,
+      category TEXT,
+      rationale TEXT,
+      impact TEXT,
+      effort TEXT,
+      files_touched TEXT,             -- JSON array
+      implementation_spec TEXT,
+      acceptance_criteria TEXT,       -- JSON array
+      risks TEXT,
+      status TEXT DEFAULT 'pending',  -- pending|approve|reject|schedule|implementing|done|failed
+      decided_at INTEGER,
+      github_issue_url TEXT,
+      created_at INTEGER
+    );
   `);
 
   return db;
