@@ -468,6 +468,20 @@ html, body {
 
     <div class="menu-group">
       <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>Projections &amp; Forecast</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('projections', this)">Vue d'ensemble</a>
+        <a class="submenu-item" onclick="navTo('projections', this)">MRR / ARR SaaS</a>
+        <a class="submenu-item" onclick="navTo('projections', this)">Scénarios</a>
+        <a class="submenu-item" onclick="navTo('projections', this)">Pipeline pondéré</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span>Rapports</span>
         <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1268,23 +1282,28 @@ html, body {
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
         Connexion bancaire
       </h2>
-      <p class="card-desc">Connecte ton compte pro pour réconciliation automatique des paiements et suivi du cash flow. Compatible Qonto, Boursorama Pro, BNP, Société Générale, et toute banque française via PSD2.</p>
+      <p class="card-desc">Connecte ton compte pro pour réconciliation automatique des paiements et suivi du cash flow.</p>
+
+      <div class="success-notice" style="margin-bottom: 16px;">
+        <strong>💡 Tu utilises Indy.fr</strong> — bonne nouvelle : Indy n'a pas d'API publique, mais il utilise <strong>Bridge API en interne</strong>. En te connectant à Bridge directement, ton dashboard verra exactement les mêmes transactions qu'Indy, sans dépendre de Indy ni risquer de violer leur TOS.
+      </div>
+
       <div class="connector-grid">
-        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('qonto')">
-          <p class="connector-name">🟠 Qonto</p>
-          <p class="connector-desc">API officielle Qonto</p>
+        <div class="connector-card" style="cursor: pointer; border: 2px solid var(--accent);" onclick="connectBank('bridge')">
+          <p class="connector-name">🌉 Bridge API (recommandé) ⭐</p>
+          <p class="connector-desc">100+ banques FR · DSP2 · même API qu'Indy</p>
         </div>
-        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('bridge')">
-          <p class="connector-name">🌉 Bridge API (PSD2)</p>
-          <p class="connector-desc">Toutes banques FR</p>
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('qonto')">
+          <p class="connector-name">🟠 Qonto (API directe)</p>
+          <p class="connector-desc">Si compte Qonto Pro · plus rapide</p>
         </div>
         <div class="connector-card" style="cursor: pointer;" onclick="connectBank('powens')">
           <p class="connector-name">⚡ Powens (Budget Insight)</p>
-          <p class="connector-desc">300+ banques EU</p>
+          <p class="connector-desc">300+ banques EU · entreprise</p>
         </div>
-        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('gocardless')">
-          <p class="connector-name">💳 GoCardless</p>
-          <p class="connector-desc">Prélèvements SEPA</p>
+        <div class="connector-card" style="cursor: pointer;" onclick="connectBank('indy_csv')">
+          <p class="connector-name">📄 Indy.fr — Export CSV</p>
+          <p class="connector-desc">Import manuel mensuel · fallback</p>
         </div>
       </div>
       <div id="bank-config" style="margin-top: 16px;"></div>
@@ -1302,6 +1321,67 @@ html, body {
       <h2 class="card-title">Cash flow projeté</h2>
       <p class="card-desc">Prévisions à 30/60/90 jours en croisant factures émises + récurrences SaaS + dépenses prévues.</p>
       <div class="chart-wrap"><canvas id="cashflowChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ============ PROJECTIONS FINANCIÈRES ============ -->
+  <div class="view" id="view-projections">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Projections financières auto-évolutives
+      </h2>
+      <p class="card-desc">Le modèle se recalcule automatiquement à chaque nouveau lead, devis ou facture. Win rates pondérés par étape pipeline.</p>
+      <div class="kpi-grid" style="margin-top: 16px;">
+        <div class="kpi">
+          <div class="kpi-icon green"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <p class="kpi-label">MRR (récurrent mensuel)</p>
+          <p class="kpi-value" id="proj-mrr">0 €</p>
+          <p class="kpi-sub">SaaS abonnements en cours</p>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon purple"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <p class="kpi-label">ARR projeté</p>
+          <p class="kpi-value" id="proj-arr">0 €</p>
+          <p class="kpi-sub">MRR × 12 + one-time</p>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon blue"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><polyline points="7 14 12 9 16 13 21 8"/></svg></div>
+          <p class="kpi-label">Pipeline pondéré (90j)</p>
+          <p class="kpi-value" id="proj-weighted">0 €</p>
+          <p class="kpi-sub">Σ deals × proba étape</p>
+        </div>
+        <div class="kpi">
+          <div class="kpi-icon pink"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+          <p class="kpi-label">Run rate fin de mois</p>
+          <p class="kpi-value" id="proj-runrate">0 €</p>
+          <p class="kpi-sub">CA réalisé + facturé en attente</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Projection sur 12 mois — 3 scénarios</h2>
+      <p class="card-desc">Pessimiste : 15% win rate · Réaliste : 30% · Optimiste : 50%. Inclut MRR cumulé.</p>
+      <div class="chart-wrap" style="height: 320px;"><canvas id="forecastChart"></canvas></div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <h2 class="card-title">Probabilités par étape pipeline</h2>
+        <p class="card-desc">Ajuste selon ton historique réel. L'agent les apprend automatiquement après 20 deals.</p>
+        <div id="proba-config" style="display: flex; flex-direction: column; gap: 10px; margin-top: 12px;"></div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">Top deals à closer</h2>
+        <p class="card-desc">Ceux qui pèsent le plus dans la projection.</p>
+        <div id="top-deals-list"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Décomposition du forecast</h2>
+      <div id="forecast-breakdown"></div>
     </div>
   </div>
 
@@ -1498,6 +1578,7 @@ function switchTab(name) {
   if (name === 'produits') renderProduitsList();
   if (name === 'branding') loadBrandingForm();
   if (name === 'banque') renderBanqueView();
+  if (name === 'projections') renderProjections();
 }
 
 // MEGA MENU navigation
@@ -2935,25 +3016,79 @@ function importClientsCSV() { alert('Import CSV : drag-drop d\'un fichier (à ve
 /* === Banque === */
 function connectBank(provider) {
   const map = {
-    qonto: { name: 'Qonto', help: 'Crée une clé API sur app.qonto.com → Paramètres → Intégrations → API. Permissions : read transactions, read accounts.' },
-    bridge: { name: 'Bridge API', help: 'Inscris-toi sur bridgeapi.io (gratuit jusqu\'à 1k connexions). Permet de connecter toutes banques FR via PSD2.' },
-    powens: { name: 'Powens', help: 'powens.com (anciennement Budget Insight). Couvre 300+ banques EU. Compte développeur gratuit.' },
-    gocardless: { name: 'GoCardless', help: 'gocardless.com pour prélèvements SEPA automatiques sur tes clients abonnés (idéal SaaS).' }
+    qonto: { name: 'Qonto', help: 'Crée une clé API sur app.qonto.com → Paramètres → Intégrations → API. Permissions : read transactions, read accounts. Cette intégration nécessite un backend (Phase 1).' },
+    bridge: { name: 'Bridge API', help: 'Le même provider qu\'utilise Indy.fr. Inscris-toi gratuitement sur dashboard.bridgeapi.io/signup. Tu obtiens un Client ID + Client Secret. ⚠ Le Client Secret ne doit JAMAIS être dans le navigateur — il faut un backend (Phase 1) qui héberge le secret et expose un proxy. Pour l\'instant, configure ici puis le backend sera connecté.' },
+    powens: { name: 'Powens', help: 'powens.com (anciennement Budget Insight). 300+ banques EU. Compte développeur sur demande. Plus lourd qu\'Bridge pour solo.' },
+    indy_csv: { name: 'Indy.fr — Export CSV', help: 'Si tu veux rester en mode manuel : exporte tes écritures Indy en CSV depuis l\'app Indy → Comptabilité → Export, puis dépose-les ici. Le matching auto facture↔écriture se fait sur montant + date ±5j. Pas idéal mais évite tout dev backend.' }
   };
   const p = map[provider];
   const div = document.getElementById('bank-config');
+
+  if (provider === 'indy_csv') {
+    div.innerHTML = `
+      <div class="card" style="margin-top: 16px; background: var(--surface-2);">
+        <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 8px;">${escapeHtml(p.name)}</h3>
+        <p style="font-size: 12px; color: var(--text-2); margin: 0 0 12px;">${escapeHtml(p.help)}</p>
+        <input type="file" id="indy-csv-file" accept=".csv" class="input" style="padding: 8px;">
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="importIndyCSV()">Importer le CSV Indy</button>
+          <a href="https://app.indy.fr/" target="_blank"><button class="btn btn-secondary">Ouvrir Indy.fr</button></a>
+        </div>
+        <p style="font-size: 11px; color: var(--text-3); margin-top: 8px;">Format attendu : colonnes Date, Libellé, Débit, Crédit (export standard Indy)</p>
+      </div>
+    `;
+    return;
+  }
+
   div.innerHTML = `
     <div class="card" style="margin-top: 16px; background: var(--surface-2);">
       <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 8px;">Configuration ${escapeHtml(p.name)}</h3>
       <p style="font-size: 12px; color: var(--text-2); margin: 0 0 12px;">${escapeHtml(p.help)}</p>
-      <input type="password" class="input" id="bank-key" placeholder="API Key / Client ID" style="margin-bottom: 8px;">
-      <input type="password" class="input" id="bank-secret" placeholder="API Secret (si requis)" style="margin-bottom: 8px;">
+      ${provider === 'bridge' ? `
+        <p class="field-label">Client ID Bridge</p>
+        <input type="text" class="input" id="bank-key" placeholder="abc123..." style="margin-bottom: 8px;">
+        <p class="field-label">Client Secret Bridge (stocké en local — sera transféré au backend Phase 1)</p>
+        <input type="password" class="input" id="bank-secret" placeholder="secret..." style="margin-bottom: 8px;">
+      ` : `
+        <input type="password" class="input" id="bank-key" placeholder="API Key / Client ID" style="margin-bottom: 8px;">
+        <input type="password" class="input" id="bank-secret" placeholder="API Secret (si requis)" style="margin-bottom: 8px;">
+      `}
       <div class="btn-row">
         <button class="btn btn-primary" onclick='saveBank("${provider}")'>Sauvegarder</button>
         <button class="btn btn-secondary" onclick='testBank("${provider}")'>Tester connexion</button>
+        ${provider === 'bridge' ? '<a href="https://dashboard.bridgeapi.io/signup" target="_blank"><button class="btn btn-ghost">Créer compte Bridge</button></a>' : ''}
       </div>
     </div>
   `;
+}
+
+function importIndyCSV() {
+  const file = document.getElementById('indy-csv-file').files[0];
+  if (!file) { alert('Sélectionne d\'abord un fichier CSV'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const txt = e.target.result;
+    const lines = txt.split('\n').filter(l => l.trim());
+    if (lines.length < 2) { alert('CSV vide'); return; }
+    // Parse simple : Date, Libellé, Débit, Crédit
+    const txs = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(/[,;\t]/).map(c => c.trim().replace(/^"|"$/g,''));
+      if (cols.length < 3) continue;
+      const date = cols[0];
+      const label = cols[1];
+      const debit = parseFloat((cols[2]||'0').replace(',','.')) || 0;
+      const credit = parseFloat((cols[3]||cols[2]||'0').replace(',','.')) || 0;
+      const amount = credit - debit;
+      txs.push({ date, label, amount });
+    }
+    state.bank.indy_transactions = (state.bank.indy_transactions || []).concat(txs);
+    saveBiz();
+    logAct('CSV Indy importé : '+txs.length+' transactions', 'success');
+    alert('✅ '+txs.length+' transactions importées. Le matching auto avec les factures en cours.');
+    renderBanqueView();
+  };
+  reader.readAsText(file);
 }
 function saveBank(provider) {
   state.bank[provider] = {
@@ -2969,6 +3104,35 @@ function testBank(provider) {
   alert('Test connexion '+provider+' : nécessite backend (CORS bloque depuis le navigateur). À implémenter Phase 1.');
 }
 function renderBanqueView() {
+  // Liste des transactions
+  const txList = document.getElementById('bank-tx-list');
+  if (txList) {
+    const txs = state.bank.indy_transactions || [];
+    if (!txs.length) {
+      txList.innerHTML = '<div class="empty">Aucune transaction. Importe un CSV Indy ou connecte Bridge API.</div>';
+    } else {
+      txList.innerHTML = `
+        <p style="font-size: 12px; color: var(--text-2); margin: 0 0 12px;">${txs.length} transactions importées · matching auto avec factures en cours</p>
+        ${txs.slice(0, 20).map(t => {
+          // Match facture par montant
+          const matchedFacture = state.factures.find(f => Math.abs(f.totalTTC - t.amount) < 0.01 && f.status !== 'paid');
+          return `
+            <div class="lead-row">
+              <div style="width: 44px; text-align: center;">
+                <div style="font-size: 18px; color: ${t.amount >= 0 ? 'var(--success)' : 'var(--text-3)'};">${t.amount >= 0 ? '↓' : '↑'}</div>
+              </div>
+              <div class="lead-info">
+                <p class="lead-name">${escapeHtml(t.label)}</p>
+                <p class="lead-meta">${escapeHtml(t.date)} ${matchedFacture ? '· <span class="badge badge-success">Match → '+escapeHtml(matchedFacture.ref)+'</span>' : ''}</p>
+              </div>
+              <div style="font-weight: 700; color: ${t.amount >= 0 ? 'var(--success)' : 'var(--text)'}; font-size: 15px;">${t.amount >= 0 ? '+' : ''}${eur(t.amount)}</div>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+  }
+
   // Init du chart cash flow
   setTimeout(() => {
     const ctx = document.getElementById('cashflowChart');
@@ -2992,6 +3156,180 @@ function renderBanqueView() {
   }, 100);
 }
 
+/* === PROJECTIONS FINANCIÈRES AUTO-ÉVOLUTIVES === */
+const STAGE_PROBABILITIES = JSON.parse(localStorage.getItem('pixee_stage_proba') || JSON.stringify({
+  prospect: 5, contact: 15, meeting: 35, quote: 60, won: 100
+}));
+
+function saveStageProba() {
+  localStorage.setItem('pixee_stage_proba', JSON.stringify(STAGE_PROBABILITIES));
+}
+
+function computeMRR() {
+  // MRR = somme des produits récurrents mensuels dans les deals signés
+  let mrr = 0;
+  state.deals.filter(d => d.stage === 'won').forEach(d => {
+    // Cherche les produits récurrents potentiels via le nom
+    const matchedProduct = state.produits.find(p =>
+      p.recurrence === 'monthly' && d.company && (d.amount === p.price || (d.products && d.products.includes(p.name)))
+    );
+    if (matchedProduct) mrr += matchedProduct.price;
+  });
+  // Ajoute MRR explicite si tracké dans state.deals[].mrr
+  state.deals.filter(d => d.stage === 'won' && d.mrr).forEach(d => mrr += d.mrr);
+  return mrr;
+}
+
+function computeWeightedPipeline() {
+  // Σ amount × proba selon étape
+  return state.deals.filter(d => d.stage !== 'won').reduce((sum, d) => {
+    const prob = STAGE_PROBABILITIES[d.stage] || 0;
+    return sum + (d.amount * prob / 100);
+  }, 0);
+}
+
+function computeRunRate() {
+  const won = state.deals.filter(d => d.stage === 'won').reduce((s,d) => s+d.amount, 0);
+  const invoicedDue = state.factures.filter(f => f.status === 'sent' || f.status === 'overdue').reduce((s,f)=>s+f.totalTTC, 0);
+  return won + invoicedDue;
+}
+
+function generateForecast() {
+  const mrr = computeMRR();
+  const labels = [];
+  const pessim = [], realist = [], optim = [];
+  const winRates = { pessim: 0.15, realist: 0.30, optim: 0.50 };
+  const monthlyPipeline = state.deals.filter(d => d.stage !== 'won').reduce((s,d)=>s+d.amount, 0) / 6; // étalé sur 6 mois
+  const currentRevenue = state.deals.filter(d=>d.stage==='won').reduce((s,d)=>s+d.amount,0);
+
+  let p = currentRevenue, r = currentRevenue, o = currentRevenue;
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
+    labels.push(d.toLocaleDateString('fr-FR', {month:'short', year:'2-digit'}));
+    // Chaque mois : MRR cumulé + nouvelle conversion pipeline
+    p += mrr + monthlyPipeline * winRates.pessim;
+    r += mrr + monthlyPipeline * winRates.realist;
+    o += mrr + monthlyPipeline * winRates.optim;
+    // MRR grandit avec les nouveaux closés (effet boule de neige)
+    pessim.push(Math.round(p)); realist.push(Math.round(r)); optim.push(Math.round(o));
+  }
+  return { labels, pessim, realist, optim };
+}
+
+let forecastChart;
+function renderProjections() {
+  const mrr = computeMRR();
+  const weighted = computeWeightedPipeline();
+  const runrate = computeRunRate();
+  const oneTimeProj = weighted; // pondéré déjà
+  const arr = mrr * 12 + oneTimeProj;
+
+  document.getElementById('proj-mrr').textContent = eur(mrr);
+  document.getElementById('proj-arr').textContent = eur(arr);
+  document.getElementById('proj-weighted').textContent = eur(weighted);
+  document.getElementById('proj-runrate').textContent = eur(runrate);
+
+  // Probas par étape (éditables)
+  const probaDiv = document.getElementById('proba-config');
+  const stages = ['prospect','contact','meeting','quote','won'];
+  const labels = { prospect:'Prospect', contact:'Contacté', meeting:'RDV', quote:'Devis envoyé', won:'Signé' };
+  probaDiv.innerHTML = stages.map(s => `
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="min-width: 120px; font-size: 13px; color: var(--text-2);">${labels[s]}</span>
+      <input type="range" min="0" max="100" value="${STAGE_PROBABILITIES[s]}" id="proba-${s}" oninput="updateProba('${s}', this.value)" style="flex: 1;">
+      <span style="min-width: 40px; font-weight: 600; color: var(--accent);" id="proba-val-${s}">${STAGE_PROBABILITIES[s]}%</span>
+    </div>
+  `).join('');
+
+  // Top deals
+  const topEl = document.getElementById('top-deals-list');
+  const tops = [...state.deals].filter(d => d.stage !== 'won').sort((a,b) => (b.amount * (STAGE_PROBABILITIES[b.stage]||0)) - (a.amount * (STAGE_PROBABILITIES[a.stage]||0))).slice(0,5);
+  if (!tops.length) {
+    topEl.innerHTML = '<div class="empty">Aucun deal en cours. Ajoute des leads pour voir les projections.</div>';
+  } else {
+    topEl.innerHTML = tops.map(d => {
+      const expected = d.amount * (STAGE_PROBABILITIES[d.stage]||0) / 100;
+      return `
+        <div class="lead-row">
+          <div class="score-circle" style="font-size: 11px;">${STAGE_PROBABILITIES[d.stage]}%</div>
+          <div class="lead-info">
+            <p class="lead-name">${escapeHtml(d.company)}</p>
+            <p class="lead-meta">${eur(d.amount)} brut · <strong style="color: var(--accent);">${eur(expected)} pondéré</strong> · étape ${labels[d.stage]}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Décomposition
+  const breakdown = document.getElementById('forecast-breakdown');
+  const byStage = {};
+  state.deals.filter(d=>d.stage!=='won').forEach(d => {
+    byStage[d.stage] = byStage[d.stage] || { count: 0, brut: 0, pondere: 0 };
+    byStage[d.stage].count++;
+    byStage[d.stage].brut += d.amount;
+    byStage[d.stage].pondere += d.amount * (STAGE_PROBABILITIES[d.stage]||0) / 100;
+  });
+  breakdown.innerHTML = `
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <thead style="border-bottom: 1px solid var(--border);">
+        <tr><th style="text-align:left; padding: 10px 0;">Étape</th><th>Deals</th><th style="text-align:right;">Brut</th><th style="text-align:right;">Probabilité</th><th style="text-align:right;">Pondéré</th></tr>
+      </thead>
+      <tbody>
+        ${stages.filter(s=>s!=='won').map(s => `
+          <tr style="border-bottom: 1px solid var(--border);">
+            <td style="padding: 10px 0;"><strong>${labels[s]}</strong></td>
+            <td style="text-align: center;">${byStage[s]?.count || 0}</td>
+            <td style="text-align: right;">${eur(byStage[s]?.brut || 0)}</td>
+            <td style="text-align: right; color: var(--text-2);">${STAGE_PROBABILITIES[s]}%</td>
+            <td style="text-align: right; color: var(--accent); font-weight: 600;">${eur(byStage[s]?.pondere || 0)}</td>
+          </tr>
+        `).join('')}
+        <tr style="font-weight: 700; font-size: 14px;">
+          <td style="padding: 12px 0;">Total pondéré</td>
+          <td colspan="3"></td>
+          <td style="text-align: right; color: var(--accent);">${eur(weighted)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  // Forecast chart
+  setTimeout(() => {
+    const ctx = document.getElementById('forecastChart');
+    if (!ctx || !window.Chart) return;
+    const fc = generateForecast();
+    if (forecastChart) forecastChart.destroy();
+    forecastChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: fc.labels,
+        datasets: [
+          { label: 'Pessimiste (15%)', data: fc.pessim, borderColor: '#F87171', backgroundColor: 'rgba(248,113,113,0.08)', tension: 0.35, fill: false, borderWidth: 2 },
+          { label: 'Réaliste (30%)', data: fc.realist, borderColor: '#A78BFA', backgroundColor: 'rgba(167,139,250,0.18)', tension: 0.35, fill: true, borderWidth: 3 },
+          { label: 'Optimiste (50%)', data: fc.optim, borderColor: '#34D399', backgroundColor: 'rgba(52,211,153,0.08)', tension: 0.35, fill: false, borderWidth: 2, borderDash: [6,4] }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { color: '#C4B5FD', font: { size: 12 } } } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('fr-FR')+' €', color:'#94A3B8' }, grid: { color: 'rgba(167,139,250,0.08)' } },
+          x: { ticks: { color: '#94A3B8' }, grid: { display: false } }
+        }
+      }
+    });
+  }, 100);
+}
+
+function updateProba(stage, val) {
+  STAGE_PROBABILITIES[stage] = parseInt(val);
+  document.getElementById('proba-val-'+stage).textContent = val+'%';
+  saveStageProba();
+  renderProjections();
+}
+
 /* === Objectif modifiable === */
 function editGoal() {
   const cur = state.monthlyGoal;
@@ -3009,21 +3347,42 @@ function editGoal() {
 function seedPixeeplayProducts() {
   if (state.produits.length > 0) return; // déjà fait
   state.produits = [
-    { id: 1, name: 'Refonte site web — Forfait complet', logo: '', price: 1250, recurrence: 'once', desc: 'Design & UX + Dev React/Next.js + Multilingue + SEO + Mise en ligne + Garantie 6 mois (lots 1 à 7)' },
-    { id: 2, name: 'Lot 1 — Design & UX', logo: '', price: 350, recurrence: 'once', desc: 'Direction artistique, maquette haute-fidélité, system de design réutilisable, responsive, WCAG 2.1 AA' },
-    { id: 3, name: 'Lot 2 — Développement technique', logo: '', price: 450, recurrence: 'once', desc: 'React 19 + Next.js 16 + Tailwind + shadcn/ui · 7 pages · Framer Motion · code documenté GitHub' },
-    { id: 4, name: 'Lot 3 — Multilingue (4 langues)', logo: '', price: 200, recurrence: 'once', desc: 'FR / EN / NL / DE · routes localisées · hreflang · sélecteur de langue' },
-    { id: 5, name: 'Lot 4 — Intégration moteur résa HotSoft', logo: '', price: 150, recurrence: 'once', desc: 'Widget Hoist HotelEngine · 3 emplacements (hero, sticky, modal)' },
-    { id: 6, name: 'Lot 5 — SEO complet', logo: '', price: 250, recurrence: 'once', desc: 'Audit + plan 301 + Schema.org + Core Web Vitals + GA4 + Search Console' },
-    { id: 7, name: 'Lot 6 — Mise en ligne & hébergement', logo: '', price: 150, recurrence: 'once', desc: 'Déploiement Vercel/OVH · DNS · SSL · RGPD · sauvegardes auto' },
-    { id: 8, name: 'Lot 7 — Garantie 6 mois', logo: '', price: 0, recurrence: 'once', desc: 'Correction bugs · MAJ sécurité · support email <48h ouvrées' },
-    { id: 9, name: 'PixeePIM — Setup initial', logo: '', price: 1500, recurrence: 'once', desc: 'Mise en place gestion centralisée des données produit, import catalogue, mapping attributs' },
-    { id: 10, name: 'PixeePIM — Abonnement mensuel', logo: '', price: 99, recurrence: 'monthly', desc: 'Hébergement PIM + MAJ + support · jusqu\'à 5 000 SKU' },
-    { id: 11, name: 'Pixeesite — Site vitrine', logo: '', price: 2900, recurrence: 'once', desc: 'Site sur-mesure haute performance React/Next.js · optimisé SEO et conversion' },
-    { id: 12, name: 'GLD Pixeeplay — Module logistique', logo: '', price: 4500, recurrence: 'once', desc: 'Solution logistique multi-entrepôts · sync stocks temps réel · intégration ERP' },
-    { id: 13, name: 'IA SaaS — Pack automatisation', logo: '', price: 990, recurrence: 'monthly', desc: 'Lead scoring auto · génération contenus · chatbot support · personnalisé selon métier' },
-    { id: 14, name: 'Traduction DeepL — Pack 4 langues', logo: '', price: 450, recurrence: 'once', desc: 'Option : traduction assistée DeepL après validation FR (EN + NL + DE)' },
-    { id: 15, name: 'Maintenance évolutive — Forfait mensuel', logo: '', price: 290, recurrence: 'monthly', desc: 'Après garantie 6 mois · 4h/mois · évolutions mineures + monitoring' }
+    // ========== PIXEEPIM (pixeepim.com) — SaaS PIM B2B ==========
+    { id: 1, name: 'PixeePIM Free', logo: 'https://pixeepim.com/favicon.ico', price: 0, recurrence: 'monthly', desc: 'PIM gratuit : 2 000 produits, 1 fournisseur. Tester avant upgrade.' },
+    { id: 2, name: 'PixeePIM Starter', logo: 'https://pixeepim.com/favicon.ico', price: 490, recurrence: 'monthly', desc: '50 000 produits, 5 fournisseurs, AI mapping, 17 connecteurs e-com' },
+    { id: 3, name: 'PixeePIM Growth ⭐', logo: 'https://pixeepim.com/favicon.ico', price: 990, recurrence: 'monthly', desc: '200 000 produits, 25 fournisseurs, Price Monitor, compliance REACH/RoHS/CE/DPP' },
+    { id: 4, name: 'PixeePIM Scale', logo: 'https://pixeepim.com/favicon.ico', price: 1490, recurrence: 'monthly', desc: '500 000 produits, fournisseurs illimités, Mirakl 400+ marketplaces, AI Copilot' },
+    { id: 5, name: 'PixeePIM Enterprise', logo: 'https://pixeepim.com/favicon.ico', price: 4500, recurrence: 'monthly', desc: 'Self-hosted, licence perpétuelle possible, SLA 99.9%, support dédié — prix indicatif' },
+    { id: 6, name: 'PixeePIM Setup & migration', logo: 'https://pixeepim.com/favicon.ico', price: 2500, recurrence: 'once', desc: 'Onboarding complet : import catalogue, mapping attributs, formation équipe (2j)' },
+
+    // ========== PIXEESITE (pixeesite.pixeeplay.com) — SaaS Website Builder IA ==========
+    { id: 10, name: 'Pixeesite Free', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 0, recurrence: 'monthly', desc: 'Site builder IA gratuit : 1 site, 50 pages, sous-domaine *.pixeesite.io' },
+    { id: 11, name: 'Pixeesite Solo', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 12, recurrence: 'monthly', desc: 'Freelance : 3 sites, 1 domaine custom, AI gen 12 providers' },
+    { id: 12, name: 'Pixeesite Pro ⭐', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 39, recurrence: 'monthly', desc: '10 sites, e-commerce Stripe + SEPA + Apple Pay, 30 langues, dropshipping' },
+    { id: 13, name: 'Pixeesite Agency', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 149, recurrence: 'monthly', desc: 'Sites illimités, white-label, API, SLA 99.9% — pour agences' },
+    { id: 14, name: 'Pixeesite Enterprise', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 990, recurrence: 'monthly', desc: 'Self-hosted Docker, SAML/SCIM, support dédié — prix indicatif grands comptes' },
+    { id: 15, name: 'Pixeesite — Création de site sur-mesure', logo: 'https://pixeesite.pixeeplay.com/favicon.ico', price: 2900, recurrence: 'once', desc: 'Site complet React/Next.js livré clé en main, design custom, SEO, mise en ligne' },
+
+    // ========== GLD PIXEEPLAY (gld.pixeeplay.com) — Plateforme God Loves Diversity ==========
+    { id: 20, name: 'GLD — Plateforme communautaire', logo: 'https://gld.pixeeplay.com/favicon.ico', price: 0, recurrence: 'once', desc: 'Site interfaith FR/EN/ES/PT — manifeste, photo map mondiale, boutique merch, donations' },
+    { id: 21, name: 'GLD Merch — Poster A3', logo: 'https://gld.pixeeplay.com/favicon.ico', price: 12, recurrence: 'once', desc: 'Poster manifeste God Loves Diversity (A3/A4 PDF + impression)' },
+    { id: 22, name: 'GLD Merch — Mug', logo: 'https://gld.pixeeplay.com/favicon.ico', price: 15, recurrence: 'once', desc: 'Tasse céramique GLD inclusive' },
+    { id: 23, name: 'GLD Merch — T-shirt / Sweat', logo: 'https://gld.pixeeplay.com/favicon.ico', price: 25, recurrence: 'once', desc: 'Vêtement coton bio GLD' },
+    { id: 24, name: 'GLD — Don 5/10/25/50 €', logo: 'https://gld.pixeeplay.com/favicon.ico', price: 10, recurrence: 'once', desc: 'Soutien au mouvement interfaith God Loves Diversity' },
+
+    // ========== PARISLGBT (lgbt.pixeeplay.com) — Annuaire LGBTQIA+ ==========
+    { id: 30, name: 'parislgbt — Espace Pro Standard', logo: 'https://lgbt.pixeeplay.com/favicon.ico', price: 29, recurrence: 'monthly', desc: 'Listing premium pour bar/club/sauna LGBT+ · stats visites · photos illimitées' },
+    { id: 31, name: 'parislgbt — Espace Pro Premium ⭐', logo: 'https://lgbt.pixeeplay.com/favicon.ico', price: 79, recurrence: 'monthly', desc: 'Mise en avant agenda, événements, newsletter dédiée, badge vérifié' },
+    { id: 32, name: 'parislgbt — Partenariat associatif', logo: 'https://lgbt.pixeeplay.com/favicon.ico', price: 500, recurrence: 'yearly', desc: 'Partenariat annuel association : visibilité, ressources dédiées, support' },
+
+    // ========== SERVICES & PORTFOLIO (pixeeplay.com) ==========
+    { id: 40, name: 'Refonte site web — Forfait complet', logo: '', price: 1250, recurrence: 'once', desc: 'Design + Dev React/Next.js + Multilingue + SEO + Hosting + Garantie 6 mois (cf. proposition BEFFROI)' },
+    { id: 41, name: 'Intégration ERP / e-commerce sur-mesure', logo: '', price: 4500, recurrence: 'once', desc: 'Connexion ERP (Odoo, Sage, SAP) ↔ e-commerce (Shopify, Magento, Prestashop)' },
+    { id: 42, name: 'Application web/mobile sur-mesure', logo: '', price: 12000, recurrence: 'once', desc: 'App React Native ou Next.js sur-mesure, backend Node.js, hosting compris' },
+    { id: 43, name: 'GLD Logistique — Module', logo: '', price: 4500, recurrence: 'once', desc: 'Solution logistique multi-entrepôts · sync stocks temps réel · intégration ERP' },
+    { id: 44, name: 'IA SaaS — Pack automatisation', logo: '', price: 990, recurrence: 'monthly', desc: 'Lead scoring auto, génération contenus, chatbot support, sur-mesure' },
+    { id: 45, name: 'Maintenance évolutive', logo: '', price: 290, recurrence: 'monthly', desc: 'Forfait mensuel post-garantie : 4h/mois évolutions + monitoring' },
+    { id: 46, name: 'Audit & conseil stratégique', logo: '', price: 1500, recurrence: 'once', desc: 'Audit complet site/ERP/PIM existant + roadmap technique 6 mois' }
   ];
   // Branding Pixeeplay par défaut
   if (!state.branding.tva && !state.branding.iban) {
