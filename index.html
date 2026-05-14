@@ -256,7 +256,7 @@ html, body {
 .empty { text-align: center; padding: 32px 16px; color: var(--text-3); font-size: 13px; }
 .empty svg { width: 36px; height: 36px; opacity: 0.4; margin-bottom: 8px; }
 
-.kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
 .kanban-col { background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px; min-height: 140px; }
 .kanban-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px; color: var(--text-2); }
 .deal-card { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid var(--border); transition: 0.15s; }
@@ -438,7 +438,7 @@ html, body {
       <div class="submenu">
         <a class="submenu-item" onclick="navTo('pipeline', this)">Vue Kanban</a>
         <a class="submenu-item" onclick="navTo('pipeline', this)">Deals à closer</a>
-        <a class="submenu-item" onclick="navTo('pipeline', this)">Deals perdus</a>
+        <a class="submenu-item" onclick="navTo('lost-deals', this)">Deals perdus</a>
       </div>
     </div>
 
@@ -453,7 +453,7 @@ html, body {
         <a class="submenu-item" onclick="navTo('devis', this)">Mes devis</a>
         <a class="submenu-item" onclick="navTo('factures', this)">Créer une facture</a>
         <a class="submenu-item" onclick="navTo('factures', this)">Mes factures</a>
-        <a class="submenu-item" onclick="navTo('factures', this)">Avoirs</a>
+        <a class="submenu-item" onclick="navTo('avoirs', this)">Avoirs</a>
         <a class="submenu-item" onclick="navTo('produits', this)">Catalogue produits</a>
       </div>
     </div>
@@ -467,7 +467,7 @@ html, body {
       <div class="submenu">
         <a class="submenu-item" onclick="navTo('clients', this)">Liste clients</a>
         <a class="submenu-item" onclick="navTo('clients', this)">Nouveau client</a>
-        <a class="submenu-item" onclick="navTo('clients', this)">Segments</a>
+        <a class="submenu-item" onclick="navTo('segments', this)">Segments IA</a>
       </div>
     </div>
 
@@ -521,8 +521,8 @@ html, body {
       </div>
       <div class="submenu">
         <a class="submenu-item" onclick="navTo('reports', this)">Rapports quotidiens</a>
-        <a class="submenu-item" onclick="navTo('reports', this)">Bilans mensuels</a>
-        <a class="submenu-item" onclick="navTo('reports', this)">Export comptable</a>
+        <a class="submenu-item" onclick="navTo('bilans', this)">Bilans mensuels</a>
+        <a class="submenu-item" onclick="navTo('fec', this)">Export FEC comptable</a>
       </div>
     </div>
 
@@ -1420,6 +1420,76 @@ html, body {
     </div>
   </div>
 
+  <!-- ============ AVOIRS ============ -->
+  <div class="view" id="view-avoirs">
+    <div class="card">
+      <h2 class="card-title">Avoirs (notes de crédit)</h2>
+      <p class="card-desc">Génère un avoir négatif rattaché à une facture existante. Référence auto AV-{YYYY}-{N}.</p>
+      <div class="input-row">
+        <select id="avoir-facture" class="select"><option value="">— Facture source —</option></select>
+        <input id="avoir-amount" type="number" class="input" placeholder="Montant TTC à rembourser (positif)">
+      </div>
+      <textarea id="avoir-reason" class="textarea" placeholder="Motif (remise commerciale, retour, erreur facturation, etc.)" style="min-height: 60px;"></textarea>
+      <button class="btn btn-primary" onclick="generateAvoir()">Générer l'avoir</button>
+      <div id="avoir-out"></div>
+    </div>
+    <div class="card">
+      <h2 class="card-title">Avoirs émis (<span id="avoirs-count">0</span>)</h2>
+      <div id="avoirs-list"></div>
+    </div>
+  </div>
+
+  <!-- ============ BILANS MENSUELS ============ -->
+  <div class="view" id="view-bilans">
+    <div class="card">
+      <h2 class="card-title">Bilans mensuels auto-générés</h2>
+      <p class="card-desc">Synthèse mensuelle : CA réalisé, taux de conversion, top deals, commentaires IA, comparaison mois précédent.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateBilanMensuel()">📊 Générer le bilan du mois en cours</button>
+        <button class="btn btn-secondary" onclick="generateBilanMensuel(-1)">Bilan mois précédent</button>
+      </div>
+      <div id="bilan-out"></div>
+    </div>
+  </div>
+
+  <!-- ============ EXPORT COMPTABLE FEC ============ -->
+  <div class="view" id="view-fec">
+    <div class="card">
+      <h2 class="card-title">Export FEC (Fichier des Écritures Comptables)</h2>
+      <p class="card-desc">Format légal français requis par l'administration fiscale. Compatible Indy, Pennylane, Sage. Génère un .txt FEC normalisé depuis tes factures + encaissements + avoirs.</p>
+      <div class="input-row">
+        <input id="fec-from" type="date" class="input">
+        <input id="fec-to" type="date" class="input">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="exportFEC()">📥 Télécharger FEC</button>
+        <button class="btn btn-secondary" onclick="previewFEC()">Aperçu</button>
+      </div>
+      <div id="fec-out"></div>
+    </div>
+  </div>
+
+  <!-- ============ SEGMENTS CLIENTS ============ -->
+  <div class="view" id="view-segments">
+    <div class="card">
+      <h2 class="card-title">Segmentation clients automatique</h2>
+      <p class="card-desc">L'IA classe tes clients en 4 catégories : Stratégique (gros CA, récent) · Croissant · Dormant (>90j sans achat) · À risque (factures impayées).</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="segmentClients()">🎯 Recalculer la segmentation</button>
+      </div>
+      <div id="segments-out" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- ============ DEALS PERDUS ============ -->
+  <div class="view" id="view-lost-deals">
+    <div class="card">
+      <h2 class="card-title">Deals perdus &amp; leçons</h2>
+      <p class="card-desc">Chaque perte est une donnée. L'IA analyse pour ne pas répéter.</p>
+      <div id="lost-deals-list"></div>
+    </div>
+  </div>
+
   <!-- ============ CERVEAU RAG ============ -->
   <div class="view" id="view-rag">
     <div class="card">
@@ -1562,9 +1632,12 @@ html, body {
         <input id="brand-siret" class="input" placeholder="SIRET">
       </div>
       <div class="input-row">
-        <input id="brand-logo" class="input" placeholder="URL logo (https://...)" value="">
+        <input id="brand-logo" class="input" placeholder="URL logo (https://...) OU upload ci-dessous" value="">
         <input id="brand-color" type="color" class="input" value="#7C3AED" style="height: 44px;">
       </div>
+      <p class="field-label">Ou upload PNG/JPG (max 500 KB, stocké en base64 → affiché partout)</p>
+      <input id="brand-logo-file" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" class="input" style="padding: 8px;" onchange="uploadLogoFile(event)">
+      <div id="brand-logo-preview" style="margin-top: 10px;"></div>
       <textarea id="brand-address" class="textarea" placeholder="Adresse complète (apparaît sur les devis/factures)" style="min-height: 80px;"></textarea>
       <div class="input-row">
         <input id="brand-tva" class="input" placeholder="N° TVA intracom (ex: FR12345678901)">
@@ -1747,6 +1820,17 @@ function switchTab(name) {
   if (name === 'banque') renderBanqueView();
   if (name === 'projections') renderProjections();
   if (name === 'rag') renderRagView();
+  if (name === 'avoirs') renderAvoirsView();
+  if (name === 'lost-deals') renderLostDealsView();
+  if (name === 'segments') segmentClients();
+  if (name === 'bilans') {/* bouton manuel pour générer */}
+  if (name === 'fec') {
+    // Pré-remplit les dates : du 1er jan au today
+    const today = new Date().toISOString().slice(0,10);
+    const jan = new Date().getFullYear()+'-01-01';
+    if (!document.getElementById('fec-from').value) document.getElementById('fec-from').value = jan;
+    if (!document.getElementById('fec-to').value) document.getElementById('fec-to').value = today;
+  }
 }
 
 // MEGA MENU navigation
@@ -1849,7 +1933,8 @@ function renderKanban() {
     { key:'contact',  label:'Contacté', color:'#D97706' },
     { key:'meeting',  label:'RDV', color:'#7C3AED' },
     { key:'quote',    label:'Devis', color:'#DB2777' },
-    { key:'won',      label:'Signé', color:'#059669' }
+    { key:'won',      label:'Signé', color:'#059669' },
+    { key:'lost',     label:'Perdu', color:'#DC2626' }
   ];
   const el = document.getElementById('kanban');
   if (!el) return;
@@ -2401,18 +2486,51 @@ function addToPipeline(leadId) {
   logAct(lead.company+' ajouté au pipeline', 'success');
 }
 function moveDeal(id) {
-  const stages = ['prospect','contact','meeting','quote','won'];
-  const labels = { prospect:'Prospect', contact:'Contacté', meeting:'RDV', quote:'Devis', won:'Signé' };
+  const stages = ['prospect','contact','meeting','quote','won','lost'];
+  const labels = { prospect:'Prospect', contact:'Contacté', meeting:'RDV', quote:'Devis', won:'Signé', lost:'Perdu' };
   const deal = state.deals.find(d => d.id === id);
   if (!deal) return;
   const next = window.prompt('Déplacer "'+deal.company+'" :\n\n'+stages.map((s,i)=>i+' : '+labels[s]).join('\n')+'\nD : supprimer');
   if (next === 'D' || next === 'd') {
     state.deals = state.deals.filter(d => d.id !== id);
   } else if (stages[next]) {
+    const oldStage = deal.stage;
     deal.stage = stages[next];
+    // Si on passe à "lost" → demander la raison + analyse IA
+    if (stages[next] === 'lost' && oldStage !== 'lost') {
+      const reason = window.prompt('Raison de la perte (optionnel) :', '');
+      deal.lostReason = reason || '';
+      deal.lostAt = new Date().toISOString();
+      // Lance l'analyse IA en arrière-plan
+      if (state.geminiKey && reason) {
+        analyzeLostDeal(deal).catch(()=>{});
+      }
+    }
     logAct(deal.company+' déplacé vers '+labels[stages[next]], 'success');
   } else return;
   save(); refresh();
+}
+
+async function analyzeLostDeal(deal) {
+  const lead = state.leads.find(l => l.id === deal.leadId) || { company: deal.company };
+  const prompt = `Analyse cette perte de deal et propose 3 leçons concrètes à appliquer pour les prochains leads similaires.
+
+DEAL PERDU :
+- Entreprise : ${deal.company}
+- Montant : ${eur(deal.amount)}
+- Étape atteinte : ${deal.stage}
+- Raison annoncée : ${deal.lostReason || '(non précisée)'}
+- Secteur : ${lead.sector || 'inconnu'}
+- Score lead : ${lead.score || '?'}/100
+- Points de douleur identifiés : ${(lead.painPoints||[]).join(', ')}
+
+Réponds en 3 bullets COURTS et actionnables : (1) cause profonde probable, (2) signal que j'aurais dû voir, (3) action à mettre en place pour ne pas répéter.`;
+  try {
+    const insight = await callGemini(prompt);
+    deal.aiAnalysis = insight;
+    save();
+    logAct('Analyse IA de la perte "'+deal.company+'" terminée', 'info');
+  } catch(e) {}
 }
 
 /* ============ AUTOPILOT ============ */
@@ -3885,6 +4003,43 @@ function updateProba(stage, val) {
   renderProjections();
 }
 
+/* === Upload logo en base64 === */
+function uploadLogoFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 500 * 1024) { alert('Trop gros, max 500 KB.'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.branding.logoBase64 = e.target.result;
+    saveBiz();
+    applyLogoEverywhere();
+    document.getElementById('brand-logo-preview').innerHTML = `
+      <div class="success-notice">
+        ✓ Logo uploadé · <img src="${e.target.result}" style="height: 40px; vertical-align: middle; margin-left: 8px; border-radius: 8px; background: rgba(167,139,250,0.1); padding: 4px;">
+        <button class="btn btn-ghost" style="margin-left: 8px; padding: 4px 10px; font-size: 11px;" onclick="removeLogo()">Retirer</button>
+      </div>
+    `;
+    logAct('Logo branding mis à jour', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+function removeLogo() {
+  state.branding.logoBase64 = null;
+  saveBiz();
+  applyLogoEverywhere();
+  document.getElementById('brand-logo-preview').innerHTML = '';
+}
+function applyLogoEverywhere() {
+  const url = state.branding.logoBase64 || state.branding.logo || '';
+  const heroLogo = document.getElementById('hero-logo-container');
+  const sidebarLogo = document.getElementById('sidebar-logo-container');
+  if (url) {
+    if (heroLogo) heroLogo.innerHTML = '<img src="'+url+'" alt="Logo">';
+    if (sidebarLogo) sidebarLogo.innerHTML = '<img src="'+url+'" alt="Logo">';
+  }
+  // si pas d'URL, les SVG d'origine restent (rechargement de page si on retire)
+}
+
 /* === Objectif modifiable === */
 function editGoal() {
   const cur = state.monthlyGoal;
@@ -3954,6 +4109,321 @@ function seedPixeeplayProducts() {
     };
   }
   saveBiz();
+}
+
+/* ============ AVOIRS ============ */
+state.avoirs = JSON.parse(localStorage.getItem('pixee_avoirs') || '[]');
+function saveAvoirs() { localStorage.setItem('pixee_avoirs', JSON.stringify(state.avoirs)); }
+
+function renderAvoirsView() {
+  const sel = document.getElementById('avoir-facture');
+  if (sel) {
+    sel.innerHTML = '<option value="">— Facture source —</option>' +
+      state.factures.map(f => `<option value="${f.id}">${escapeHtml(f.ref)} — ${escapeHtml(f.clientLabel||'')} (${eur(f.totalTTC)})</option>`).join('');
+  }
+  const list = document.getElementById('avoirs-list');
+  if (list) {
+    document.getElementById('avoirs-count').textContent = state.avoirs.length;
+    if (!state.avoirs.length) { list.innerHTML = '<div class="empty">Aucun avoir émis.</div>'; }
+    else list.innerHTML = state.avoirs.map(a => `
+      <div class="lead-row">
+        <div class="score-circle" style="background: linear-gradient(135deg, #F87171, #EC4899); font-size: 11px;">AV</div>
+        <div class="lead-info">
+          <p class="lead-name">${escapeHtml(a.ref)}</p>
+          <p class="lead-meta">Lié à ${escapeHtml(a.facture_ref)} · ${escapeHtml(a.reason)} · ${new Date(a.date).toLocaleDateString('fr-FR')}</p>
+        </div>
+        <div style="font-weight: 700; color: #F87171;">- ${eur(a.amount)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function generateAvoir() {
+  const factureId = document.getElementById('avoir-facture').value;
+  const amount = parseFloat(document.getElementById('avoir-amount').value);
+  const reason = document.getElementById('avoir-reason').value.trim();
+  if (!factureId || !amount || amount <= 0) { alert('Sélectionne une facture + saisis un montant positif'); return; }
+  const facture = state.factures.find(f => f.id == factureId);
+  if (!facture) return;
+  const year = new Date().getFullYear();
+  const num = state.avoirs.filter(a => a.ref?.includes('-'+year+'-')).length + 1;
+  const avoir = {
+    id: Date.now(),
+    ref: 'AV-'+year+'-'+String(num).padStart(4,'0'),
+    facture_id: factureId,
+    facture_ref: facture.ref,
+    clientLabel: facture.clientLabel,
+    amount, reason,
+    date: new Date().toISOString()
+  };
+  state.avoirs.unshift(avoir);
+  saveAvoirs();
+  document.getElementById('avoir-out').innerHTML = '<div class="success-notice">Avoir '+avoir.ref+' généré pour -'+eur(amount)+'</div>';
+  renderAvoirsView();
+  logAct('Avoir '+avoir.ref+' créé : -'+eur(amount), 'success');
+}
+
+/* ============ BILANS MENSUELS ============ */
+async function generateBilanMensuel(offset = 0) {
+  if (!state.geminiKey) { alert('Configure ta clé Gemini'); switchTab('settings'); return; }
+  const out = document.getElementById('bilan-out');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération du bilan...</div>';
+
+  const ref = new Date(); ref.setMonth(ref.getMonth() + offset);
+  const monthStart = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  const monthEnd = new Date(ref.getFullYear(), ref.getMonth()+1, 0);
+  const prevStart = new Date(ref.getFullYear(), ref.getMonth()-1, 1);
+  const prevEnd = new Date(ref.getFullYear(), ref.getMonth(), 0);
+
+  const facturesMois = state.factures.filter(f => { const d=new Date(f.date); return d >= monthStart && d <= monthEnd; });
+  const facturesPrev = state.factures.filter(f => { const d=new Date(f.date); return d >= prevStart && d <= prevEnd; });
+  const ca = facturesMois.reduce((s,f)=>s+f.totalTTC, 0);
+  const caPrev = facturesPrev.reduce((s,f)=>s+f.totalTTC, 0);
+  const dealsClosed = state.deals.filter(d => d.stage === 'won').length;
+  const dealsLost = state.deals.filter(d => d.stage === 'lost').length;
+  const winRate = dealsClosed + dealsLost > 0 ? Math.round(dealsClosed / (dealsClosed + dealsLost) * 100) : 0;
+  const evolution = caPrev > 0 ? Math.round((ca - caPrev) / caPrev * 100) : null;
+
+  const prompt = `Tu es PixeeSales-Alpha. Rédige un bilan mensuel synthétique pour ${monthStart.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}.
+
+CHIFFRES :
+- CA facturé ce mois : ${eur(ca)}
+- CA mois précédent : ${eur(caPrev)}
+- Évolution : ${evolution !== null ? (evolution>=0?'+':'')+evolution+'%' : 'N/A'}
+- Factures émises : ${facturesMois.length}
+- Deals signés (total cumulé) : ${dealsClosed}
+- Deals perdus (total cumulé) : ${dealsLost}
+- Win rate : ${winRate}%
+- Nb leads actuels : ${state.leads.length} (${state.leads.filter(l=>l.category==='hot').length} hot)
+
+Format souhaité :
+## Résumé exécutif (2-3 lignes)
+## Top 3 succès du mois
+## Top 3 alertes / points d'attention
+## Plan d'action pour le mois suivant (3 actions concrètes)
+## Comparaison vs mois précédent
+
+Sois direct, chiffré, actionnable. Pas de blabla.`;
+
+  try {
+    const text = await callGemini(prompt);
+    out.innerHTML = `
+      <div class="card" style="margin-top: 16px; background: var(--surface-2);">
+        <h3 style="margin: 0 0 12px;">Bilan ${monthStart.toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</h3>
+        <div class="kpi-grid" style="margin-bottom: 16px;">
+          <div class="kpi"><p class="kpi-label">CA facturé</p><p class="kpi-value">${eur(ca)}</p><p class="kpi-sub">${facturesMois.length} factures</p></div>
+          <div class="kpi"><p class="kpi-label">Évolution</p><p class="kpi-value">${evolution!==null?(evolution>=0?'+':'')+evolution+'%':'—'}</p><p class="kpi-sub">vs mois précédent</p></div>
+          <div class="kpi"><p class="kpi-label">Win rate</p><p class="kpi-value">${winRate}%</p><p class="kpi-sub">${dealsClosed} won · ${dealsLost} lost</p></div>
+          <div class="kpi"><p class="kpi-label">Leads hot</p><p class="kpi-value">${state.leads.filter(l=>l.category==='hot').length}</p><p class="kpi-sub">sur ${state.leads.length} total</p></div>
+        </div>
+        <div class="output">${escapeHtml(text)}</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick='copyText(${JSON.stringify(text)}, this)'>Copier</button>
+        </div>
+      </div>
+    `;
+    logAct('Bilan mensuel généré', 'success');
+  } catch(e) {
+    out.innerHTML = '<div class="error">Erreur : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+/* ============ EXPORT FEC ============ */
+function buildFECData(from, to) {
+  // Format FEC officiel : 18 colonnes pipe-separated
+  // JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit|EcritureLet|DateLet|ValidDate|Montantdevise|Idevise
+  const header = 'JournalCode|JournalLib|EcritureNum|EcritureDate|CompteNum|CompteLib|CompAuxNum|CompAuxLib|PieceRef|PieceDate|EcritureLib|Debit|Credit|EcritureLet|DateLet|ValidDate|Montantdevise|Idevise';
+  const rows = [];
+  let ecritureNum = 1;
+  const fromDate = from ? new Date(from) : new Date(0);
+  const toDate = to ? new Date(to) : new Date();
+
+  state.factures.filter(f => { const d=new Date(f.date); return d>=fromDate && d<=toDate; }).forEach(f => {
+    const d = new Date(f.date).toISOString().slice(0,10).replace(/-/g,'');
+    const ht = (f.totalHT||0).toFixed(2).replace('.',',');
+    const tva = ((f.totalTTC||0) - (f.totalHT||0)).toFixed(2).replace('.',',');
+    const ttc = (f.totalTTC||0).toFixed(2).replace('.',',');
+    // Client débit TTC
+    rows.push(`VTE|Ventes|${ecritureNum}|${d}|411000|Clients|${(f.clientId||'').substr(0,20)}|${(f.clientLabel||'').substr(0,40)}|${f.ref}|${d}|Facture ${f.ref}|${ttc}|0,00|||${d}|0,00|EUR`);
+    // Produit crédit HT
+    rows.push(`VTE|Ventes|${ecritureNum}|${d}|707000|Ventes de marchandises|||${f.ref}|${d}|Facture ${f.ref}|0,00|${ht}|||${d}|0,00|EUR`);
+    // TVA crédit
+    rows.push(`VTE|Ventes|${ecritureNum}|${d}|445710|TVA collectée|||${f.ref}|${d}|TVA ${f.ref}|0,00|${tva}|||${d}|0,00|EUR`);
+    ecritureNum++;
+  });
+
+  state.avoirs.filter(a => { const d=new Date(a.date); return d>=fromDate && d<=toDate; }).forEach(a => {
+    const d = new Date(a.date).toISOString().slice(0,10).replace(/-/g,'');
+    const ttc = a.amount.toFixed(2).replace('.',',');
+    rows.push(`AVO|Avoirs|${ecritureNum}|${d}|411000|Clients||${(a.clientLabel||'').substr(0,40)}|${a.ref}|${d}|Avoir ${a.ref}|0,00|${ttc}|||${d}|0,00|EUR`);
+    rows.push(`AVO|Avoirs|${ecritureNum}|${d}|707000|Ventes de marchandises|||${a.ref}|${d}|Avoir ${a.ref}|${ttc}|0,00|||${d}|0,00|EUR`);
+    ecritureNum++;
+  });
+
+  return [header, ...rows].join('\n');
+}
+
+function previewFEC() {
+  const from = document.getElementById('fec-from').value;
+  const to = document.getElementById('fec-to').value;
+  const fec = buildFECData(from, to);
+  document.getElementById('fec-out').innerHTML = `
+    <div class="output" style="font-family: ui-monospace, monospace; font-size: 11px; max-height: 300px;">${escapeHtml(fec.slice(0, 3000))}${fec.length>3000?'\n... ('+(fec.split('\n').length-1)+' lignes total)':''}</div>
+  `;
+}
+
+function exportFEC() {
+  const from = document.getElementById('fec-from').value;
+  const to = document.getElementById('fec-to').value;
+  const fec = buildFECData(from, to);
+  const siret = (state.branding.siret||'PIXEEPLAY').replace(/\s/g,'');
+  const dateStr = (to||new Date().toISOString().slice(0,10)).replace(/-/g,'');
+  const filename = siret+'FEC'+dateStr+'.txt';
+  const blob = new Blob([fec], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  logAct('Export FEC généré : '+filename, 'success');
+}
+
+/* ============ SEGMENTS CLIENTS IA ============ */
+async function segmentClients() {
+  if (!state.geminiKey) { alert('Configure ta clé Gemini'); return; }
+  if (!state.clients.length) { alert('Aucun client à segmenter'); return; }
+  const out = document.getElementById('segments-out');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Segmentation IA...</div>';
+
+  // Enrichit chaque client avec ses factures
+  const enrichedClients = state.clients.map(c => {
+    const factures = state.factures.filter(f => (f.clientId||'').includes(String(c.id)));
+    const totalCA = factures.reduce((s,f)=>s+f.totalTTC, 0);
+    const lastFacture = factures.sort((a,b) => new Date(b.date)-new Date(a.date))[0];
+    const daysSinceLast = lastFacture ? Math.round((Date.now() - new Date(lastFacture.date)) / 86400000) : 999;
+    const overdueCount = factures.filter(f => f.status === 'overdue').length;
+    return { ...c, totalCA, daysSinceLast, overdueCount, facturesCount: factures.length };
+  });
+
+  // Segmentation heuristique
+  const segments = {
+    strategique: enrichedClients.filter(c => c.totalCA >= 5000 && c.daysSinceLast < 90),
+    croissant: enrichedClients.filter(c => c.totalCA > 0 && c.totalCA < 5000 && c.daysSinceLast < 60),
+    dormant: enrichedClients.filter(c => c.daysSinceLast >= 90 && c.totalCA > 0),
+    a_risque: enrichedClients.filter(c => c.overdueCount > 0),
+    nouveau: enrichedClients.filter(c => c.totalCA === 0)
+  };
+
+  const renderSeg = (key, label, color, items) => `
+    <div class="card" style="margin-top: 12px; border-left: 4px solid ${color};">
+      <h3 style="margin: 0 0 4px; font-size: 15px;">${label} <span style="color: var(--text-3);">(${items.length})</span></h3>
+      ${items.length ? items.slice(0,10).map(c => `
+        <div class="lead-row">
+          <div class="score-circle" style="background: ${color}; font-size: 13px;">${escapeHtml(c.name.charAt(0).toUpperCase())}</div>
+          <div class="lead-info">
+            <p class="lead-name">${escapeHtml(c.name)}</p>
+            <p class="lead-meta">CA total : ${eur(c.totalCA)} · ${c.facturesCount} factures · dernière il y a ${c.daysSinceLast}j${c.overdueCount?' · '+c.overdueCount+' impayée(s)':''}</p>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">Aucun client dans ce segment.</div>'}
+    </div>
+  `;
+
+  out.innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi"><p class="kpi-label">Stratégiques</p><p class="kpi-value" style="color:#34D399;">${segments.strategique.length}</p><p class="kpi-sub">CA &gt;5K + récent</p></div>
+      <div class="kpi"><p class="kpi-label">Croissants</p><p class="kpi-value" style="color:#A78BFA;">${segments.croissant.length}</p><p class="kpi-sub">à fidéliser</p></div>
+      <div class="kpi"><p class="kpi-label">Dormants</p><p class="kpi-value" style="color:#FBBF24;">${segments.dormant.length}</p><p class="kpi-sub">&gt;90j sans facture</p></div>
+      <div class="kpi"><p class="kpi-label">À risque</p><p class="kpi-value" style="color:#F87171;">${segments.a_risque.length}</p><p class="kpi-sub">impayés</p></div>
+    </div>
+    ${renderSeg('strategique','🌟 Stratégiques','#10B981',segments.strategique)}
+    ${renderSeg('croissant','📈 Croissants','#A78BFA',segments.croissant)}
+    ${renderSeg('dormant','💤 Dormants','#FBBF24',segments.dormant)}
+    ${renderSeg('a_risque','⚠ À risque (impayés)','#F87171',segments.a_risque)}
+    ${renderSeg('nouveau','✨ Nouveaux','#60A5FA',segments.nouveau)}
+  `;
+  logAct('Segmentation clients : '+enrichedClients.length+' classés', 'success');
+}
+
+/* ============ DEALS PERDUS ============ */
+function renderLostDealsView() {
+  const list = document.getElementById('lost-deals-list');
+  if (!list) return;
+  const lost = state.deals.filter(d => d.stage === 'lost');
+  if (!lost.length) { list.innerHTML = '<div class="empty">Aucun deal perdu pour l\'instant. C\'est plutôt bon signe 🎯</div>'; return; }
+  const totalLost = lost.reduce((s,d)=>s+d.amount,0);
+  list.innerHTML = `
+    <div class="kpi-grid" style="margin-bottom: 16px;">
+      <div class="kpi"><p class="kpi-label">Deals perdus</p><p class="kpi-value">${lost.length}</p></div>
+      <div class="kpi"><p class="kpi-label">Manque à gagner</p><p class="kpi-value">${eur(totalLost)}</p></div>
+      <div class="kpi"><p class="kpi-label">Avec analyse IA</p><p class="kpi-value">${lost.filter(d=>d.aiAnalysis).length}</p></div>
+    </div>
+    ${lost.map(d => `
+      <div class="card" style="margin-top: 12px; border-left: 3px solid #DC2626;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+          <div><strong>${escapeHtml(d.company)}</strong> · ${eur(d.amount)}</div>
+          <div style="font-size: 11px; color: var(--text-3);">Perdu ${d.lostAt ? new Date(d.lostAt).toLocaleDateString('fr-FR') : '?'}</div>
+        </div>
+        ${d.lostReason ? '<p style="font-size: 13px; margin: 4px 0;"><strong>Raison :</strong> '+escapeHtml(d.lostReason)+'</p>' : ''}
+        ${d.aiAnalysis ? '<div class="output" style="margin-top: 8px; border-left-color: #DC2626;">'+escapeHtml(d.aiAnalysis)+'</div>' : '<button class="btn btn-ghost" style="margin-top: 8px;" onclick=\'analyzeLostDealNow('+d.id+')\'>🤖 Lancer analyse IA</button>'}
+      </div>
+    `).join('')}
+  `;
+}
+
+async function analyzeLostDealNow(id) {
+  const deal = state.deals.find(d => d.id === id);
+  if (!deal) return;
+  await analyzeLostDeal(deal);
+  renderLostDealsView();
+}
+
+/* ============ CSV IMPORT pour clients/leads ============ */
+function importClientsCSV() {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.csv';
+  inp.onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const txt = ev.target.result;
+      const lines = txt.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { alert('CSV vide'); return; }
+      // Détection séparateur
+      const sep = lines[0].includes(';') ? ';' : ',';
+      const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/^["']|["']$/g,''));
+      const idx = (names) => {
+        for (const n of names) { const i = headers.indexOf(n); if (i >= 0) return i; }
+        return -1;
+      };
+      const nameIdx = idx(['raison sociale','nom','company','name','entreprise']);
+      const emailIdx = idx(['email','mail','e-mail']);
+      const phoneIdx = idx(['téléphone','telephone','phone','tel']);
+      const siretIdx = idx(['siret']);
+      const addressIdx = idx(['adresse','address']);
+      let imported = 0;
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(sep).map(c => c.trim().replace(/^["']|["']$/g,''));
+        const name = nameIdx >= 0 ? cols[nameIdx] : cols[0];
+        if (!name) continue;
+        state.clients.unshift({
+          id: Date.now() + i,
+          name,
+          email: emailIdx >= 0 ? cols[emailIdx] : '',
+          contact: '',
+          phone: phoneIdx >= 0 ? cols[phoneIdx] : '',
+          siret: siretIdx >= 0 ? cols[siretIdx] : '',
+          address: addressIdx >= 0 ? cols[addressIdx] : ''
+        });
+        imported++;
+      }
+      saveBiz(); renderClientsList();
+      alert('✅ '+imported+' clients importés');
+      logAct(imported+' clients importés depuis CSV', 'success');
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
 }
 
 /* === Branding === */
@@ -4057,6 +4527,7 @@ if (!state.log.length) {
 }
 // Resume autopilot if was on
 if (state.autopilotOn && state.geminiKey) startAutopilot();
+if (state.branding && state.branding.logoBase64) setTimeout(applyLogoEverywhere, 100);
 // Update countdown every second
 setInterval(() => { if (state.autopilotOn) updateAutopilotUI(); }, 1000);
 // Update report email display when changed
