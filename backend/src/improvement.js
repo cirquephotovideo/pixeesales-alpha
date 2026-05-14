@@ -4,6 +4,7 @@ import cron from 'node-cron';
 import crypto from 'crypto';
 import fetch from 'node-fetch';
 import nodemailer from 'nodemailer';
+import { sendTelegramAdmin } from './telegram.js';
 
 const SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
@@ -120,6 +121,12 @@ async function sendProposalsEmail(db, proposals) {
     html
   });
   console.log('[self-improve] ✓ Email envoyé à', to);
+
+  // Notification Telegram aussi (si configuré)
+  const tgMsg = `🤖 *PixeeSales-Alpha — ${proposals.length} propositions d'évolution*\n\n` +
+    proposals.slice(0, 3).map((p, i) => `${i+1}. *${p.title}*\n   📈 ${p.impact} · ⏱ ${p.effort}`).join('\n\n') +
+    `\n\n👉 Check tes emails pour les boutons Approuver/Refuser.`;
+  try { await sendTelegramAdmin(tgMsg); } catch {}
 }
 
 export function improvementRoutes(db) {
