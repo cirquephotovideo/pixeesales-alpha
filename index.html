@@ -2,7 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PixeeSales">
+<meta name="theme-color" content="#0A0510" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F8F7FB" media="(prefers-color-scheme: light)">
 <title>PixeeSales-Alpha — Agent Commercial Autonome</title>
 <style>
 :root {
@@ -161,6 +166,9 @@
 .kpi-glass-label { font-size: 11px; color: var(--text-2); position: relative; z-index: 1; }
 .kpi-glass-num { font-size: 28px; font-weight: 700; color: var(--c, var(--text)); position: relative; z-index: 1; margin-top: 4px; }
 
+/* Dev plans filter chips */
+.dp-filter.dp-active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
 /* Boutons success */
 .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; }
 .btn-success:hover { box-shadow: 0 4px 12px rgba(16,185,129,0.4); transform: translateY(-1px); }
@@ -259,6 +267,96 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+
+/* ============ RESPONSIVE iPad (768-1024px) ============ */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .app { grid-template-columns: 220px 1fr; }
+  .main-content { padding: 20px 22px; }
+  .hero { padding: 16px 20px; }
+  .hero h1 { font-size: 17px; }
+  .card { padding: 16px 18px; }
+  .input-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+}
+
+/* ============ RESPONSIVE iPhone (≤768px) ============ */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; top: 0; left: -280px; width: 280px; height: 100vh;
+    transition: left 0.3s ease; z-index: 1000;
+    border-right: 1px solid var(--glass-border-strong);
+  }
+  .sidebar.mobile-open { left: 0; box-shadow: 4px 0 32px rgba(0,0,0,0.5); }
+  .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(4px); }
+  .mobile-overlay.active { display: block; }
+  .mobile-toggle {
+    display: flex; position: fixed; top: 14px; left: 14px; z-index: 1001;
+    width: 44px; height: 44px; align-items: center; justify-content: center;
+    background: var(--surface); border: 1px solid var(--glass-border-strong);
+    border-radius: 12px; cursor: pointer; color: var(--text);
+    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .mobile-toggle svg { width: 22px; height: 22px; }
+  .main-content { padding: 70px 14px 60px; }
+  .search-palette { margin: -70px -14px 14px; padding: 12px 14px 8px; top: 0; }
+  .sp-bar { padding: 10px 14px; padding-left: 60px; }
+  .sp-kbd { display: none; }
+  .hero { flex-direction: column; gap: 14px; align-items: stretch; padding: 14px 16px; }
+  .hero-left { gap: 12px; }
+  .hero h1 { font-size: 16px; }
+  .hero-sub { font-size: 12px; }
+  .logo { width: 48px; height: 48px; }
+  .card { padding: 14px 16px; border-radius: 14px; }
+  .card-title { font-size: 15px; }
+  .input-row, .input-row-3 { grid-template-columns: 1fr !important; gap: 10px; }
+  .btn { padding: 12px 18px; font-size: 14px; min-height: 44px; } /* touch-friendly */
+  .btn-ghost, .btn-secondary { min-height: 44px; }
+  .input, .select, textarea.input { font-size: 16px; min-height: 44px; padding: 10px 14px; } /* iOS no-zoom */
+  /* Tabs scrollables horizontalement */
+  #outreach-tabs, .tab-row { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  #outreach-tabs::-webkit-scrollbar, .tab-row::-webkit-scrollbar { height: 4px; }
+  .otab { white-space: nowrap; flex-shrink: 0; padding: 10px 14px; min-height: 44px; }
+  /* Webmail grid stacked */
+  .otab-pane[data-pane="webmail"] > .card > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  #wm-list { max-height: 320px !important; }
+  #wm-detail { max-height: 500px !important; }
+  /* KPI cards en 2 colonnes sur mobile */
+  div[style*="grid-template-columns: repeat(auto-fit, minmax(160px,1fr))"],
+  div[style*="grid-template-columns: repeat(auto-fit, minmax(140px,1fr))"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .kpi-glass { padding: 10px; }
+  .kpi-glass-num { font-size: 22px; }
+  /* Action cards : boutons en wrap */
+  .action-card { padding: 12px 14px; }
+  .action-card div[style*="display: flex; gap: 6px; flex-wrap: wrap"] { gap: 8px; }
+  .action-card .btn { padding: 8px 12px !important; font-size: 12px !important; flex: 1 1 calc(50% - 4px); }
+  /* Chat widget plus petit */
+  .chat-widget { width: 92vw !important; max-width: 92vw; right: 4vw !important; bottom: 72px !important; }
+  .chat-toggle { right: 12px !important; bottom: 12px !important; width: 52px !important; height: 52px !important; }
+  /* Lead picker dropdown full-width */
+  .lp-dropdown { max-height: 280px; }
+  /* Hero sticky moins fort sur mobile */
+  .hero { position: relative; top: 0; }
+  /* Tables responsives */
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+  /* Modals plein écran sur mobile */
+  .modal-card { width: 95vw !important; max-width: 95vw !important; max-height: 90vh; overflow-y: auto; }
+}
+
+/* iPhone très petit (≤375px) */
+@media (max-width: 375px) {
+  .main-content { padding: 64px 10px 50px; }
+  .card { padding: 12px 14px; }
+  div[style*="grid-template-columns: repeat(auto-fit, minmax(160px,1fr))"],
+  div[style*="grid-template-columns: repeat(auto-fit, minmax(140px,1fr))"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
 
 /* MEGA MENU LATÉRAL — liquid glass */
@@ -744,7 +842,13 @@ body.domain-agent .sales-only { display: none !important; }
 <div class="app" id="main-app" style="display: none;">
 
 <!-- ========== SIDEBAR MEGA MENU ========== -->
-<aside class="sidebar">
+<!-- Mobile hamburger toggle -->
+<button class="mobile-toggle" id="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu" style="display: none;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+<div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo" id="sidebar-logo-link" onclick="goHome()" style="cursor: pointer;" title="Retour au dashboard">
     <div class="sidebar-logo-mark" id="sidebar-logo-container">
       <!-- Logo dynamique : si state.branding.logo est défini, on l'affiche, sinon fallback SVG -->
@@ -992,6 +1096,7 @@ body.domain-agent .sales-only { display: none !important; }
         <a class="submenu-item" onclick="navTo('tasks', this)">🔁 Jobs récurrents</a>
         <a class="submenu-item" onclick="navTo('tasks', this, 'queue')">📋 Queue / Tâches tech</a>
         <a class="submenu-item" onclick="navTo('tasks', this, 'logs')">📜 Logs &amp; historique</a>
+        <a class="submenu-item" onclick="navTo('devplans', this)">🤖 Plans de dev auto</a>
       </div>
     </div>
 
@@ -1545,6 +1650,33 @@ body.domain-agent .sales-only { display: none !important; }
         <p class="card-desc">Les 20 dernières exécutions de chaque tâche récurrente.</p>
         <select id="logs-task" class="select" style="max-width: 280px; margin-top: 10px;" onchange="loadTaskLogs()"></select>
         <div id="logs-list" style="margin-top: 16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ DEV PLANS (Auto-generated, approve-via-email) ============ -->
+  <div class="view" id="view-devplans">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <h2 class="card-title" style="margin: 0;">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          🤖 Plans de développement auto-générés
+        </h2>
+        <button class="btn btn-primary" onclick="generateDevPlansNow()">▶ Générer maintenant + envoyer par email</button>
+      </div>
+      <p class="card-desc" style="margin-top: 8px;">Tous les jours à 7h, l'agent CTO analyse les performances du système et propose 3-5 plans de développement. Tu reçois un <strong>email + Telegram</strong> avec des boutons pour Approuver, Refuser ou Planifier. Une fois approuvé, le plan est documenté en spec .md + une issue GitHub est créée + tu peux dire à Claude "implémente le plan X".</p>
+
+      <div style="display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap;">
+        <button class="chip dp-filter dp-active" onclick="filterDevPlans('all', this)">Tous</button>
+        <button class="chip dp-filter" onclick="filterDevPlans('pending', this)">⏳ En attente</button>
+        <button class="chip dp-filter" onclick="filterDevPlans('approve', this)">✅ Approuvés</button>
+        <button class="chip dp-filter" onclick="filterDevPlans('schedule', this)">⏰ Planifiés</button>
+        <button class="chip dp-filter" onclick="filterDevPlans('done', this)">🎉 Implémentés</button>
+        <button class="chip dp-filter" onclick="filterDevPlans('reject', this)">✕ Refusés</button>
+      </div>
+
+      <div id="devplans-list">
+        <div class="empty" style="padding: 30px;">Chargement…</div>
       </div>
     </div>
   </div>
@@ -2967,6 +3099,8 @@ function switchTab(name) {
   if (name === 'studio-media') loadMediaGallery();
   // Tâches background
   if (name === 'tasks') loadRecurringTasks();
+  // Dev plans
+  if (name === 'devplans') loadDevPlans();
 }
 
 // MEGA MENU navigation
@@ -5374,6 +5508,151 @@ async function loadTaskLogs() {
   }
 }
 
+// ============ DEV PLANS ============
+let _devPlansCache = [];
+let _devPlansFilter = 'all';
+
+async function loadDevPlans() {
+  const el = document.getElementById('devplans-list');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/devplans/list');
+    const d = await r.json();
+    _devPlansCache = d.plans || [];
+    renderDevPlans();
+  } catch(e) {
+    el.innerHTML = '<div class="error">' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function filterDevPlans(status, btn) {
+  _devPlansFilter = status;
+  document.querySelectorAll('.dp-filter').forEach(c => c.classList.remove('dp-active'));
+  btn?.classList.add('dp-active');
+  renderDevPlans();
+}
+
+function renderDevPlans() {
+  const el = document.getElementById('devplans-list');
+  if (!el) return;
+  const plans = _devPlansFilter === 'all' ? _devPlansCache : _devPlansCache.filter(p => p.status === _devPlansFilter);
+  if (!plans.length) {
+    el.innerHTML = '<div class="empty" style="padding: 40px;">Aucun plan ' + (_devPlansFilter !== 'all' ? '"'+_devPlansFilter+'"' : '') + ' encore. Clique "Générer maintenant" pour faire un test.</div>';
+    return;
+  }
+  const catColors = { feature: '#7C3AED', fix: '#EF4444', optim: '#10B981', ux: '#EC4899', data: '#3B82F6', integration: '#F59E0B', infra: '#6B7280' };
+  const statusInfo = {
+    pending: { icon: '⏳', label: 'En attente', color: '#fbbf24' },
+    approve: { icon: '✅', label: 'Approuvé', color: '#10b981' },
+    schedule: { icon: '⏰', label: 'Planifié 23h', color: '#6366f1' },
+    implementing: { icon: '⚙️', label: 'En cours', color: '#3b82f6' },
+    done: { icon: '🎉', label: 'Implémenté', color: '#10b981' },
+    failed: { icon: '❌', label: 'Échec', color: '#ef4444' },
+    reject: { icon: '✕', label: 'Refusé', color: '#6b7280' }
+  };
+
+  el.innerHTML = plans.map(p => {
+    const cat = (p.category || 'feature').toLowerCase();
+    const catColor = catColors[cat] || '#7C3AED';
+    const st = statusInfo[p.status] || statusInfo.pending;
+    const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '';
+    const files = Array.isArray(p.files_touched) ? p.files_touched : [];
+    const criteria = Array.isArray(p.acceptance_criteria) ? p.acceptance_criteria : [];
+
+    return `
+      <div style="background: var(--surface); border: 1px solid var(--glass-border-strong); border-left: 4px solid ${catColor}; border-radius: 14px; padding: 18px; margin-bottom: 14px; backdrop-filter: blur(20px) saturate(180%);">
+        <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
+              <span style="font-size: 10px; padding: 3px 8px; background: ${catColor}; color: white; border-radius: 4px; font-weight: 700; text-transform: uppercase;">${escapeHtml(cat)}</span>
+              <span style="font-size: 10px; padding: 3px 8px; background: ${st.color}33; color: ${st.color}; border-radius: 4px; font-weight: 600;">${st.icon} ${escapeHtml(st.label)}</span>
+              <span style="font-size: 11px; color: var(--text-3);">⏱ ${escapeHtml(p.effort||'?')} · 📅 ${escapeHtml(dateStr)} · <code style="font-size: 10px; background: var(--glass-bg); padding: 1px 6px; border-radius: 4px;">${escapeHtml(p.plan_id || '')}</code></span>
+            </div>
+            <h3 style="margin: 0 0 8px; font-size: 15px;">${escapeHtml(p.title || '')}</h3>
+            <p style="font-size: 12px; color: var(--text-2); line-height: 1.5; margin: 6px 0;">${escapeHtml(p.rationale || '')}</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; font-size: 12px;">
+              <div><strong style="color: var(--accent);">📈 Impact :</strong> ${escapeHtml(p.impact || '')}</div>
+              ${files.length ? `<div><strong style="color: var(--accent);">📁 Fichiers :</strong> ${files.slice(0,3).map(f => '<code style="font-size:10px;background:var(--glass-bg);padding:1px 5px;border-radius:3px;">'+escapeHtml(f)+'</code>').join(' ')}${files.length>3?' +'+(files.length-3):''}</div>` : ''}
+            </div>
+            <details style="margin-top: 12px;">
+              <summary style="cursor: pointer; font-size: 12px; color: var(--accent);">📋 Spec d'implémentation</summary>
+              <div style="margin-top: 8px; padding: 12px; background: var(--glass-bg); border-radius: 8px; font-size: 12px; line-height: 1.6;">
+                <p style="margin: 0 0 8px;">${escapeHtml(p.implementation_spec || '')}</p>
+                ${criteria.length ? '<p style="margin: 8px 0 4px;"><strong>Critères :</strong></p><ul style="margin: 4px 0; padding-left: 20px;">'+criteria.map(c => '<li>'+escapeHtml(c)+'</li>').join('')+'</ul>' : ''}
+                ${p.risks ? `<p style="margin-top:8px;"><strong>⚠ Risques :</strong> ${escapeHtml(p.risks)}</p>` : ''}
+              </div>
+            </details>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap;">
+          ${p.status === 'pending' ? `
+            <button class="btn btn-success" style="padding: 6px 14px; font-size: 12px;" onclick="decideDevPlan('${escapeHtml(p.plan_id).replace(/'/g,'')}', 'approve', '${escapeHtml(p.title).replace(/'/g,'')}')">✓ Approuver</button>
+            <button class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px;" onclick="decideDevPlan('${escapeHtml(p.plan_id).replace(/'/g,'')}', 'schedule', '${escapeHtml(p.title).replace(/'/g,'')}')">⏰ Planifier 23h</button>
+            <button class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px;" onclick="decideDevPlan('${escapeHtml(p.plan_id).replace(/'/g,'')}', 'reject', '${escapeHtml(p.title).replace(/'/g,'')}')">✕ Refuser</button>
+          ` : ''}
+          ${p.status === 'approve' ? `
+            <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;" onclick="askClaudeToImplement('${escapeHtml(p.plan_id).replace(/'/g,'')}', '${escapeHtml(p.title).replace(/'/g,'')}')">🤖 "Implémente le plan ${escapeHtml(p.plan_id)}"</button>
+            <button class="btn btn-success" style="padding: 6px 14px; font-size: 12px;" onclick="markPlanDone('${escapeHtml(p.plan_id).replace(/'/g,'')}')">🎉 Marquer implémenté</button>
+            ${p.github_issue_url ? `<a href="${escapeHtml(p.github_issue_url)}" target="_blank" class="btn btn-ghost" style="padding: 6px 14px; font-size: 12px; text-decoration: none;">🐙 Issue GitHub</a>` : ''}
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function decideDevPlan(planId, action, title) {
+  try {
+    const r = await fetch(backendUrl() + '/api/devplans/' + planId + '/status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: action })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    logAct((action==='approve'?'✓ Plan approuvé':action==='reject'?'✕ Plan refusé':'⏰ Plan planifié')+' : '+title, 'info');
+    loadDevPlans();
+  } catch(e) { alert(e.message); }
+}
+
+async function markPlanDone(planId) {
+  if (!confirm('Marquer ce plan comme implémenté ?')) return;
+  try {
+    await fetch(backendUrl() + '/api/devplans/' + planId + '/status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'done' })
+    });
+    loadDevPlans();
+  } catch(e) { alert(e.message); }
+}
+
+function askClaudeToImplement(planId, title) {
+  const msg = `Implémente le plan "${planId}" : ${title}.\n\nLe plan complet est dans /data/dev-specs/${planId}.md (sur le backend) ou récupérable via GET https://api.pixeeplay.com/api/devplans/list (filtrer par plan_id=${planId}).\n\nUne fois fait, push sur GitHub et marque le plan "done" via POST /api/devplans/${planId}/status {status:"done"}.`;
+  navigator.clipboard?.writeText(msg).then(() => {
+    alert('✓ Message copié dans le presse-papier !\n\nColle-le dans Claude (cmd+V) pour qu\'il implémente le plan.');
+  }).catch(() => {
+    prompt('Copie ce message et envoie-le à Claude :', msg);
+  });
+}
+
+async function generateDevPlansNow() {
+  if (!confirm('Générer maintenant 3-5 nouveaux plans + envoyer par email ?')) return;
+  const btn = event?.target;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Génération IA…'; }
+  try {
+    const r = await fetch(backendUrl() + '/api/devplans/generate', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ send: true })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Erreur');
+    alert(`✓ ${d.plans?.length || 0} plans générés !\nEmail envoyé sur ${(d.sent?'arnaud@pixeeplay.com':'NON envoyé')}.\nTelegram aussi notifié.`);
+    loadDevPlans();
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Générer maintenant + envoyer par email'; }
+  }
+}
+
 // Améliore createTechTask : push aussi dans la queue backend
 const _oldCreateTechTask = window.createTechTask;
 window.createTechTask = function(title, detail) {
@@ -5634,6 +5913,36 @@ document.addEventListener('keydown', (e) => {
     document.getElementById('sp-input')?.focus();
   }
 });
+
+// ============ MOBILE MENU ============
+function toggleMobileMenu() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('mobile-overlay');
+  if (!sb) return;
+  const isOpen = sb.classList.toggle('mobile-open');
+  if (ov) ov.classList.toggle('active', isOpen);
+}
+function updateMobileToggle() {
+  const btn = document.getElementById('mobile-toggle');
+  if (!btn) return;
+  btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+}
+window.addEventListener('resize', updateMobileToggle);
+window.addEventListener('load', updateMobileToggle);
+setTimeout(updateMobileToggle, 100);
+// Fermer le menu mobile après nav
+const _navToOld = window.navTo;
+if (_navToOld) {
+  window.navTo = function(...args) {
+    _navToOld.apply(this, args);
+    if (window.innerWidth <= 768) {
+      const sb = document.getElementById('sidebar');
+      const ov = document.getElementById('mobile-overlay');
+      sb?.classList.remove('mobile-open');
+      ov?.classList.remove('active');
+    }
+  };
+}
 // Fermer si click extérieur
 document.addEventListener('click', (e) => {
   const p = document.getElementById('search-palette');
