@@ -280,27 +280,61 @@ html, body {
 
 /* ============ RESPONSIVE iPhone (≤768px) ============ */
 @media (max-width: 768px) {
-  .app { grid-template-columns: 1fr; }
+  html, body { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
+  .app { grid-template-columns: 1fr; display: block; }
+  /* Sidebar masquée par défaut, slide depuis la gauche */
   .sidebar {
-    position: fixed; top: 0; left: -280px; width: 280px; height: 100vh;
-    transition: left 0.3s ease; z-index: 1000;
+    position: fixed !important;
+    top: 0; left: 0;
+    width: 84vw; max-width: 320px; height: 100vh; height: 100dvh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
     border-right: 1px solid var(--glass-border-strong);
+    padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
-  .sidebar.mobile-open { left: 0; box-shadow: 4px 0 32px rgba(0,0,0,0.5); }
-  .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; backdrop-filter: blur(4px); }
+  .sidebar.mobile-open { transform: translateX(0); box-shadow: 4px 0 32px rgba(0,0,0,0.6); }
+  /* Bouton de fermeture en haut de la sidebar */
+  .sidebar-close {
+    position: absolute; top: max(12px, env(safe-area-inset-top)); right: 14px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--glass-bg); border: 1px solid var(--glass-border-strong);
+    color: var(--text); cursor: pointer; font-size: 20px; line-height: 1;
+    display: none; align-items: center; justify-content: center;
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .sidebar.mobile-open .sidebar-close { display: flex; }
+  .mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 999; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
   .mobile-overlay.active { display: block; }
   .mobile-toggle {
-    display: flex; position: fixed; top: 14px; left: 14px; z-index: 1001;
-    width: 44px; height: 44px; align-items: center; justify-content: center;
-    background: var(--surface); border: 1px solid var(--glass-border-strong);
-    border-radius: 12px; cursor: pointer; color: var(--text);
-    backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    display: flex !important;
+    position: fixed;
+    top: max(12px, env(safe-area-inset-top));
+    left: 12px;
+    z-index: 1001;
+    width: 48px; height: 48px;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(167,139,250,0.95), rgba(244,114,182,0.95));
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px; cursor: pointer; color: white;
+    box-shadow: 0 4px 20px rgba(124,58,237,0.5);
   }
-  .mobile-toggle svg { width: 22px; height: 22px; }
-  .main-content { padding: 70px 14px 60px; }
-  .search-palette { margin: -70px -14px 14px; padding: 12px 14px 8px; top: 0; }
-  .sp-bar { padding: 10px 14px; padding-left: 60px; }
+  .mobile-toggle svg { width: 24px; height: 24px; }
+  .sidebar.mobile-open ~ .mobile-toggle { opacity: 0; pointer-events: none; }
+  /* Main content : padding pour ne pas être sous le hamburger ni coupé par Safari */
+  .main-content {
+    padding: max(72px, calc(env(safe-area-inset-top) + 60px)) 14px max(80px, calc(env(safe-area-inset-bottom) + 60px));
+  }
+  /* Search palette : full width sous le hamburger */
+  .search-palette {
+    margin: calc(-1 * max(72px, env(safe-area-inset-top) + 60px)) -14px 14px;
+    padding: max(12px, env(safe-area-inset-top) + 4px) 14px 10px;
+    padding-left: 68px;
+    top: 0;
+  }
+  .sp-bar { padding: 10px 14px; }
   .sp-kbd { display: none; }
   .hero { flex-direction: column; gap: 14px; align-items: stretch; padding: 14px 16px; }
   .hero-left { gap: 12px; }
@@ -849,6 +883,7 @@ body.domain-agent .sales-only { display: none !important; }
 <div class="mobile-overlay" id="mobile-overlay" onclick="toggleMobileMenu()"></div>
 
 <aside class="sidebar" id="sidebar">
+  <button class="sidebar-close" id="sidebar-close" onclick="toggleMobileMenu()" aria-label="Fermer le menu">×</button>
   <div class="sidebar-logo" id="sidebar-logo-link" onclick="goHome()" style="cursor: pointer;" title="Retour au dashboard">
     <div class="sidebar-logo-mark" id="sidebar-logo-container">
       <!-- Logo dynamique : si state.branding.logo est défini, on l'affiche, sinon fallback SVG -->
@@ -5915,34 +5950,59 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ============ MOBILE MENU ============
+function isMobile() { return window.innerWidth <= 768; }
+function closeMobileMenu() {
+  document.getElementById('sidebar')?.classList.remove('mobile-open');
+  document.getElementById('mobile-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+function openMobileMenu() {
+  document.getElementById('sidebar')?.classList.add('mobile-open');
+  document.getElementById('mobile-overlay')?.classList.add('active');
+  document.body.style.overflow = 'hidden'; // empêche scroll body en arrière-plan
+}
 function toggleMobileMenu() {
   const sb = document.getElementById('sidebar');
-  const ov = document.getElementById('mobile-overlay');
   if (!sb) return;
-  const isOpen = sb.classList.toggle('mobile-open');
-  if (ov) ov.classList.toggle('active', isOpen);
+  if (sb.classList.contains('mobile-open')) closeMobileMenu();
+  else openMobileMenu();
 }
 function updateMobileToggle() {
   const btn = document.getElementById('mobile-toggle');
   if (!btn) return;
-  btn.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  if (isMobile()) {
+    btn.style.display = 'flex';
+  } else {
+    btn.style.display = 'none';
+    closeMobileMenu();
+  }
 }
 window.addEventListener('resize', updateMobileToggle);
 window.addEventListener('load', updateMobileToggle);
 setTimeout(updateMobileToggle, 100);
-// Fermer le menu mobile après nav
-const _navToOld = window.navTo;
-if (_navToOld) {
-  window.navTo = function(...args) {
-    _navToOld.apply(this, args);
-    if (window.innerWidth <= 768) {
-      const sb = document.getElementById('sidebar');
-      const ov = document.getElementById('mobile-overlay');
-      sb?.classList.remove('mobile-open');
-      ov?.classList.remove('active');
-    }
-  };
-}
+setTimeout(updateMobileToggle, 500);
+
+// Wrap navTo pour fermer le menu après navigation
+(function() {
+  const origNavTo = window.navTo;
+  if (typeof origNavTo === 'function') {
+    window.navTo = function(...args) {
+      origNavTo.apply(this, args);
+      if (isMobile()) setTimeout(closeMobileMenu, 50);
+    };
+  }
+})();
+// Pareil pour les clics sur submenu-item (au cas où navTo n'est pas wrappé)
+document.addEventListener('click', (e) => {
+  if (!isMobile()) return;
+  if (e.target.closest('.submenu-item, .sidebar-logo')) {
+    setTimeout(closeMobileMenu, 100);
+  }
+});
+// Pareil pour Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && isMobile()) closeMobileMenu();
+});
 // Fermer si click extérieur
 document.addEventListener('click', (e) => {
   const p = document.getElementById('search-palette');
