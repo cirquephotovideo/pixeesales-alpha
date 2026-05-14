@@ -1377,7 +1377,7 @@ async function checkPassword() {
     sessionStorage.setItem(PIXEE_AUTH_KEY, email);
     localStorage.setItem('pixee_admin_email', email);
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('main-app').style.display = 'block';
+    document.getElementById('main-app').style.display = 'grid';
     err.style.display = 'none';
   } else {
     err.style.display = 'block';
@@ -1389,7 +1389,7 @@ async function checkPassword() {
 // Auto-login si déjà authentifié dans cette session
 if (sessionStorage.getItem(PIXEE_AUTH_KEY) === PIXEE_ADMIN_EMAIL) {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('main-app').style.display = 'block';
+  document.getElementById('main-app').style.display = 'grid';
 } else {
   setTimeout(() => document.getElementById('login-email')?.focus(), 100);
 }
