@@ -1,0 +1,9 @@
+.git
+.gitignore
+.DS_Store
+*.md
+node_modules
+.env*
+.vscode
+.idea
+Lancer-PixeeSales.command

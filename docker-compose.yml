@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  pixeesales:
+    build: .
+    image: pixeesales-alpha:latest
+    container_name: pixeesales-alpha
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    labels:
+      # Coolify auto-discovery (si activé)
+      - "coolify.managed=true"
+      # Traefik labels (si tu utilises Traefik avec Coolify)
+      - "traefik.enable=true"
+      - "traefik.http.routers.pixeesales.rule=Host(`sales.pixeeplay.com`)"
+      - "traefik.http.routers.pixeesales.entrypoints=websecure"
+      - "traefik.http.routers.pixeesales.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pixeesales.loadbalancer.server.port=80"
