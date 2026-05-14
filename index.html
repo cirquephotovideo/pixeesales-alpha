@@ -92,6 +92,11 @@
 }
 :root[data-theme="light"] .chat-msg.bot { background: var(--surface-2); color: var(--text); }
 
+/* Hide mobile-only elements on desktop */
+.sidebar-close { display: none; }
+.mobile-toggle { display: none; }
+.mobile-overlay { display: none; }
+
 /* ============ SEARCH PALETTE (Cmd+K style) ============ */
 .search-palette { position: sticky; top: 0; z-index: 60; margin: -24px -32px 16px; padding: 14px 32px; background: linear-gradient(180deg, rgba(10,5,16,0.7), rgba(10,5,16,0.4) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 :root[data-theme="light"] .search-palette { background: linear-gradient(180deg, rgba(248,247,251,0.85), rgba(248,247,251,0.5) 80%, transparent); }
