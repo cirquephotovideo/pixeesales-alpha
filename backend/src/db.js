@@ -78,6 +78,19 @@ export function initDB(dbPath) {
       key TEXT PRIMARY KEY,
       value TEXT
     );
+    CREATE TABLE IF NOT EXISTS improvement_proposals (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      proposal_id TEXT UNIQUE,
+      title TEXT,
+      category TEXT,
+      rationale TEXT,
+      impact TEXT,
+      effort TEXT,
+      implementation TEXT,
+      status TEXT DEFAULT 'pending',
+      decided_at INTEGER,
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );
   `);
 
   return db;
