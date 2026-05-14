@@ -3186,7 +3186,7 @@ function importClientsCSV() { alert('Import CSV : drag-drop d\'un fichier (à ve
 function connectBank(provider) {
   const map = {
     qonto: { name: 'Qonto', help: 'Crée une clé API sur app.qonto.com → Paramètres → Intégrations → API. Permissions : read transactions, read accounts. Cette intégration nécessite un backend (Phase 1).' },
-    bridge: { name: 'Bridge API', help: 'Le même provider qu\'utilise Indy.fr. Inscris-toi gratuitement sur dashboard.bridgeapi.io/signup. Tu obtiens un Client ID + Client Secret. ⚠ Le Client Secret ne doit JAMAIS être dans le navigateur — il faut un backend (Phase 1) qui héberge le secret et expose un proxy. Pour l\'instant, configure ici puis le backend sera connecté.' },
+    bridge: { name: 'Bridge API', help: 'Provider utilisé par Indy.fr. Inscris-toi gratuitement sur dashboard.bridgeapi.io/signup. Type de sync recommandé : "Continuous" (re-auth tous les 90j). Redirect URLs à configurer : https://sales.pixeeplay.com,https://agent.pixeeplay.com. ⚠ Le Client Secret reste local ici, mais en production le backend Phase 1 le manipulera côté serveur uniquement.' },
     powens: { name: 'Powens', help: 'powens.com (anciennement Budget Insight). 300+ banques EU. Compte développeur sur demande. Plus lourd qu\'Bridge pour solo.' },
     indy_csv: { name: 'Indy.fr — Export CSV', help: 'Si tu veux rester en mode manuel : exporte tes écritures Indy en CSV depuis l\'app Indy → Comptabilité → Export, puis dépose-les ici. Le matching auto facture↔écriture se fait sur montant + date ±5j. Pas idéal mais évite tout dev backend.' }
   };
@@ -3214,21 +3214,143 @@ function connectBank(provider) {
       <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 8px;">Configuration ${escapeHtml(p.name)}</h3>
       <p style="font-size: 12px; color: var(--text-2); margin: 0 0 12px;">${escapeHtml(p.help)}</p>
       ${provider === 'bridge' ? `
-        <p class="field-label">Client ID Bridge</p>
-        <input type="text" class="input" id="bank-key" placeholder="abc123..." style="margin-bottom: 8px;">
-        <p class="field-label">Client Secret Bridge (stocké en local — sera transféré au backend Phase 1)</p>
-        <input type="password" class="input" id="bank-secret" placeholder="secret..." style="margin-bottom: 8px;">
+        <p class="field-label">Client ID Bridge (sandbox_id_... ou client_id_...)</p>
+        <input type="text" class="input" id="bank-key" placeholder="sandbox_id_..." value="${escapeHtml((state.bank.bridge||{}).key||'')}" style="margin-bottom: 8px;">
+        <p class="field-label">Client Secret Bridge</p>
+        <input type="password" class="input" id="bank-secret" placeholder="sandbox_secret_..." value="${escapeHtml((state.bank.bridge||{}).secret||'')}" style="margin-bottom: 8px;">
+        <p class="field-label">Environnement</p>
+        <select class="select" id="bank-env" style="margin-bottom: 8px;">
+          <option value="sandbox" ${(state.bank.bridge||{}).env==='sandbox'?'selected':''}>Sandbox (tests)</option>
+          <option value="production" ${(state.bank.bridge||{}).env==='production'?'selected':''}>Production (réelle)</option>
+        </select>
       ` : `
         <input type="password" class="input" id="bank-key" placeholder="API Key / Client ID" style="margin-bottom: 8px;">
         <input type="password" class="input" id="bank-secret" placeholder="API Secret (si requis)" style="margin-bottom: 8px;">
       `}
       <div class="btn-row">
         <button class="btn btn-primary" onclick='saveBank("${provider}")'>Sauvegarder</button>
+        ${provider === 'bridge' ? '<button class="btn btn-primary" style="background: linear-gradient(135deg, #00C29F, #7C3AED);" onclick="bridgeConnect()"><svg class="ico-sm" viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2.5\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\'/><path d=\'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\'/></svg> 🔗 Connect Bridge</button>' : ''}
         <button class="btn btn-secondary" onclick='testBank("${provider}")'>Tester connexion</button>
-        ${provider === 'bridge' ? '<a href="https://dashboard.bridgeapi.io/signup" target="_blank"><button class="btn btn-ghost">Créer compte Bridge</button></a>' : ''}
+        ${provider === 'bridge' ? '<a href="https://dashboard.bridgeapi.io/signup" target="_blank"><button class="btn btn-ghost">Dashboard Bridge</button></a>' : ''}
       </div>
+      ${provider === 'bridge' ? `
+        <div class="notice" style="margin-top: 16px;">
+          <svg class="ico-sm" style="flex-shrink: 0; margin-top: 1px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/></svg>
+          <div>
+            <strong>Configuration côté Bridge dashboard :</strong>
+            <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 12px;">
+              <li>Domaines autorisés : <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">https://sales.pixeeplay.com, https://agent.pixeeplay.com</code></li>
+              <li>Type de sync : <strong>Continuous</strong> (DSP2 re-auth 90j)</li>
+              <li>Redirect URI: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">https://sales.pixeeplay.com/bridge-callback</code></li>
+            </ul>
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
+}
+
+// === BRIDGE CONNECT FLOW ===
+async function bridgeConnect() {
+  const cfg = state.bank.bridge;
+  if (!cfg || !cfg.key || !cfg.secret) {
+    alert('Sauvegarde d\'abord Client ID + Client Secret.');
+    return;
+  }
+  const env = cfg.env || 'sandbox';
+  const baseUrl = env === 'sandbox' ? 'https://api.bridgeapi.io' : 'https://api.bridgeapi.io';
+
+  // Étape 1 : créer un user Bridge (POST /v2/users)
+  // Étape 2 : créer une connect session (POST /v3/aggregation/connect-sessions)
+  // Étape 3 : rediriger vers l'URL renvoyée
+  //
+  // ⚠ Cet appel nécessite normalement le Client Secret côté backend.
+  // En sandbox, Bridge tolère les appels CORS si l'origin est dans les domaines autorisés.
+
+  const out = document.getElementById('bank-config');
+  out.innerHTML += '<div class="loading" style="margin-top: 12px;"><div class="spinner"></div>Initialisation du flow Bridge Connect...</div>';
+
+  try {
+    // Headers requis par Bridge
+    const headers = {
+      'Content-Type': 'application/json',
+      'Bridge-Version': '2025-01-15',
+      'Client-Id': cfg.key,
+      'Client-Secret': cfg.secret
+    };
+
+    // 1. Créer un Bridge user (idempotent via external_user_id)
+    const externalUserId = 'pixeesales_' + (state.email || 'admin').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    let user;
+    try {
+      const userRes = await fetch(baseUrl + '/v2/users', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ external_user_id: externalUserId })
+      });
+      user = await userRes.json();
+      if (!userRes.ok && user.error_code !== 'user_already_exists') {
+        throw new Error('Création user : '+JSON.stringify(user));
+      }
+      // Si user existe déjà, récupère-le
+      if (user.error_code === 'user_already_exists') {
+        const listRes = await fetch(baseUrl + '/v2/users?external_user_id='+encodeURIComponent(externalUserId), { headers });
+        const list = await listRes.json();
+        user = (list.resources || [])[0];
+      }
+    } catch(e) {
+      throw new Error('Étape 1 (user) : '+e.message);
+    }
+
+    if (!user || !user.uuid) throw new Error('Impossible de récupérer le user UUID Bridge');
+
+    // 2. Créer un access token pour ce user (Bridge v3)
+    const tokenRes = await fetch(baseUrl + '/v3/aggregation/authorization/token', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ user_uuid: user.uuid })
+    });
+    const tokenData = await tokenRes.json();
+    if (!tokenData.access_token) throw new Error('Token : '+JSON.stringify(tokenData));
+
+    // 3. Créer une connect session
+    const sessionRes = await fetch(baseUrl + '/v3/aggregation/connect-sessions', {
+      method: 'POST',
+      headers: { ...headers, 'Authorization': 'Bearer '+tokenData.access_token },
+      body: JSON.stringify({
+        user_email: state.email,
+        country_code: 'fr'
+      })
+    });
+    const session = await sessionRes.json();
+    if (!session.url) throw new Error('Session : '+JSON.stringify(session));
+
+    // Stocker user_uuid + token pour les appels futurs
+    state.bank.bridge.user_uuid = user.uuid;
+    state.bank.bridge.access_token = tokenData.access_token;
+    state.bank.bridge.connected = true;
+    saveBiz();
+
+    // 4. Rediriger l'utilisateur vers le Connect Bridge
+    out.innerHTML = `
+      <div class="success-notice" style="margin-top: 12px;">
+        <strong>✅ Bridge initialisé !</strong><br>
+        User UUID : <code>${escapeHtml(user.uuid)}</code><br>
+        Token valide pour 2h.<br><br>
+        <a href="${session.url}" target="_blank"><button class="btn btn-primary">🔗 Ouvrir Bridge Connect → Choisir ma banque</button></a>
+      </div>
+    `;
+    logAct('Bridge Connect prêt : '+user.uuid, 'success');
+  } catch(e) {
+    out.innerHTML = `
+      <div class="error" style="margin-top: 12px;">
+        Bridge a refusé l'appel direct depuis le navigateur (CORS attendu en prod).<br>
+        Détail : ${escapeHtml(e.message)}<br><br>
+        <strong>Solution :</strong> en mode sandbox, ajoute https://sales.pixeeplay.com dans tes "Domaines autorisés" Bridge. En prod, le backend Phase 1 fera ces appels côté serveur.
+      </div>
+    `;
+    logAct('Bridge connect erreur : '+e.message, 'error');
+  }
 }
 
 function importIndyCSV() {
@@ -3918,6 +4040,16 @@ function hydrateConnectors() {
 }
 hydrateConnectors();
 seedPixeeplayProducts(); // Pré-charge le catalogue Pixeeplay + branding
+// Pré-config Bridge sandbox (les credentials de l'user)
+if (!state.bank.bridge) {
+  state.bank.bridge = {
+    key: 'sandbox_id_05d5ac1d060e4a989bb5512f09b2b063',
+    secret: 'sandbox_secret_8WUY0h6kYhEWTKLpfOEIcgMkb85NFJUVpk8gd4N2ejzAB4QOxvx5KMSqbc5HWAMe',
+    env: 'sandbox',
+    configured: true
+  };
+  saveBiz();
+}
 
 refresh();
 if (!state.log.length) {
