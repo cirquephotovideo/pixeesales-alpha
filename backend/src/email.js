@@ -5,7 +5,15 @@ import cron from 'node-cron';
 import fetch from 'node-fetch';
 
 // Config SMTP en mémoire (override les env vars), persistée dans DB
-let SMTP_RUNTIME = { user: null, pass: null, from: null };
+export let SMTP_RUNTIME = { user: null, pass: null, from: null };
+
+// Accès lecture pour les autres modules (webmail IMAP)
+export function getSmtpCreds() {
+  return {
+    user: SMTP_RUNTIME.user || process.env.SMTP_USER || null,
+    pass: SMTP_RUNTIME.pass || process.env.SMTP_PASS || null
+  };
+}
 
 function transporter() {
   const user = SMTP_RUNTIME.user || process.env.SMTP_USER;
