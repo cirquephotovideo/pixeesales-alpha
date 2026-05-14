@@ -1491,27 +1491,34 @@ body.domain-agent .sales-only { display: none !important; }
         </div>
       </div>
 
-      <p class="field-label" style="margin-top: 12px;">📦 Ajouter un produit du catalogue</p>
-      <div style="display: grid; grid-template-columns: 2fr 80px auto; gap: 8px; margin-bottom: 12px;">
-        <select id="devis-product-picker" class="select">
-          <option value="">— Choisir un produit —</option>
-        </select>
-        <input id="devis-product-qty" type="number" class="input" value="1" min="1" placeholder="Qté">
-        <button class="btn btn-primary" onclick="addProductToDevis()">+ Ajouter</button>
-      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 16px; margin-top: 12px;" id="devis-dnd-grid">
+        <!-- CATALOGUE (DRAG SOURCE) -->
+        <div style="background: var(--surface-2); border-radius: var(--radius); padding: 12px;">
+          <p class="field-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>📦 Catalogue (glisse →)</span>
+            <input id="catalog-search" placeholder="🔍 Filtrer" style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 11px; color: var(--text); width: 110px;" oninput="renderCatalogDraggable()">
+          </p>
+          <div id="catalog-draggable" style="display: flex; flex-direction: column; gap: 6px; max-height: 420px; overflow-y: auto; padding-right: 4px;"></div>
+        </div>
 
-      <p class="field-label" style="margin-top: 8px;">💼 Lignes du devis</p>
-      <div id="devis-items-list" style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 8px; min-height: 60px;"></div>
+        <!-- LIGNES DEVIS (DROP ZONE) -->
+        <div>
+          <p class="field-label">💼 Lignes du devis (← dépose ici)</p>
+          <div id="devis-items-list"
+               ondragover="devisDragOver(event)"
+               ondrop="devisDrop(event)"
+               ondragleave="devisDragLeave(event)"
+               style="background: var(--surface-2); border-radius: var(--radius); padding: 10px; min-height: 280px; transition: 0.2s; border: 2px dashed transparent;"></div>
 
-      <div style="margin-top: 8px;">
-        <details>
-          <summary style="cursor: pointer; font-size: 12px; color: var(--text-2); margin-bottom: 6px;">+ Ajouter une ligne sur-mesure (libre)</summary>
-          <div style="display: grid; grid-template-columns: 3fr 1fr auto; gap: 6px; margin-top: 6px;">
-            <input id="devis-custom-desc" class="input" placeholder="Description">
-            <input id="devis-custom-price" type="number" class="input" placeholder="Prix HT €" step="0.01">
-            <button class="btn btn-secondary" onclick="addCustomLine()">+</button>
-          </div>
-        </details>
+          <details style="margin-top: 8px;">
+            <summary style="cursor: pointer; font-size: 12px; color: var(--text-2); margin-bottom: 6px;">+ Ajouter une ligne sur-mesure (libre)</summary>
+            <div style="display: grid; grid-template-columns: 3fr 1fr auto; gap: 6px; margin-top: 6px;">
+              <input id="devis-custom-desc" class="input" placeholder="Description">
+              <input id="devis-custom-price" type="number" class="input" placeholder="Prix HT €" step="0.01">
+              <button class="btn btn-secondary" onclick="addCustomLine()">+</button>
+            </div>
+          </details>
+        </div>
       </div>
 
       <div class="input-row" style="margin-top: 16px;">
@@ -3598,30 +3605,82 @@ function refreshDevisDropdowns() {
   sel.innerHTML = '<option value="">— Sélectionner —</option>' + opts.map(o => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join('');
   const ref = document.getElementById('devis-ref');
   if (ref && !ref.value) ref.placeholder = 'Auto: '+nextRef('DV');
-  // Catalogue products
-  const picker = document.getElementById('devis-product-picker');
-  if (picker) {
-    picker.innerHTML = '<option value="">— Choisir un produit —</option>' +
-      state.produits.map(p => `<option value="${p.id}">${escapeHtml(p.name)} — ${eur(p.price)}${p.recurrence==='monthly'?'/mois':p.recurrence==='yearly'?'/an':''}</option>`).join('');
-  }
+  renderCatalogDraggable();
   renderDevisItems();
   recalcDevisTotals();
 }
 
-function addProductToDevis() {
-  const pid = document.getElementById('devis-product-picker').value;
-  const qty = parseInt(document.getElementById('devis-product-qty').value) || 1;
-  if (!pid) { alert('Choisis un produit'); return; }
-  const product = state.produits.find(p => p.id == pid);
+function renderCatalogDraggable() {
+  const el = document.getElementById('catalog-draggable');
+  if (!el) return;
+  const search = (document.getElementById('catalog-search')?.value || '').toLowerCase();
+  const products = state.produits.filter(p =>
+    !search || p.name.toLowerCase().includes(search) || (p.desc||'').toLowerCase().includes(search)
+  );
+  if (!products.length) {
+    el.innerHTML = '<div class="empty" style="padding: 20px 12px;">Aucun produit. Ajoute-en dans Catalogue produits.</div>';
+    return;
+  }
+  el.innerHTML = products.map(p => {
+    const recur = p.recurrence === 'monthly' ? '/mois' : p.recurrence === 'yearly' ? '/an' : '';
+    return `
+      <div class="catalog-card"
+           draggable="true"
+           ondragstart="catalogDragStart(event, ${p.id})"
+           ondragend="catalogDragEnd(event)"
+           ondblclick="quickAddCatalogProduct(${p.id})"
+           title="Double-clic ou glisse pour ajouter"
+           style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; cursor: grab; transition: 0.15s; display: flex; align-items: center; gap: 10px; user-select: none;">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 16px;">
+          ${p.logo ? '<img src="'+escapeHtml(p.logo)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'📦\'">' : '📦'}
+        </div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-size: 12px; font-weight: 600; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(p.name)}</div>
+          <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;">${eur(p.price)}${recur}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function quickAddCatalogProduct(productId) {
+  const product = state.produits.find(p => p.id == productId);
   if (!product) return;
   state.devisDraft.items.push({
     desc: product.name + (product.recurrence==='monthly'?' (mensuel)':product.recurrence==='yearly'?' (annuel)':''),
-    qty, unitPrice: product.price, price: product.price * qty,
+    qty: 1, unitPrice: product.price, price: product.price,
     logo: product.logo, productId: product.id, recurrence: product.recurrence
   });
   renderDevisItems(); recalcDevisTotals();
-  document.getElementById('devis-product-picker').value = '';
-  document.getElementById('devis-product-qty').value = 1;
+}
+
+/* === DRAG & DROP catalogue → lignes devis === */
+let _catalogDragId = null;
+function catalogDragStart(e, productId) {
+  _catalogDragId = productId;
+  e.dataTransfer.effectAllowed = 'copy';
+  e.target.style.opacity = '0.5';
+}
+function catalogDragEnd(e) {
+  e.target.style.opacity = '1';
+}
+function devisDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  e.currentTarget.style.border = '2px dashed var(--accent)';
+  e.currentTarget.style.background = 'rgba(167,139,250,0.12)';
+}
+function devisDragLeave(e) {
+  e.currentTarget.style.border = '2px dashed transparent';
+  e.currentTarget.style.background = 'var(--surface-2)';
+}
+function devisDrop(e) {
+  e.preventDefault();
+  e.currentTarget.style.border = '2px dashed transparent';
+  e.currentTarget.style.background = 'var(--surface-2)';
+  if (!_catalogDragId) return;
+  quickAddCatalogProduct(_catalogDragId);
+  _catalogDragId = null;
 }
 
 function addCustomLine() {
@@ -3640,31 +3699,59 @@ function removeDevisItem(idx) {
 }
 
 function updateDevisQty(idx, qty) {
-  const q = parseInt(qty) || 1;
+  const q = Math.max(1, parseInt(qty) || 1);
   state.devisDraft.items[idx].qty = q;
   state.devisDraft.items[idx].price = state.devisDraft.items[idx].unitPrice * q;
   renderDevisItems(); recalcDevisTotals();
+}
+function updateDevisUnitPrice(idx, price) {
+  const p = Math.max(0, parseFloat(price) || 0);
+  state.devisDraft.items[idx].unitPrice = p;
+  state.devisDraft.items[idx].price = p * state.devisDraft.items[idx].qty;
+  recalcDevisTotals();
+  // Update affichage total ligne sans re-render complet pour garder le focus
+  const totalEl = document.getElementById('devis-line-total-'+idx);
+  if (totalEl) totalEl.textContent = eur(state.devisDraft.items[idx].price);
+}
+function updateDevisDesc(idx, desc) {
+  state.devisDraft.items[idx].desc = desc;
 }
 
 function renderDevisItems() {
   const el = document.getElementById('devis-items-list');
   if (!el) return;
   if (!state.devisDraft.items.length) {
-    el.innerHTML = '<div class="empty" style="padding: 16px;">Aucune ligne. Ajoute un produit du catalogue ci-dessus.</div>';
+    el.innerHTML = '<div class="empty" style="padding: 40px 16px; text-align: center; color: var(--text-3); font-size: 13px;">⬅ Glisse un produit du catalogue ici<br><span style="font-size: 11px;">ou double-clique un produit pour l\'ajouter</span></div>';
     return;
   }
   el.innerHTML = state.devisDraft.items.map((it, i) => `
-    <div style="display: grid; grid-template-columns: 40px 1fr 80px 90px 36px; gap: 10px; align-items: center; padding: 8px 10px; background: var(--surface); border-radius: 6px; margin-bottom: 6px;">
-      <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-        ${it.logo ? '<img src="'+escapeHtml(it.logo)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' : '📦'}
+    <div style="background: var(--surface); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; border-left: 3px solid var(--accent);">
+      <div style="display: grid; grid-template-columns: 32px 1fr 32px; gap: 10px; align-items: center; margin-bottom: 8px;">
+        <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 16px;">
+          ${it.logo ? '<img src="'+escapeHtml(it.logo)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'📦\'">' : '📦'}
+        </div>
+        <input type="text" value="${escapeHtml(it.desc)}" oninput="updateDevisDesc(${i}, this.value)"
+               style="padding: 6px 8px; background: transparent; border: 1px solid transparent; border-radius: 4px; color: var(--text); font-size: 13px; font-weight: 500; width: 100%;"
+               onfocus="this.style.border='1px solid var(--border-strong)'; this.style.background='var(--surface-2)'"
+               onblur="this.style.border='1px solid transparent'; this.style.background='transparent'">
+        <button onclick="removeDevisItem(${i})" style="background: var(--danger-soft); color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px;" title="Supprimer">✕</button>
       </div>
-      <div>
-        <div style="font-size: 13px; font-weight: 500;">${escapeHtml(it.desc)}</div>
-        <div style="font-size: 11px; color: var(--text-3);">${eur(it.unitPrice)} HT × ${it.qty}</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; align-items: center; padding-left: 42px;">
+        <div>
+          <div style="font-size: 10px; color: var(--text-3); margin-bottom: 2px;">Quantité</div>
+          <input type="number" min="1" step="1" value="${it.qty}" onchange="updateDevisQty(${i}, this.value)"
+                 style="padding: 5px 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; width: 100%;">
+        </div>
+        <div>
+          <div style="font-size: 10px; color: var(--text-3); margin-bottom: 2px;">Prix HT unitaire</div>
+          <input type="number" min="0" step="0.01" value="${it.unitPrice}" onchange="updateDevisUnitPrice(${i}, this.value)"
+                 style="padding: 5px 8px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 12px; width: 100%;" title="Modifie le prix unitaire">
+        </div>
+        <div>
+          <div style="font-size: 10px; color: var(--text-3); margin-bottom: 2px;">Total HT</div>
+          <strong id="devis-line-total-${i}" style="color: var(--accent); font-size: 14px;">${eur(it.price)}</strong>
+        </div>
       </div>
-      <input type="number" min="1" value="${it.qty}" onchange="updateDevisQty(${i}, this.value)" style="padding: 6px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 100%; text-align: center;">
-      <strong style="text-align: right;">${eur(it.price)}</strong>
-      <button onclick="removeDevisItem(${i})" style="background: var(--danger-soft); color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px;">✕</button>
     </div>
   `).join('');
 }
