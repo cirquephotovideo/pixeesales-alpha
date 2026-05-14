@@ -273,17 +273,32 @@ Rédige UNIQUEMENT le corps de la réponse (sans "Objet :", sans signature — l
 
     // IA : extrait actions prioritaires
     const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const sample = messages.slice(0, 30).map((m, i) => `${i+1}. De: ${m.fromName} <${m.from}> · Sujet: ${m.subject}\n   Aperçu: ${m.preview.slice(0,200)}`).join('\n\n');
-    const prompt = `Analyse cette inbox Pixeeplay (SaaS B2B PME). Identifie les 5 actions PRIORITAIRES.
-Pour chaque action, retourne JSON :
-[{ "title": "...", "detail": "...", "from": "expéditeur", "suggestion": "action concrète à faire" }]
+    const sample = messages.slice(0, 30).map((m, i) => `[uid:${m.uid}] De: ${m.fromName} <${m.from}> · Sujet: ${m.subject}\n   Aperçu: ${m.preview.slice(0,200)}`).join('\n\n');
+    const prompt = `Tu analyses la boîte mail de Pixeeplay (SaaS B2B PME). Identifie les 5 actions PRIORITAIRES à entreprendre.
+
+Pour chaque action, retourne ce JSON exact :
+[{
+  "title": "Titre court (max 60 chars)",
+  "detail": "Pourquoi c'est urgent (1-2 phrases)",
+  "from": "Nom et email de l'expéditeur",
+  "fromEmail": "email seul",
+  "uid": <uid du mail concerné>,
+  "actionType": "hot-lead" | "partnership" | "payment-issue" | "invoice-pending" | "tech-update" | "support" | "churn-risk" | "opportunity",
+  "urgency": "high" | "medium" | "low",
+  "suggestion": "Action concrète à faire (1-2 phrases)",
+  "ctaLabel": "Label court du bouton principal (ex: Rappeler maintenant, Régulariser, Payer facture, Créer lead)",
+  "ctaUrl": "URL si pertinent (ex: lien facture, lien billing) ou null"
+}]
 
 Critères de priorité (du plus urgent au moins) :
-1. Hot lead (demande de prix, devis, RDV)
-2. Client en colère / churn risk
-3. Facture impayée / paiement
-4. Support critique
-5. Opportunité commerciale
+1. hot-lead : demande explicite de RDV / prix / devis / rappel commercial
+2. churn-risk : client mécontent / risque de partir
+3. payment-issue : échec paiement / CB invalide / suspension service imminent
+4. invoice-pending : facture à payer
+5. partnership : opportunité commerciale entrante
+6. tech-update : mise à jour technique requise (API keys, credentials)
+7. support : ticket critique
+8. opportunity : autre
 
 Mails à analyser :
 ${sample}
