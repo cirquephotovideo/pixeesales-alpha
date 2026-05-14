@@ -1398,6 +1398,47 @@ body.domain-agent .sales-only { display: none !important; }
         </div>
       </details>
 
+      <!-- TELEGRAM BOT bidirectionnel -->
+      <details class="card" style="margin: 0 0 12px; padding: 12px 16px; background: var(--surface-2); box-shadow: none;">
+        <summary style="cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
+          <span><span style="color: #0088CC;">●</span> Telegram Bot — Chat bidirectionnel avec l'agent (mobile + desktop)</span>
+          <span class="badge badge-neutral" id="badge-telegram">non configuré</span>
+        </summary>
+        <div style="margin-top: 12px;">
+          <div class="success-notice" style="margin-bottom: 12px;">
+            <strong>📱 Chat l'agent depuis Telegram</strong><br>
+            Tu lui parles depuis ton mobile, il te répond en temps réel avec le contexte de ton business (stats, leads, deals, RAG).
+            Commandes : /start /stats /leads /deals /report — ou question libre.
+          </div>
+
+          <p class="field-label">1️⃣ Crée ton bot sur Telegram</p>
+          <ol style="font-size: 12px; color: var(--text-2); margin: 0 0 12px 16px; padding: 0;">
+            <li>Ouvre Telegram → cherche <strong>@BotFather</strong> → écris-lui <code>/newbot</code></li>
+            <li>Choisis un nom (ex: "PixeeSales Bot") et un username (ex: <code>pixeesales_bot</code>)</li>
+            <li>BotFather te donne un <strong>token</strong> du genre <code>1234567890:AAEh...XYZ</code></li>
+            <li>Copie-le ci-dessous</li>
+          </ol>
+
+          <p class="field-label">2️⃣ Token Bot Telegram</p>
+          <input id="conn-telegram-token" type="password" class="input" placeholder="1234567890:AAEh...XYZ" style="margin-bottom: 12px;" autocomplete="new-password">
+
+          <p class="field-label">3️⃣ Ton chat_id Telegram (optionnel — pour recevoir les alertes proactives)</p>
+          <input id="conn-telegram-admin" class="input" placeholder="ex: 123456789 (à obtenir via @userinfobot)" style="margin-bottom: 12px;">
+          <p style="font-size: 11px; color: var(--text-3); margin: -6px 0 12px;">Si rempli, l'agent t'envoie des notifs proactives (nouveau lead hot, deal signé, etc.). Pour obtenir ton ID, écris <code>/start</code> à <strong>@userinfobot</strong> sur Telegram.</p>
+
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveTelegramBot()">💾 Sauvegarder le bot</button>
+            <button class="btn btn-secondary" onclick="setupTelegramWebhook()">🔗 Activer webhook</button>
+            <button class="btn btn-secondary" onclick="testTelegramBot()">📩 Envoyer un test</button>
+            <span id="telegram-result" style="font-size: 12px; align-self: center;"></span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-3); margin: 12px 0 0;">
+            Le webhook URL configuré est : <code>https://api.pixeeplay.com/api/telegram/webhook</code><br>
+            Telegram POST chaque message reçu, le backend appelle Gemini + RAG, et répond automatiquement.
+          </p>
+        </div>
+      </details>
+
       <!-- PhantomBuster -->
       <details class="card" style="margin: 0 0 12px; padding: 12px 16px; background: var(--surface-2); box-shadow: none;">
         <summary style="cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
@@ -3501,6 +3542,79 @@ function showZapierBlueprint() {
 }</pre>
     </div>
   `;
+}
+
+/* === TELEGRAM BOT bidirectionnel === */
+async function saveTelegramBot() {
+  const token = document.getElementById('conn-telegram-token').value.trim();
+  const admin = document.getElementById('conn-telegram-admin').value.trim();
+  const out = document.getElementById('telegram-result');
+  if (!token) { alert('Token bot requis (obtenu via @BotFather sur Telegram)'); return; }
+  if (!token.match(/^\d+:[A-Za-z0-9_-]{30,}$/)) {
+    if (!confirm('Le token ne ressemble pas au format Telegram standard (format: 1234567890:AAEh...). Continuer ?')) return;
+  }
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Vérification...</span>';
+  try {
+    const r = await fetch(BACKEND_URL + '/api/telegram/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bot_token: token, admin_chat_id: admin })
+    });
+    const data = await r.json();
+    if (data.ok && data.bot) {
+      if (out) out.innerHTML = '<span class="badge badge-success">✓ Bot @'+escapeHtml(data.bot.username)+' connecté</span>';
+      state.connectors.telegram = { configured: true, bot_username: data.bot.username, admin_chat_id: admin };
+      saveConnectors(); updateConnectorBadges();
+      logAct('Telegram bot connecté : @'+data.bot.username, 'success');
+    } else {
+      throw new Error(data.error || 'unknown');
+    }
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+  }
+}
+
+async function setupTelegramWebhook() {
+  const out = document.getElementById('telegram-result');
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Setup webhook...</span>';
+  try {
+    const r = await fetch(BACKEND_URL + '/api/telegram/setup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    const data = await r.json();
+    if (data.ok) {
+      if (out) out.innerHTML = '<span class="badge badge-success">✓ Webhook actif sur '+escapeHtml(data.webhook)+'</span>';
+      alert('✅ Webhook Telegram configuré !\n\n👉 Ouvre Telegram, cherche ton bot (@'+(state.connectors.telegram?.bot_username || 'ton_bot')+') et écris /start.\n\nL\'agent va te répondre en temps réel.');
+    } else throw new Error(data.error || 'unknown');
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+  }
+}
+
+async function testTelegramBot() {
+  const admin = document.getElementById('conn-telegram-admin').value.trim() || state.connectors.telegram?.admin_chat_id;
+  if (!admin) { alert('Renseigne d\'abord ton chat_id Telegram (point 3) ou écris /start au bot pour qu\'il connaisse ton ID'); return; }
+  const out = document.getElementById('telegram-result');
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Envoi test...</span>';
+  try {
+    const r = await fetch(BACKEND_URL + '/api/telegram/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: admin,
+        text: '🎉 *PixeeSales-Alpha — Test*\n\nLe bot Telegram fonctionne ! Tu peux maintenant me poser n\'importe quelle question business.\n\nEssaie /stats ou /leads pour voir.',
+        parse_mode: 'Markdown'
+      })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      if (out) out.innerHTML = '<span class="badge badge-success">✓ Message envoyé sur Telegram</span>';
+    } else throw new Error(data.error || 'unknown');
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+  }
 }
 
 /* === Gmail SMTP NATIF via backend === */
