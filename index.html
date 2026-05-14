@@ -104,6 +104,58 @@ body.domain-agent .sales-only { display: none !important; }
 .domain-badge.agent { background: linear-gradient(135deg, #EC4899, #F472B6); color: white; }
 .domain-badge.dual { background: linear-gradient(135deg, #7C3AED, #A78BFA); color: white; }
 
+/* ============ CHAT WIDGET FLOATING ============ */
+.chat-bubble {
+  position: fixed; bottom: 24px; right: 24px; z-index: 8000;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.5);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: 0.2s ease;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+.chat-bubble:hover { transform: scale(1.1) translateY(-2px); box-shadow: 0 12px 32px rgba(124, 58, 237, 0.7); }
+.chat-bubble.has-unread::after {
+  content: ''; position: absolute; top: 4px; right: 4px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: #F87171; border: 2px solid #15101F;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.chat-panel {
+  position: fixed; bottom: 100px; right: 24px; z-index: 8000;
+  width: 380px; max-width: calc(100vw - 48px);
+  height: 560px; max-height: calc(100vh - 130px);
+  background: var(--surface); border-radius: var(--radius-lg);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(167, 139, 250, 0.1);
+  display: none; flex-direction: column; overflow: hidden;
+  backdrop-filter: blur(20px);
+}
+.chat-panel.open { display: flex; animation: chatSlide 0.25s ease; }
+@keyframes chatSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.chat-header { padding: 14px 18px; background: linear-gradient(135deg, #6D28D9 0%, #EC4899 100%); color: white; display: flex; justify-content: space-between; align-items: center; }
+.chat-header-title { display: flex; align-items: center; gap: 10px; }
+.chat-header h3 { margin: 0; font-size: 14px; font-weight: 700; }
+.chat-header p { margin: 0; font-size: 11px; opacity: 0.85; }
+.chat-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+.chat-close:hover { background: rgba(255,255,255,0.3); }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.chat-msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+.chat-msg.user { align-self: flex-end; background: linear-gradient(135deg, #7C3AED, #A78BFA); color: white; border-bottom-right-radius: 4px; }
+.chat-msg.bot { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.chat-msg.bot .sources { font-size: 11px; color: var(--text-3); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+.chat-msg.thinking { align-self: flex-start; background: var(--surface-2); display: flex; align-items: center; gap: 8px; }
+.chat-msg.thinking .spinner { width: 12px; height: 12px; }
+.chat-suggestions { padding: 10px 16px 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chat-suggestion { font-size: 11px; padding: 4px 10px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; cursor: pointer; border: none; font-family: inherit; }
+.chat-suggestion:hover { background: rgba(167, 139, 250, 0.25); }
+.chat-input-row { padding: 12px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+.chat-input-row input { flex: 1; padding: 10px 14px; background: var(--surface-2); border: 1px solid var(--border-strong); border-radius: 20px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; }
+.chat-input-row input:focus { border-color: var(--accent); }
+.chat-send-btn { background: linear-gradient(135deg, #7C3AED, #EC4899); border: none; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; }
+.chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-foot { font-size: 10px; color: var(--text-3); text-align: center; padding: 6px 0 8px; }
+
 .hero {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; margin-bottom: 24px;
@@ -1286,45 +1338,92 @@ body.domain-agent .sales-only { display: none !important; }
     </div>
   </div>
 
-  <!-- ============ DEVIS ============ -->
+  <!-- ============ DEVIS (version pro) ============ -->
   <div class="view" id="view-devis">
     <div class="card">
       <h2 class="card-title">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Devis
+        Nouveau devis
       </h2>
-      <p class="card-desc">Génère des devis avec logo Pixeeplay (ou ton logo client), envoie pour signature électronique via PandaDoc, suis l'acceptation.</p>
+      <p class="card-desc">Sélectionne ton client et ajoute des produits depuis le catalogue. Le devis est généré avec ton logo + branding et peut être envoyé en signature électronique.</p>
+
       <div class="input-row">
-        <select id="devis-client" class="select"><option value="">— Client / Lead —</option></select>
-        <input id="devis-ref" class="input" placeholder="Ref devis (auto: DV-{YYYY}-{N})">
+        <div>
+          <p class="field-label">Client / Lead</p>
+          <select id="devis-client" class="select"><option value="">— Sélectionner —</option></select>
+        </div>
+        <div>
+          <p class="field-label">Référence (auto)</p>
+          <input id="devis-ref" class="input" placeholder="DV-{YYYY}-0001">
+        </div>
       </div>
-      <textarea id="devis-items" class="textarea" placeholder="Lignes du devis (une par ligne) :&#10;PixeePIM - Setup initial - 1500&#10;PixeePIM - Abonnement mensuel x12 - 99&#10;Pixeesite - Site vitrine - 2900" style="min-height: 140px;"></textarea>
-      <div class="input-row">
-        <select id="devis-tva" class="select">
-          <option value="20">TVA 20% (normale)</option>
-          <option value="10">TVA 10%</option>
-          <option value="5.5">TVA 5,5%</option>
-          <option value="0">Exonéré TVA</option>
+
+      <p class="field-label" style="margin-top: 12px;">📦 Ajouter un produit du catalogue</p>
+      <div style="display: grid; grid-template-columns: 2fr 80px auto; gap: 8px; margin-bottom: 12px;">
+        <select id="devis-product-picker" class="select">
+          <option value="">— Choisir un produit —</option>
         </select>
-        <select id="devis-validite" class="select">
-          <option value="30">Valide 30 jours</option>
-          <option value="60">Valide 60 jours</option>
-          <option value="90">Valide 90 jours</option>
-        </select>
+        <input id="devis-product-qty" type="number" class="input" value="1" min="1" placeholder="Qté">
+        <button class="btn btn-primary" onclick="addProductToDevis()">+ Ajouter</button>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" onclick="generateDevis()">
-          <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Générer le devis IA
+
+      <p class="field-label" style="margin-top: 8px;">💼 Lignes du devis</p>
+      <div id="devis-items-list" style="background: var(--surface-2); border-radius: var(--radius-sm); padding: 8px; min-height: 60px;"></div>
+
+      <div style="margin-top: 8px;">
+        <details>
+          <summary style="cursor: pointer; font-size: 12px; color: var(--text-2); margin-bottom: 6px;">+ Ajouter une ligne sur-mesure (libre)</summary>
+          <div style="display: grid; grid-template-columns: 3fr 1fr auto; gap: 6px; margin-top: 6px;">
+            <input id="devis-custom-desc" class="input" placeholder="Description">
+            <input id="devis-custom-price" type="number" class="input" placeholder="Prix HT €" step="0.01">
+            <button class="btn btn-secondary" onclick="addCustomLine()">+</button>
+          </div>
+        </details>
+      </div>
+
+      <div class="input-row" style="margin-top: 16px;">
+        <div>
+          <p class="field-label">TVA</p>
+          <select id="devis-tva" class="select" onchange="recalcDevisTotals()">
+            <option value="20">TVA 20% (normale)</option>
+            <option value="10">TVA 10%</option>
+            <option value="5.5">TVA 5,5%</option>
+            <option value="0">Exonéré TVA (art. 293 B CGI)</option>
+          </select>
+        </div>
+        <div>
+          <p class="field-label">Validité</p>
+          <select id="devis-validite" class="select">
+            <option value="30">30 jours</option>
+            <option value="60">60 jours</option>
+            <option value="90">90 jours</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Totaux en direct -->
+      <div style="background: linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft)); border-radius: var(--radius-sm); padding: 14px; margin-top: 16px;">
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>Total HT</span><strong id="devis-total-ht">0 €</strong></div>
+        <div style="display: flex; justify-content: space-between; padding: 4px 0;"><span>TVA <span id="devis-tva-display">20%</span></span><strong id="devis-total-tva">0 €</strong></div>
+        <div style="display: flex; justify-content: space-between; padding: 8px 0 0; margin-top: 6px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 18px;"><span>Total TTC</span><strong id="devis-total-ttc" style="color: var(--accent);">0 €</strong></div>
+      </div>
+
+      <div class="btn-row" style="margin-top: 16px;">
+        <button class="btn btn-primary" onclick="generateDevisPro()">
+          <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Valider le devis
         </button>
-        <button class="btn btn-secondary" onclick="exportDevisPDF()">Export PDF</button>
-        <button class="btn btn-secondary" onclick="sendDevisPandadoc()">Envoyer via PandaDoc</button>
+        <button class="btn btn-secondary" onclick="previewDevisPDF()">👁 Prévisualiser PDF</button>
+        <button class="btn btn-secondary" onclick="sendDevisPandadoc()">✍ Envoyer signature</button>
       </div>
       <div id="devis-out"></div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">Mes devis (<span id="devis-count">0</span>)</h2>
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+        Mes devis (<span id="devis-count">0</span>)
+      </h2>
       <div id="devis-list"></div>
     </div>
   </div>
@@ -1756,6 +1855,42 @@ body.domain-agent .sales-only { display: none !important; }
     </p>
   </footer>
 
+</div>
+
+<!-- ============ CHAT WIDGET FLOATING ============ -->
+<div class="chat-bubble" id="chat-bubble" onclick="toggleChat()" title="Chat avec l'agent IA">
+  <svg style="width: 28px; height: 28px; color: white;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+</div>
+
+<div class="chat-panel" id="chat-panel">
+  <div class="chat-header">
+    <div class="chat-header-title">
+      <div style="width: 32px; height: 32px;">
+        <svg viewBox="0 0 100 100" style="width:100%;height:100%;">
+          <defs>
+            <linearGradient id="chPet" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#C4B5FD"/></linearGradient>
+          </defs>
+          <path d="M 30 18 Q 22 18 22 26 L 22 82 Q 22 90 30 90 L 38 90 L 38 18 Z" fill="url(#chPet)"/>
+          <path d="M 42 18 Q 60 18 64 38 Q 64 50 56 60 L 38 60 L 38 18 Z" fill="url(#chPet)"/>
+          <path d="M 42 42 L 60 50 L 42 58 Z" fill="#7C3AED"/>
+        </svg>
+      </div>
+      <div>
+        <h3>PixeeSales-Alpha</h3>
+        <p>Augmenté par RAG + Gemini</p>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-suggestions" id="chat-suggestions"></div>
+  <div class="chat-input-row">
+    <input id="chat-input" placeholder="Demande à l'agent..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+    <button class="chat-send-btn" id="chat-send-btn" onclick="sendChatMessage()">
+      <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="chat-foot">Powered by Gemini · La conversation reste privée</div>
 </div>
 
 <!-- LOGIN GATE -->
@@ -3090,15 +3225,154 @@ function nextRef(prefix) {
   return prefix+'-'+year+'-'+String(num).padStart(4,'0');
 }
 
-/* === Devis === */
+/* === Devis (version pro) === */
+state.devisDraft = state.devisDraft || { items: [] };
+
 function refreshDevisDropdowns() {
   const sel = document.getElementById('devis-client');
   if (!sel) return;
   const opts = [...state.clients.map(c => ({id: 'c-'+c.id, label: c.name+' (client)'})),
                 ...state.leads.map(l => ({id: 'l-'+l.id, label: l.company+' (lead)'}))];
-  sel.innerHTML = '<option value="">— Client / Lead —</option>' + opts.map(o => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join('');
+  sel.innerHTML = '<option value="">— Sélectionner —</option>' + opts.map(o => `<option value="${o.id}">${escapeHtml(o.label)}</option>`).join('');
   const ref = document.getElementById('devis-ref');
   if (ref && !ref.value) ref.placeholder = 'Auto: '+nextRef('DV');
+  // Catalogue products
+  const picker = document.getElementById('devis-product-picker');
+  if (picker) {
+    picker.innerHTML = '<option value="">— Choisir un produit —</option>' +
+      state.produits.map(p => `<option value="${p.id}">${escapeHtml(p.name)} — ${eur(p.price)}${p.recurrence==='monthly'?'/mois':p.recurrence==='yearly'?'/an':''}</option>`).join('');
+  }
+  renderDevisItems();
+  recalcDevisTotals();
+}
+
+function addProductToDevis() {
+  const pid = document.getElementById('devis-product-picker').value;
+  const qty = parseInt(document.getElementById('devis-product-qty').value) || 1;
+  if (!pid) { alert('Choisis un produit'); return; }
+  const product = state.produits.find(p => p.id == pid);
+  if (!product) return;
+  state.devisDraft.items.push({
+    desc: product.name + (product.recurrence==='monthly'?' (mensuel)':product.recurrence==='yearly'?' (annuel)':''),
+    qty, unitPrice: product.price, price: product.price * qty,
+    logo: product.logo, productId: product.id, recurrence: product.recurrence
+  });
+  renderDevisItems(); recalcDevisTotals();
+  document.getElementById('devis-product-picker').value = '';
+  document.getElementById('devis-product-qty').value = 1;
+}
+
+function addCustomLine() {
+  const desc = document.getElementById('devis-custom-desc').value.trim();
+  const price = parseFloat(document.getElementById('devis-custom-price').value);
+  if (!desc || isNaN(price)) { alert('Description et prix requis'); return; }
+  state.devisDraft.items.push({ desc, qty: 1, unitPrice: price, price });
+  renderDevisItems(); recalcDevisTotals();
+  document.getElementById('devis-custom-desc').value = '';
+  document.getElementById('devis-custom-price').value = '';
+}
+
+function removeDevisItem(idx) {
+  state.devisDraft.items.splice(idx, 1);
+  renderDevisItems(); recalcDevisTotals();
+}
+
+function updateDevisQty(idx, qty) {
+  const q = parseInt(qty) || 1;
+  state.devisDraft.items[idx].qty = q;
+  state.devisDraft.items[idx].price = state.devisDraft.items[idx].unitPrice * q;
+  renderDevisItems(); recalcDevisTotals();
+}
+
+function renderDevisItems() {
+  const el = document.getElementById('devis-items-list');
+  if (!el) return;
+  if (!state.devisDraft.items.length) {
+    el.innerHTML = '<div class="empty" style="padding: 16px;">Aucune ligne. Ajoute un produit du catalogue ci-dessus.</div>';
+    return;
+  }
+  el.innerHTML = state.devisDraft.items.map((it, i) => `
+    <div style="display: grid; grid-template-columns: 40px 1fr 80px 90px 36px; gap: 10px; align-items: center; padding: 8px 10px; background: var(--surface); border-radius: 6px; margin-bottom: 6px;">
+      <div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-3); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+        ${it.logo ? '<img src="'+escapeHtml(it.logo)+'" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\'">' : '📦'}
+      </div>
+      <div>
+        <div style="font-size: 13px; font-weight: 500;">${escapeHtml(it.desc)}</div>
+        <div style="font-size: 11px; color: var(--text-3);">${eur(it.unitPrice)} HT × ${it.qty}</div>
+      </div>
+      <input type="number" min="1" value="${it.qty}" onchange="updateDevisQty(${i}, this.value)" style="padding: 6px 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; width: 100%; text-align: center;">
+      <strong style="text-align: right;">${eur(it.price)}</strong>
+      <button onclick="removeDevisItem(${i})" style="background: var(--danger-soft); color: var(--danger); border: none; width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px;">✕</button>
+    </div>
+  `).join('');
+}
+
+function recalcDevisTotals() {
+  const totalHT = state.devisDraft.items.reduce((s, it) => s + (it.price || 0), 0);
+  const tva = parseFloat(document.getElementById('devis-tva')?.value || 20);
+  const totalTVA = totalHT * tva / 100;
+  const totalTTC = totalHT + totalTVA;
+  const elHT = document.getElementById('devis-total-ht');
+  const elTVA = document.getElementById('devis-total-tva');
+  const elTTC = document.getElementById('devis-total-ttc');
+  const elTVADisp = document.getElementById('devis-tva-display');
+  if (elHT) elHT.textContent = eur(totalHT);
+  if (elTVA) elTVA.textContent = eur(totalTVA);
+  if (elTTC) elTTC.textContent = eur(totalTTC);
+  if (elTVADisp) elTVADisp.textContent = tva + '%';
+}
+
+function generateDevisPro() {
+  if (!state.devisDraft.items.length) { alert('Ajoute au moins une ligne'); return; }
+  const clientSel = document.getElementById('devis-client');
+  const clientLabel = clientSel.selectedOptions[0]?.text || 'Client à définir';
+  const tva = parseFloat(document.getElementById('devis-tva').value);
+  const validite = parseInt(document.getElementById('devis-validite').value);
+  const totalHT = state.devisDraft.items.reduce((s, it) => s + it.price, 0);
+  const totalTTC = totalHT * (1 + tva/100);
+  const ref = document.getElementById('devis-ref').value.trim() || nextRef('DV');
+  const echeance = new Date(); echeance.setDate(echeance.getDate() + validite);
+
+  const devis = {
+    id: Date.now(), ref, clientId: clientSel.value, clientLabel,
+    items: state.devisDraft.items.slice(), totalHT, tva, totalTTC, validite,
+    date: new Date().toISOString(), echeance: echeance.toISOString(), status: 'draft'
+  };
+  state.devis.unshift(devis); saveBiz();
+
+  // Reset draft
+  state.devisDraft = { items: [] };
+  renderDevisItems(); recalcDevisTotals();
+  document.getElementById('devis-ref').value = '';
+
+  document.getElementById('devis-out').innerHTML = renderDevisCard(devis);
+  renderDevisList();
+  logAct('Devis '+ref+' validé : '+eur(totalTTC), 'success');
+}
+
+async function previewDevisPDF() {
+  if (!state.devisDraft.items.length) { alert('Ajoute des lignes'); return; }
+  if (!USE_BACKEND) { alert('Active le mode Backend dans Configuration pour générer le PDF natif. En direct, utilise "Valider le devis" puis exporte.'); return; }
+  const tva = parseFloat(document.getElementById('devis-tva').value);
+  const totalHT = state.devisDraft.items.reduce((s,it)=>s+it.price, 0);
+  try {
+    const r = await fetch(BACKEND_URL + '/api/pdf/devis', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        ref: nextRef('DV'),
+        clientLabel: document.getElementById('devis-client').selectedOptions[0]?.text || '',
+        items: state.devisDraft.items, totalHT, tva, totalTTC: totalHT*(1+tva/100),
+        date: new Date().toISOString(),
+        echeance: new Date(Date.now() + 30*86400000).toISOString(),
+        validite: parseInt(document.getElementById('devis-validite').value),
+        branding: state.branding
+      })
+    });
+    if (!r.ok) throw new Error('Backend HTTP '+r.status);
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  } catch(e) { alert('Erreur prévisualisation : '+e.message); }
 }
 
 async function generateDevis() {
@@ -4117,6 +4391,133 @@ function applyLogoEverywhere() {
     if (sidebarLogo) sidebarLogo.innerHTML = '<img src="'+url+'" alt="Logo">';
   }
   // si pas d'URL, les SVG d'origine restent (rechargement de page si on retire)
+}
+
+/* ============ CHAT WIDGET ============ */
+state.chatHistory = JSON.parse(sessionStorage.getItem('pixee_chat_history') || '[]');
+function saveChatHistory() { sessionStorage.setItem('pixee_chat_history', JSON.stringify(state.chatHistory.slice(-30))); }
+
+function toggleChat() {
+  const panel = document.getElementById('chat-panel');
+  const bubble = document.getElementById('chat-bubble');
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+  } else {
+    panel.classList.add('open');
+    bubble.classList.remove('has-unread');
+    renderChatMessages();
+    renderChatSuggestions();
+    setTimeout(() => document.getElementById('chat-input')?.focus(), 200);
+  }
+}
+
+function renderChatMessages() {
+  const el = document.getElementById('chat-messages');
+  if (!state.chatHistory.length) {
+    el.innerHTML = `
+      <div class="chat-msg bot">
+        Bonjour 👋 je suis PixeeSales-Alpha, ton agent commercial augmenté.
+        Je peux t'aider sur tes leads, devis, factures, produits Pixeeplay, ou répondre à toute question business.
+        Que veux-tu faire ?
+      </div>
+    `;
+  } else {
+    el.innerHTML = state.chatHistory.map(m => {
+      const cls = m.role === 'user' ? 'user' : 'bot';
+      const srcHtml = m.sources && m.sources.length ? '<div class="sources">📚 Sources : ' + m.sources.map(s => escapeHtml(s.title)).join(' · ') + '</div>' : '';
+      return `<div class="chat-msg ${cls}">${escapeHtml(m.text)}${srcHtml}</div>`;
+    }).join('');
+  }
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderChatSuggestions() {
+  const suggestions = DOMAIN_MODE === 'agent' ? [
+    'Génère un post LinkedIn',
+    'Newsletter du mois',
+    'Article SEO',
+    'Plan campagne ads',
+    'Brief influenceur'
+  ] : [
+    'Trouve 5 leads PME',
+    'Cold email pour BTP',
+    'Forecast 12 mois',
+    'Synthèse de la journée',
+    'Mes deals à closer'
+  ];
+  const el = document.getElementById('chat-suggestions');
+  el.innerHTML = state.chatHistory.length === 0 ? suggestions.map(s => `<button class="chat-suggestion" onclick="useSuggestion('${escapeHtml(s).replace(/'/g,"\\'")}')">${escapeHtml(s)}</button>`).join('') : '';
+}
+
+function useSuggestion(text) {
+  document.getElementById('chat-input').value = text;
+  sendChatMessage();
+}
+
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const btn = document.getElementById('chat-send-btn');
+  btn.disabled = true;
+  input.value = '';
+
+  state.chatHistory.push({ role: 'user', text });
+  saveChatHistory(); renderChatMessages();
+  renderChatSuggestions(); // hide suggestions after first message
+
+  // Thinking indicator
+  const el = document.getElementById('chat-messages');
+  const thinkId = 'think-'+Date.now();
+  el.insertAdjacentHTML('beforeend', `<div class="chat-msg thinking" id="${thinkId}"><div class="spinner"></div>Réflexion en cours...</div>`);
+  el.scrollTop = el.scrollHeight;
+
+  try {
+    if (!state.geminiKey) throw new Error('Configure ta clé Gemini dans Configuration');
+
+    // RAG retrieval pour augmenter la réponse
+    let sources = [];
+    let context = '';
+    if (state.rag && state.rag.docs && state.rag.docs.length > 0) {
+      try {
+        const top = await ragRetrieve(text, 3);
+        if (top.length) {
+          sources = top.map(d => ({ title: d.title, score: d.score }));
+          context = '\n\nCONTEXTE PERTINENT (extrait de la base de connaissances) :\n' +
+            top.map((d, i) => `[${i+1}] ${d.title}: ${d.text.slice(0, 800)}`).join('\n\n');
+        }
+      } catch(e) {}
+    }
+
+    // Build prompt avec contexte
+    const dashboardCtx = `Tu es PixeeSales-Alpha, l'agent commercial augmenté de ${state.branding.company || 'Pixeeplay'}.
+Domaine actif : ${DOMAIN_MODE === 'agent' ? 'Agent Omega (marketing/ops)' : 'Sales Alpha (ventes)'}.
+État actuel : ${state.leads.length} leads · ${state.deals.length} deals · CA signé ${computeStats().revenue}€.
+
+Historique récent :
+${state.chatHistory.slice(-6).map(m => (m.role==='user'?'User: ':'Toi: ')+m.text).join('\n')}
+
+Question utilisateur : ${text}${context}
+
+Réponds en français, court (3-5 phrases), concret. Si tu utilises le contexte de la base, mentionne-le.`;
+
+    const reply = await callGeminiBackend(dashboardCtx);
+    document.getElementById(thinkId)?.remove();
+    state.chatHistory.push({ role: 'bot', text: reply, sources });
+    saveChatHistory(); renderChatMessages();
+
+    // Si chat fermé, marquer unread
+    if (!document.getElementById('chat-panel').classList.contains('open')) {
+      document.getElementById('chat-bubble').classList.add('has-unread');
+    }
+  } catch(e) {
+    document.getElementById(thinkId)?.remove();
+    state.chatHistory.push({ role: 'bot', text: '⚠️ Erreur : ' + e.message });
+    saveChatHistory(); renderChatMessages();
+  } finally {
+    btn.disabled = false;
+    input.focus();
+  }
 }
 
 /* === BACKEND MODE + DOMAIN OVERRIDE === */
