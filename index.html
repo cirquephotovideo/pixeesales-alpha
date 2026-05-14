@@ -8,18 +8,23 @@
 :root {
   color-scheme: dark;
   --bg: #0A0510;
-  --surface: #15101F;
-  --surface-2: #1F1830;
-  --surface-3: #2A2243;
-  --border: rgba(167, 139, 250, 0.12);
-  --border-strong: rgba(167, 139, 250, 0.22);
+  /* Liquid glass surfaces — semi-transparent, on s'appuie sur backdrop-filter blur */
+  --surface: rgba(31, 24, 48, 0.45);
+  --surface-2: rgba(42, 34, 67, 0.55);
+  --surface-3: rgba(60, 48, 95, 0.55);
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-hi: rgba(255, 255, 255, 0.10);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-strong: rgba(255, 255, 255, 0.16);
+  --border: rgba(167, 139, 250, 0.18);
+  --border-strong: rgba(167, 139, 250, 0.30);
   --text: #F5F3FF;
   --text-2: #C4B5FD;
-  --text-3: #8B7AB8;
-  --accent: #7C3AED;
-  --accent-soft: rgba(139, 92, 246, 0.18);
-  --accent-2: #EC4899;
-  --accent-2-soft: rgba(236, 72, 153, 0.18);
+  --text-3: #9F8FCC;
+  --accent: #A78BFA;
+  --accent-soft: rgba(167, 139, 250, 0.18);
+  --accent-2: #F472B6;
+  --accent-2-soft: rgba(244, 114, 182, 0.18);
   --success: #34D399;
   --success-soft: rgba(52, 211, 153, 0.15);
   --warn: #FBBF24;
@@ -28,29 +33,35 @@
   --danger-soft: rgba(248, 113, 113, 0.15);
   --info: #60A5FA;
   --info-soft: rgba(96, 165, 250, 0.15);
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(124, 58, 237, 0.08);
-  --shadow-md: 0 8px 24px rgba(124, 58, 237, 0.15);
+  --radius-sm: 10px;
+  --radius: 14px;
+  --radius-lg: 20px;
+  --blur: 22px;
+  --blur-strong: 32px;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.35), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
+  --shadow-md: 0 12px 40px rgba(124, 58, 237, 0.25), 0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
 /* ============ LIGHT MODE ============ */
 :root[data-theme="light"] {
   color-scheme: light;
   --bg: #F8F7FB;
-  --surface: #FFFFFF;
-  --surface-2: #F1EEFC;
-  --surface-3: #E5E0F5;
-  --border: rgba(124, 58, 237, 0.12);
-  --border-strong: rgba(124, 58, 237, 0.22);
+  --surface: rgba(255, 255, 255, 0.55);
+  --surface-2: rgba(241, 238, 252, 0.65);
+  --surface-3: rgba(229, 224, 245, 0.75);
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-hi: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(124, 58, 237, 0.12);
+  --glass-border-strong: rgba(124, 58, 237, 0.22);
+  --border: rgba(124, 58, 237, 0.14);
+  --border-strong: rgba(124, 58, 237, 0.28);
   --text: #1F1837;
   --text-2: #5B4B7C;
   --text-3: #8B7AB8;
   --accent: #6D28D9;
-  --accent-soft: rgba(124, 58, 237, 0.10);
+  --accent-soft: rgba(124, 58, 237, 0.12);
   --accent-2: #BE185D;
-  --accent-2-soft: rgba(190, 24, 93, 0.10);
+  --accent-2-soft: rgba(190, 24, 93, 0.12);
   --success: #059669;
   --success-soft: rgba(5, 150, 105, 0.10);
   --warn: #D97706;
@@ -59,8 +70,8 @@
   --danger-soft: rgba(220, 38, 38, 0.10);
   --info: #2563EB;
   --info-soft: rgba(37, 99, 235, 0.10);
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.10);
+  --shadow: 0 4px 24px rgba(15, 23, 42, 0.10), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  --shadow-md: 0 12px 40px rgba(124, 58, 237, 0.15), 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 :root[data-theme="light"] body {
   background-image:
@@ -76,6 +87,106 @@
 }
 :root[data-theme="light"] .chat-msg.bot { background: var(--surface-2); color: var(--text); }
 
+/* ============ SEARCH PALETTE (Cmd+K style) ============ */
+.search-palette { position: sticky; top: 0; z-index: 60; margin: -24px -32px 16px; padding: 14px 32px; background: linear-gradient(180deg, rgba(10,5,16,0.7), rgba(10,5,16,0.4) 80%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+:root[data-theme="light"] .search-palette { background: linear-gradient(180deg, rgba(248,247,251,0.85), rgba(248,247,251,0.5) 80%, transparent); }
+.sp-bar {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 16px;
+  padding: 10px 16px;
+  backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25), 0 1px 0 rgba(255,255,255,0.06) inset;
+  cursor: text; transition: 0.2s;
+}
+.sp-bar:hover, .sp-bar:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 8px 32px rgba(167,139,250,0.3), 0 0 0 4px rgba(167,139,250,0.10), 0 1px 0 rgba(255,255,255,0.08) inset;
+}
+.sp-ico { width: 18px; height: 18px; color: var(--text-3); flex-shrink: 0; }
+.sp-bar:focus-within .sp-ico { color: var(--accent); }
+.sp-bar input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: inherit; font-size: 14px; color: var(--text);
+}
+.sp-bar input::placeholder { color: var(--text-3); }
+.sp-kbd {
+  font-size: 10px; padding: 3px 8px; border-radius: 6px;
+  background: var(--glass-hi); color: var(--text-2);
+  border: 1px solid var(--glass-border-strong);
+  font-family: ui-monospace, monospace;
+}
+.sp-results {
+  margin-top: 8px; max-height: 380px; overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 14px;
+  backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+  display: none;
+}
+.sp-results.active { display: block; }
+.sp-result-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; cursor: pointer;
+  border-bottom: 1px solid var(--glass-border);
+  transition: 0.12s;
+}
+.sp-result-row:last-child { border-bottom: none; }
+.sp-result-row:hover, .sp-result-row.sp-active { background: var(--glass-hi); }
+.sp-result-icon { font-size: 18px; width: 24px; text-align: center; }
+.sp-result-body { flex: 1; min-width: 0; }
+.sp-result-title { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-result-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-result-kind { font-size: 10px; padding: 2px 8px; background: var(--glass-hi); border-radius: 4px; color: var(--text-2); border: 1px solid var(--glass-border); }
+.sp-empty { padding: 30px; text-align: center; color: var(--text-3); font-size: 13px; }
+
+/* ============ LEAD PICKER (autocomplete interactif) ============ */
+.lead-picker-wrap { margin-bottom: 8px; position: relative; }
+.lp-wrap { position: relative; }
+.lp-input-row { display: flex; gap: 6px; align-items: center; position: relative; }
+.lp-input { flex: 1; padding-right: 36px !important; }
+.lp-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: var(--text-3); cursor: pointer; font-size: 22px; line-height: 1; padding: 0 6px; }
+.lp-clear:hover { color: var(--accent); }
+.lp-dropdown {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 100;
+  margin-top: 6px; max-height: 320px; overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--glass-border-strong); border-radius: 12px;
+  backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+  display: none;
+}
+.lp-dropdown.active { display: block; }
+.lp-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--glass-border); transition: 0.12s; }
+.lp-row:last-child { border-bottom: none; }
+.lp-row:hover { background: var(--glass-hi); }
+.lp-icon { font-size: 18px; }
+.lp-body { flex: 1; min-width: 0; }
+.lp-title { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lp-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lp-score { font-size: 11px; font-weight: 700; padding: 4px 8px; background: var(--accent-soft); color: var(--accent); border-radius: 6px; }
+.lp-empty { padding: 18px; text-align: center; color: var(--text-3); font-size: 12px; }
+.lp-selected { margin-top: 6px; }
+.lp-chip { display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 10px; font-size: 13px; }
+.lp-chip-close { background: transparent; border: none; color: var(--text); cursor: pointer; font-size: 18px; line-height: 1; padding: 0 4px; }
+.lp-chip-close:hover { color: var(--danger); }
+
+/* GLOBAL GLASS UPGRADE — inputs, selects, buttons, modales */
+.input, .select, textarea.input {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+}
+.input:focus, .select:focus, textarea.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.btn { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.btn-ghost, .btn-secondary { background: var(--glass-bg); border: 1px solid var(--glass-border-strong); }
+.btn-ghost:hover, .btn-secondary:hover { background: var(--glass-hi); border-color: var(--accent); }
+
 /* THEME TOGGLE BUTTON */
 .theme-toggle {
   background: var(--surface-2); border: 1px solid var(--border);
@@ -86,12 +197,38 @@
 }
 .theme-toggle:hover { background: var(--surface-3); color: var(--text); }
 body {
+  background-color: var(--bg);
   background-image:
-    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124, 58, 237, 0.15), transparent 60%),
-    radial-gradient(ellipse 70% 50% at 80% 100%, rgba(236, 72, 153, 0.10), transparent 60%);
+    radial-gradient(ellipse 60% 50% at 15% 8%, rgba(167, 139, 250, 0.25), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 25%, rgba(244, 114, 182, 0.18), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 95%, rgba(96, 165, 250, 0.16), transparent 60%),
+    radial-gradient(ellipse 40% 30% at 90% 75%, rgba(52, 211, 153, 0.10), transparent 60%);
   background-attachment: fixed;
   transition: background-color 0.3s ease;
+  position: relative;
 }
+/* Bulles flottantes pour amplifier l'effet glass */
+body::before, body::after {
+  content: ""; position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%; filter: blur(80px); opacity: 0.45;
+}
+body::before {
+  width: 480px; height: 480px;
+  background: radial-gradient(circle, rgba(167,139,250,0.7), transparent 70%);
+  top: -120px; left: -80px;
+  animation: floatA 20s ease-in-out infinite;
+}
+body::after {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(244,114,182,0.5), transparent 70%);
+  bottom: -150px; right: -120px;
+  animation: floatB 26s ease-in-out infinite;
+}
+@keyframes floatA { 0%,100% { transform: translate(0,0); } 50% { transform: translate(80px, 60px); } }
+@keyframes floatB { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-100px, -80px); } }
+.app, .sidebar, .main-content, .card, .hero, .modal-card, .modal-overlay { position: relative; z-index: 1; }
+:root[data-theme="light"] body::before { opacity: 0.30; }
+:root[data-theme="light"] body::after { opacity: 0.22; }
 * { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
@@ -103,13 +240,19 @@ html, body {
 .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
 @media (max-width: 900px) { .app { grid-template-columns: 1fr; } }
 
-/* MEGA MENU LATÉRAL */
+/* MEGA MENU LATÉRAL — liquid glass */
 .sidebar {
-  background: linear-gradient(180deg, rgba(21, 16, 31, 0.95) 0%, rgba(10, 5, 16, 0.95) 100%);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(31, 24, 48, 0.45) 0%, rgba(15, 10, 24, 0.55) 100%);
+  border-right: 1px solid var(--glass-border-strong);
   padding: 24px 16px;
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  box-shadow: 1px 0 0 rgba(255,255,255,0.06) inset, 0 4px 32px rgba(0,0,0,0.3);
+}
+:root[data-theme="light"] .sidebar {
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(241,238,252,0.55) 100%);
+  box-shadow: 1px 0 0 rgba(255,255,255,0.8) inset, 0 4px 32px rgba(124,58,237,0.08);
 }
 @media (max-width: 900px) {
   .sidebar { position: static; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
@@ -212,8 +355,10 @@ body.domain-agent .sales-only { display: none !important; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; margin-bottom: 24px;
   background: var(--surface); border-radius: var(--radius-lg);
-  box-shadow: var(--shadow); border: 1px solid var(--border);
+  box-shadow: var(--shadow-md); border: 1px solid var(--glass-border-strong);
   position: sticky; top: 16px; z-index: 50;
+  backdrop-filter: blur(var(--blur-strong)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(180%);
 }
 .hero-left { display: flex; align-items: center; gap: 16px; }
 .logo {
@@ -302,7 +447,24 @@ body.domain-agent .sales-only { display: none !important; }
 .kpi-bar { height: 4px; background: var(--surface-2); border-radius: 2px; margin-top: 10px; overflow: hidden; }
 .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, #6D28D9, #EC4899); border-radius: 2px; transition: width 0.6s; }
 
-.card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px 24px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 20px; }
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  backdrop-filter: blur(var(--blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(160%);
+  position: relative;
+  overflow: hidden;
+}
+/* Highlight subtil en haut de chaque carte (liquid reflet) */
+.card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 30%);
+}
+.card > * { position: relative; z-index: 1; }
 .card-title { display: flex; align-items: center; gap: 10px; margin: 0 0 4px; font-size: 16px; font-weight: 600; }
 .card-title svg { color: var(--accent); }
 .card-desc { font-size: 13px; color: var(--text-2); margin: 0 0 16px; }
@@ -829,6 +991,16 @@ body.domain-agent .sales-only { display: none !important; }
 
 <!-- ========== MAIN CONTENT ========== -->
 <div class="main-content">
+
+  <!-- ============ SEARCH PALETTE (toujours visible en haut) ============ -->
+  <div class="search-palette" id="search-palette">
+    <div class="sp-bar" onclick="document.getElementById('sp-input').focus()">
+      <svg class="sp-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="sp-input" placeholder="Rechercher partout — leads, devis, factures, emails, ou demande à l'IA…" oninput="paletteSearch()" onkeydown="paletteKey(event)" autocomplete="off">
+      <kbd class="sp-kbd">⌘K</kbd>
+    </div>
+    <div class="sp-results" id="sp-results"></div>
+  </div>
 
   <!-- Hero -->
   <div class="hero">
@@ -4850,6 +5022,251 @@ function goHome() {
   switchTab('dashboard');
   document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// ============ SEARCH PALETTE (Cmd+K) ============
+let SP_SELECTED_IDX = 0;
+let SP_RESULTS_CACHE = [];
+
+function paletteSearch() {
+  const q = (document.getElementById('sp-input')?.value || '').trim().toLowerCase();
+  const out = document.getElementById('sp-results');
+  if (!q || q.length < 1) {
+    out.innerHTML = '<div class="sp-empty">Tape pour rechercher, ou ⏎ pour demander à l\'IA</div>';
+    out.classList.add('active');
+    SP_RESULTS_CACHE = [];
+    return;
+  }
+  const matches = (s) => s && String(s).toLowerCase().includes(q);
+  const r = [];
+  (state.leads||[]).forEach(l => { if (matches(l.company) || matches(l.email) || matches(l.sector)) r.push({ icon: '⭐', title: l.company, sub: (l.sector||'')+' · '+(l.email||''), kind: 'lead', action: () => { navTo('pipeline', null); } }); });
+  (state.clients||[]).forEach(c => { if (matches(c.name) || matches(c.email)) r.push({ icon: '✅', title: c.name, sub: (c.contact||'')+' · '+(c.email||''), kind: 'client', action: () => { navTo('clients', null); } }); });
+  (state.devis||[]).forEach(d => { if (matches(d.ref) || matches(d.clientName)) r.push({ icon: '📄', title: d.ref+' — '+(d.clientName||''), sub: (d.status||'')+' · '+eur(d.totalTtc||0), kind: 'devis', action: () => { navTo('devis', null); } }); });
+  (state.factures||[]).forEach(f => { if (matches(f.ref) || matches(f.clientName)) r.push({ icon: '🧾', title: f.ref+' — '+(f.clientName||''), sub: (f.status||'')+' · '+eur(f.totalTtc||0), kind: 'facture', action: () => { navTo('factures', null); } }); });
+  (state.produits||[]).forEach(p => { if (matches(p.name) || matches(p.desc)) r.push({ icon: '📦', title: p.name, sub: eur(p.price||0), kind: 'produit', action: () => { navTo('produits', null); } }); });
+  // Quick nav suggestions
+  const navs = [
+    { keys: ['dash','accueil','home'], target: 'dashboard', icon: '🏠', title: 'Dashboard' },
+    { keys: ['lead','prospect','scrap'], target: 'scraping', icon: '🔍', title: 'Prospection' },
+    { keys: ['pipe','kanban','deal'], target: 'pipeline', icon: '📊', title: 'Pipeline' },
+    { keys: ['outreach','mail','email','cold','relance','linkedin'], target: 'outreach', icon: '📧', title: 'Outreach' },
+    { keys: ['devis','quote'], target: 'devis', icon: '📄', title: 'Devis' },
+    { keys: ['fact','invoice'], target: 'factures', icon: '🧾', title: 'Factures' },
+    { keys: ['client'], target: 'clients', icon: '✅', title: 'Clients' },
+    { keys: ['banque','bank','bridge'], target: 'banque', icon: '🏦', title: 'Banque' },
+    { keys: ['rag','cerveau','brain'], target: 'rag', icon: '🧠', title: 'Cerveau RAG' },
+    { keys: ['studio','image','video','veo','nano'], target: 'studio-media', icon: '🎬', title: 'Studio Media' },
+    { keys: ['webmail','inbox'], target: 'outreach', sub: 'webmail', icon: '📥', title: 'Webmail' },
+    { keys: ['analyse','analyze'], target: 'outreach', sub: 'analyse', icon: '🧠', title: 'Analyse IA inbox' }
+  ];
+  navs.forEach(n => {
+    if (n.keys.some(k => q.includes(k))) {
+      r.push({ icon: n.icon, title: '→ ' + n.title, sub: 'Naviguer', kind: 'nav', action: () => navTo(n.target, null, n.sub) });
+    }
+  });
+  // AI fallback
+  r.push({ icon: '🧠', title: 'Demander à l\'IA : "' + q + '"', sub: 'Réponse en langage naturel via le Cerveau RAG', kind: 'ai', action: () => askPaletteAi(q) });
+
+  SP_RESULTS_CACHE = r.slice(0, 12);
+  SP_SELECTED_IDX = 0;
+  renderPaletteResults();
+}
+
+function renderPaletteResults() {
+  const out = document.getElementById('sp-results');
+  if (!SP_RESULTS_CACHE.length) { out.innerHTML = '<div class="sp-empty">Aucun résultat</div>'; out.classList.add('active'); return; }
+  out.innerHTML = SP_RESULTS_CACHE.map((r,i) => `
+    <div class="sp-result-row ${i===SP_SELECTED_IDX?'sp-active':''}" data-idx="${i}" onmouseover="SP_SELECTED_IDX=${i};renderPaletteResults();" onclick="paletteSelect(${i})">
+      <div class="sp-result-icon">${r.icon}</div>
+      <div class="sp-result-body">
+        <div class="sp-result-title">${escapeHtml(r.title)}</div>
+        <div class="sp-result-sub">${escapeHtml(r.sub||'')}</div>
+      </div>
+      <div class="sp-result-kind">${r.kind}</div>
+    </div>
+  `).join('');
+  out.classList.add('active');
+}
+
+function paletteSelect(i) {
+  const r = SP_RESULTS_CACHE[i];
+  if (!r) return;
+  if (r.action) r.action();
+  const inp = document.getElementById('sp-input');
+  if (inp) inp.value = '';
+  document.getElementById('sp-results')?.classList.remove('active');
+}
+
+function paletteKey(ev) {
+  const total = SP_RESULTS_CACHE.length;
+  if (ev.key === 'ArrowDown') { ev.preventDefault(); SP_SELECTED_IDX = (SP_SELECTED_IDX+1) % total; renderPaletteResults(); }
+  else if (ev.key === 'ArrowUp') { ev.preventDefault(); SP_SELECTED_IDX = (SP_SELECTED_IDX-1+total) % total; renderPaletteResults(); }
+  else if (ev.key === 'Enter') { ev.preventDefault(); paletteSelect(SP_SELECTED_IDX); }
+  else if (ev.key === 'Escape') { document.getElementById('sp-results')?.classList.remove('active'); document.getElementById('sp-input').blur(); }
+}
+
+async function askPaletteAi(q) {
+  navTo('search', null);
+  const inp = document.getElementById('sg-q');
+  if (inp) inp.value = q;
+  if (typeof askRagBrain === 'function') askRagBrain();
+}
+
+// Cmd+K / Ctrl+K → focus palette
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('sp-input')?.focus();
+  }
+});
+// Fermer si click extérieur
+document.addEventListener('click', (e) => {
+  const p = document.getElementById('search-palette');
+  if (p && !p.contains(e.target)) document.getElementById('sp-results')?.classList.remove('active');
+});
+
+// ============ LEAD-PICKER INTERACTIF (remplace les <select> lead) ============
+// Usage : <div class="lead-picker" data-target="out-lead"></div>
+function initLeadPicker(container, opts = {}) {
+  // opts.target : id du select à remplacer
+  // opts.placeholder
+  // opts.onSelect(item)
+  // opts.includeClients : bool
+  const target = opts.target;
+  const placeholder = opts.placeholder || 'Tape pour chercher un lead ou client…';
+  const includeClients = opts.includeClients !== false;
+  container.innerHTML = `
+    <div class="lp-wrap">
+      <div class="lp-input-row">
+        <input type="text" class="lp-input input" placeholder="${escapeHtml(placeholder)}" autocomplete="off">
+        <button class="lp-clear" type="button" title="Effacer">×</button>
+      </div>
+      <div class="lp-selected" style="display:none;"></div>
+      <div class="lp-dropdown"></div>
+    </div>
+  `;
+  const inp = container.querySelector('.lp-input');
+  const dd = container.querySelector('.lp-dropdown');
+  const sel = container.querySelector('.lp-selected');
+  const clearBtn = container.querySelector('.lp-clear');
+
+  function buildItems(q) {
+    q = q.toLowerCase().trim();
+    const items = [];
+    (state.leads || []).forEach(l => {
+      if (!q || (l.company||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q) || (l.sector||'').toLowerCase().includes(q)) {
+        items.push({ kind: 'lead', id: 'l-'+l.id, raw: l, title: l.company, sub: (l.sector||'') + (l.email ? ' · '+l.email : ''), score: l.score, cat: l.category });
+      }
+    });
+    if (includeClients) (state.clients || []).forEach(c => {
+      if (!q || (c.name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q)) {
+        items.push({ kind: 'client', id: 'c-'+c.id, raw: c, title: c.name, sub: (c.contact||'') + (c.email ? ' · '+c.email : '') });
+      }
+    });
+    return items.slice(0, 20);
+  }
+  function render(items) {
+    if (!items.length) { dd.innerHTML = '<div class="lp-empty">Aucun résultat. Tape ⏎ pour créer.</div>'; dd.classList.add('active'); return; }
+    dd.innerHTML = items.map((it,i) => `
+      <div class="lp-row" data-id="${it.id}" data-idx="${i}">
+        <div class="lp-icon">${it.kind==='lead'?'⭐':'✅'}</div>
+        <div class="lp-body">
+          <div class="lp-title">${escapeHtml(it.title)} ${it.cat?`<span class="badge ${badgeClass?badgeClass(it.cat):''}" style="font-size:9px;padding:1px 6px;">${escapeHtml(it.cat)}</span>`:''}</div>
+          <div class="lp-sub">${escapeHtml(it.sub)}</div>
+        </div>
+        ${it.score?`<div class="lp-score">${it.score}</div>`:''}
+      </div>
+    `).join('');
+    dd.classList.add('active');
+    dd.querySelectorAll('.lp-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.id;
+        const it = items.find(x => x.id === id);
+        if (it) selectItem(it);
+      });
+    });
+  }
+  function selectItem(it) {
+    // Synchronise le select caché
+    if (target) {
+      const t = document.getElementById(target);
+      if (t) {
+        // S'il n'existe pas comme option, on l'ajoute
+        if (!t.querySelector(`option[value="${it.id}"]`) && !t.querySelector(`option[value="${it.raw.id}"]`)) {
+          const opt = document.createElement('option');
+          opt.value = it.id; opt.textContent = it.title;
+          t.appendChild(opt);
+        }
+        t.value = it.id;
+        // Fallback : essaie aussi avec l'id brut (pour les anciennes fonctions)
+        if (!t.value) t.value = it.raw.id;
+      }
+    }
+    inp.value = '';
+    dd.classList.remove('active');
+    sel.style.display = '';
+    sel.innerHTML = `
+      <div class="lp-chip">
+        <span class="lp-icon">${it.kind==='lead'?'⭐':'✅'}</span>
+        <span><strong>${escapeHtml(it.title)}</strong><br><span style="font-size:11px;color:var(--text-3);">${escapeHtml(it.sub)}</span></span>
+        <button class="lp-chip-close" type="button">×</button>
+      </div>
+    `;
+    sel.querySelector('.lp-chip-close').addEventListener('click', () => {
+      sel.style.display = 'none';
+      if (target) { const t = document.getElementById(target); if (t) t.value = ''; }
+      inp.focus();
+    });
+    if (typeof opts.onSelect === 'function') opts.onSelect(it);
+  }
+  inp.addEventListener('input', () => render(buildItems(inp.value)));
+  inp.addEventListener('focus', () => render(buildItems(inp.value)));
+  inp.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { dd.classList.remove('active'); }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const first = dd.querySelector('.lp-row');
+      if (first) first.click();
+      else if (inp.value.trim()) {
+        // Création rapide : prompt minimal
+        const company = inp.value.trim();
+        const lead = { id: Date.now(), company, sector: '', size: '', email: '', phone: '', score: 50, category: 'warm', basketEur: 0, createdAt: Date.now() };
+        if (!Array.isArray(state.leads)) state.leads = [];
+        state.leads.unshift(lead);
+        if (typeof save === 'function') save();
+        selectItem({ kind: 'lead', id: 'l-'+lead.id, raw: lead, title: company, sub: '(créé à la volée)' });
+        if (typeof logAct === 'function') logAct('Lead créé : '+company, 'success');
+      }
+    }
+  });
+  clearBtn.addEventListener('click', () => {
+    inp.value = '';
+    dd.classList.remove('active');
+    sel.style.display = 'none';
+    if (target) { const t = document.getElementById(target); if (t) t.value = ''; }
+    inp.focus();
+  });
+  document.addEventListener('click', (e) => { if (!container.contains(e.target)) dd.classList.remove('active'); });
+}
+
+function initAllLeadPickers() {
+  // Pour chaque <select id="*-lead">, on insère un lead-picker juste avant + on cache le select
+  ['out-lead','re-lead','li-lead','sc-lead','devis-client','facture-client'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel || sel.dataset.lpInited) return;
+    sel.dataset.lpInited = '1';
+    sel.style.display = 'none';
+    const wrap = document.createElement('div');
+    wrap.className = 'lead-picker-wrap';
+    sel.parentNode.insertBefore(wrap, sel);
+    initLeadPicker(wrap, { target: id, includeClients: true, placeholder: 'Tape pour chercher (nom, email, secteur)…' });
+  });
+}
+// Init après chaque switchTab
+const _switchTabOld = window.switchTab;
+window.addEventListener('load', () => {
+  setTimeout(initAllLeadPickers, 500);
+  setInterval(initAllLeadPickers, 2500); // re-tente régulièrement pour les vues lazy-rendered
+});
 
 // Sync auto du logo sidebar avec state.branding.logo
 function syncSidebarLogo() {
