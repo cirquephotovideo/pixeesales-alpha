@@ -16,7 +16,9 @@
     "node-cron": "^3.0.3",
     "pdfkit": "^0.15.0",
     "dotenv": "^16.4.5",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "imapflow": "^1.0.165",
+    "mailparser": "^3.7.1"
   },
   "engines": { "node": ">=20" }
 }
