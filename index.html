@@ -984,6 +984,19 @@ body.domain-agent .sales-only { display: none !important; }
 
     <div class="menu-group">
       <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+        <span>Tâches background</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('tasks', this)">🔁 Jobs récurrents</a>
+        <a class="submenu-item" onclick="navTo('tasks', this, 'queue')">📋 Queue / Tâches tech</a>
+        <a class="submenu-item" onclick="navTo('tasks', this, 'logs')">📜 Logs &amp; historique</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Configuration</span>
         <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1482,6 +1495,56 @@ body.domain-agent .sales-only { display: none !important; }
         </div>
         <button class="btn btn-primary btn-full" onclick="generateOutreach('call-script')">Générer le script</button>
         <div id="sc-result" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TÂCHES BACKGROUND ============ -->
+  <div class="view" id="view-tasks">
+    <div class="card" style="padding: 8px;">
+      <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+        <button class="otab otab-active" data-ttab="recurring" onclick="switchTaskTab('recurring')">🔁 Jobs récurrents</button>
+        <button class="otab" data-ttab="queue" onclick="switchTaskTab('queue')">📋 Queue tech</button>
+        <button class="otab" data-ttab="logs" onclick="switchTaskTab('logs')">📜 Historique</button>
+      </div>
+    </div>
+
+    <!-- Recurring tasks -->
+    <div class="ttab-pane" data-ttab-pane="recurring">
+      <div class="card">
+        <h2 class="card-title">🔁 Jobs récurrents (5 tâches)</h2>
+        <p class="card-desc">Tâches qui tournent automatiquement en background sur le serveur. Active/désactive selon tes besoins.</p>
+        <div id="recurring-list" style="margin-top: 16px;">
+          <div class="loading"><div class="spinner"></div>Chargement…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue one-shot -->
+    <div class="ttab-pane" data-ttab-pane="queue" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">📋 Queue tech (tâches one-shot)</h2>
+        <p class="card-desc">Tâches créées à la demande (depuis le bouton "Créer tâche tech" des actions IA, ou manuellement ici).</p>
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+          <input id="tq-title" class="input" placeholder="Titre de la tâche">
+          <select id="tq-priority" class="select" style="max-width: 140px;">
+            <option value="high">🔴 Haute</option>
+            <option value="normal" selected>🟡 Normale</option>
+            <option value="low">🟢 Basse</option>
+          </select>
+          <button class="btn btn-primary" onclick="createQueueTask()">+ Créer</button>
+        </div>
+        <div id="queue-list" style="margin-top: 18px;"></div>
+      </div>
+    </div>
+
+    <!-- Logs -->
+    <div class="ttab-pane" data-ttab-pane="logs" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">📜 Historique des runs</h2>
+        <p class="card-desc">Les 20 dernières exécutions de chaque tâche récurrente.</p>
+        <select id="logs-task" class="select" style="max-width: 280px; margin-top: 10px;" onchange="loadTaskLogs()"></select>
+        <div id="logs-list" style="margin-top: 16px;"></div>
       </div>
     </div>
   </div>
@@ -2902,6 +2965,8 @@ function switchTab(name) {
   if (name.startsWith('agent-')) renderAgentView(name);
   // Studio Media : galerie auto
   if (name === 'studio-media') loadMediaGallery();
+  // Tâches background
+  if (name === 'tasks') loadRecurringTasks();
 }
 
 // MEGA MENU navigation
@@ -2927,6 +2992,9 @@ function navTo(name, itemEl, subTab) {
   switchTab(target);
   if (target === 'outreach' && subTab) {
     setTimeout(() => switchOutreachTab(subTab), 50);
+  }
+  if (target === 'tasks' && subTab) {
+    setTimeout(() => switchTaskTab(subTab), 50);
   }
   // Scroll en haut du contenu
   document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4933,7 +5001,7 @@ function renderActionCard(a, i) {
   const fromName = (a.from || '').replace(/<.*$/, '').trim() || fromEmail;
 
   return `
-    <div class="action-card" data-action-key="${escapeHtml(actionKey(a))}" style="
+    <div class="action-card" data-action-key="${escapeHtml(actionKey(a))}" data-uid="${a.uid||''}" data-from-email="${escapeHtml(a.fromEmail||'')}" style="
       background: linear-gradient(135deg, ${st.bg} 0%, var(--surface) 100%);
       border: 1px solid var(--glass-border-strong);
       border-left: 4px solid ${st.color};
@@ -4970,6 +5038,17 @@ function renderActionCard(a, i) {
 // ============ Action handlers ============
 function markActionDone(key, title) {
   setActionStatus(key, 'done');
+  // Persiste côté backend (pour que les autres devices + crons l'ignorent aussi)
+  try {
+    // Récupère le uid depuis la card
+    const card = document.querySelector(`[data-action-key="${CSS.escape(key)}"]`);
+    const uid = card?.dataset?.uid || null;
+    const fromEmail = card?.dataset?.fromEmail || '';
+    fetch(backendUrl() + '/api/webmail/action/mark', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, title, mailUid: uid ? parseInt(uid) : null, fromEmail, status: 'done' })
+    }).catch(() => {});
+  } catch {}
   // Anime la carte avant de la masquer
   const card = document.querySelector(`[data-action-key="${CSS.escape(key)}"]`);
   if (card) {
@@ -4984,6 +5063,16 @@ function snoozeAction(key, days) {
   const st = getActionStatus();
   st[key] = { status: 'snoozed', ts: Date.now(), snoozeDays: days || 1 };
   localStorage.setItem('pixee_action_status', JSON.stringify(st));
+  // Persiste côté backend
+  try {
+    const card = document.querySelector(`[data-action-key="${CSS.escape(key)}"]`);
+    const uid = card?.dataset?.uid || null;
+    const fromEmail = card?.dataset?.fromEmail || '';
+    fetch(backendUrl() + '/api/webmail/action/mark', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, mailUid: uid ? parseInt(uid) : null, fromEmail, status: 'snoozed', snoozeDays: days || 1 })
+    }).catch(() => {});
+  } catch {}
   const card = document.querySelector(`[data-action-key="${CSS.escape(key)}"]`);
   if (card) {
     card.style.transition = '0.3s';
@@ -5048,12 +5137,25 @@ async function runInboxAnalysis() {
   const days = parseInt(document.getElementById('wm-analyze-window')?.value || '30');
   const count = parseInt(document.getElementById('wm-analyze-count')?.value || '50');
   const out = document.getElementById('wm-analysis-result');
-  out.innerHTML = '<div class="loading"><div class="spinner"></div>L\'IA analyse tes derniers ' + count + ' mails sur ' + days + ' jours…</div>';
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>L\'IA analyse tes derniers ' + count + ' mails sur ' + days + ' jours… (exclut les actions déjà traitées)</div>';
+  // Récupère les uids déjà processés depuis localStorage
+  const processedUids = [];
+  try {
+    const st = getActionStatus();
+    Object.entries(st).forEach(([k, v]) => {
+      // key format : fromEmail|uid|title
+      const parts = k.split('|');
+      const uid = parseInt(parts[1]);
+      if (uid && (v.status === 'done' || (v.status === 'snoozed' && (Date.now() - v.ts) < (v.snoozeDays||1) * 86400000))) {
+        processedUids.push(uid);
+      }
+    });
+  } catch {}
   try {
     const r = await fetch(backendUrl() + '/api/webmail/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ days, count })
+      body: JSON.stringify({ days, count, excludeUids: processedUids, onlyNew: true })
     });
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'Erreur analyse');
@@ -5095,6 +5197,202 @@ function clearActionHistory() {
   localStorage.removeItem('pixee_action_status');
   runInboxAnalysis();
 }
+
+// ============ TASKS BACKGROUND ============
+function switchTaskTab(tab) {
+  document.querySelectorAll('.otab[data-ttab]').forEach(b => b.classList.remove('otab-active'));
+  const btn = document.querySelector('.otab[data-ttab="'+tab+'"]');
+  if (btn) btn.classList.add('otab-active');
+  document.querySelectorAll('.ttab-pane').forEach(p => p.style.display = 'none');
+  const pane = document.querySelector('.ttab-pane[data-ttab-pane="'+tab+'"]');
+  if (pane) pane.style.display = '';
+  if (tab === 'recurring') loadRecurringTasks();
+  if (tab === 'queue') loadTaskQueue();
+  if (tab === 'logs') loadTaskLogsSelector();
+}
+
+async function loadRecurringTasks() {
+  const el = document.getElementById('recurring-list');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/list');
+    const d = await r.json();
+    const tasks = d.tasks || [];
+    el.innerHTML = tasks.map(t => {
+      const last = t.lastRun;
+      const lastStr = last ? (new Date(last.ranAt)).toLocaleString('fr-FR') : 'Jamais';
+      const statusClr = last?.status === 'success' ? '#10b981' : (last?.status === 'error' ? '#ef4444' : '#6b7280');
+      return `
+        <div style="background: var(--surface); border: 1px solid var(--glass-border-strong); border-left: 4px solid ${t.enabled ? '#10b981' : '#6b7280'}; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; backdrop-filter: blur(20px); display: flex; gap: 14px; align-items: center;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <strong style="font-size: 14px;">${escapeHtml(t.label)}</strong>
+              <span style="font-size: 11px; padding: 2px 8px; background: ${t.enabled ? 'rgba(16,185,129,0.15)' : 'rgba(107,114,128,0.15)'}; color: ${t.enabled ? '#10b981' : '#9ca3af'}; border-radius: 4px; font-weight: 600;">${t.enabled ? 'ACTIF' : 'OFF'}</span>
+              <span style="font-size: 11px; color: var(--text-3);">${escapeHtml(t.scheduleLabel)}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-2); margin-top: 6px; line-height: 1.5;">${escapeHtml(t.description)}</div>
+            <div style="font-size: 11px; color: ${statusClr}; margin-top: 6px;">
+              ${last ? `● Dernier run : ${escapeHtml(lastStr)} · ${escapeHtml(last.status)}` : '○ Pas encore exécuté'}
+              ${last?.result ? ' · <span style="color: var(--text-3);">'+escapeHtml(JSON.stringify(last.result).slice(0, 80))+'</span>' : ''}
+              ${t.lastError ? ` · <span style="color: #ef4444;">${escapeHtml(t.lastError.slice(0,80))}</span>` : ''}
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px; flex-shrink: 0;">
+            <button class="btn btn-primary" style="padding: 6px 14px; font-size: 12px;" onclick="runTask('${escapeHtml(t.name).replace(/'/g,'')}')">▶ Lancer</button>
+            <button class="btn ${t.enabled ? 'btn-ghost' : 'btn-success'}" style="padding: 6px 14px; font-size: 12px;" onclick="toggleTask('${escapeHtml(t.name).replace(/'/g,'')}')">${t.enabled ? '⏸ Désactiver' : '▶ Activer'}</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error">Erreur : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function runTask(name) {
+  const btn = event?.target;
+  if (btn) { btn.disabled = true; btn.textContent = '⏳…'; }
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/run/' + name, { method: 'POST' });
+    const d = await r.json();
+    if (d.ok) {
+      alert('✓ Tâche exécutée\n\n' + JSON.stringify(d.result, null, 2));
+      logAct('Tâche '+name+' exécutée', 'success');
+    } else {
+      alert('Erreur : ' + (d.error || 'inconnue'));
+    }
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  }
+  loadRecurringTasks();
+}
+
+async function toggleTask(name) {
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/toggle/' + name, { method: 'POST' });
+    const d = await r.json();
+    if (d.ok) {
+      logAct('Tâche '+name+' '+(d.enabled?'activée':'désactivée'), 'info');
+      loadRecurringTasks();
+    }
+  } catch(e) { alert(e.message); }
+}
+
+async function loadTaskQueue() {
+  const el = document.getElementById('queue-list');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/queue');
+    const d = await r.json();
+    const queue = d.queue || [];
+    if (!queue.length) {
+      el.innerHTML = '<div class="empty" style="padding: 30px;">Aucune tâche dans la queue. Crée-en une ci-dessus ou via "🧠 Analyse IA → Créer tâche tech".</div>';
+      return;
+    }
+    el.innerHTML = queue.map(q => {
+      const prioColor = { high: '#ef4444', normal: '#fbbf24', low: '#10b981' }[q.priority] || '#9ca3af';
+      const date = new Date(q.created_at).toLocaleString('fr-FR');
+      return `
+        <div style="background: var(--surface); border: 1px solid var(--glass-border-strong); border-left: 4px solid ${prioColor}; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; backdrop-filter: blur(20px); display: flex; gap: 14px; align-items: center; ${q.status==='done'?'opacity:0.5;':''}">
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 600; font-size: 13px; ${q.status==='done'?'text-decoration:line-through;':''}">${escapeHtml(q.title)}</div>
+            ${q.detail ? `<div style="font-size: 12px; color: var(--text-2); margin-top: 4px; line-height: 1.5;">${escapeHtml(q.detail)}</div>` : ''}
+            <div style="font-size: 11px; color: var(--text-3); margin-top: 6px;">Créée : ${escapeHtml(date)} · ${escapeHtml(q.priority)}</div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-shrink: 0;">
+            ${q.status !== 'done' ? `<button class="btn btn-success" style="padding: 5px 12px; font-size: 12px;" onclick="markQueueDone(${q.id})">✓ Fait</button>` : ''}
+            <button class="btn btn-ghost" style="padding: 5px 12px; font-size: 12px;" onclick="deleteQueueTask(${q.id})">🗑</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error">'+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function createQueueTask() {
+  const title = (document.getElementById('tq-title')?.value || '').trim();
+  if (!title) { alert('Titre requis'); return; }
+  const priority = document.getElementById('tq-priority')?.value || 'normal';
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/queue', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, priority })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    document.getElementById('tq-title').value = '';
+    loadTaskQueue();
+  } catch(e) { alert(e.message); }
+}
+
+async function markQueueDone(id) {
+  try {
+    await fetch(backendUrl() + '/api/tasks/queue/' + id + '/done', { method: 'POST' });
+    loadTaskQueue();
+  } catch(e) { alert(e.message); }
+}
+async function deleteQueueTask(id) {
+  if (!confirm('Supprimer ?')) return;
+  try {
+    await fetch(backendUrl() + '/api/tasks/queue/' + id, { method: 'DELETE' });
+    loadTaskQueue();
+  } catch(e) { alert(e.message); }
+}
+
+async function loadTaskLogsSelector() {
+  const sel = document.getElementById('logs-task');
+  if (sel.options.length > 1) return; // déjà chargé
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/list');
+    const d = await r.json();
+    sel.innerHTML = '<option value="">— Sélectionner une tâche —</option>' + (d.tasks||[]).map(t => `<option value="${t.name}">${escapeHtml(t.label)}</option>`).join('');
+  } catch(e) {}
+}
+
+async function loadTaskLogs() {
+  const name = document.getElementById('logs-task')?.value;
+  const el = document.getElementById('logs-list');
+  if (!name) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/tasks/logs/' + name);
+    const d = await r.json();
+    const logs = d.logs || [];
+    if (!logs.length) { el.innerHTML = '<div class="empty" style="padding: 24px;">Aucun log pour cette tâche.</div>'; return; }
+    el.innerHTML = logs.map(l => `
+      <div style="background: var(--surface); border: 1px solid var(--glass-border-strong); border-left: 4px solid ${l.status==='success'?'#10b981':'#ef4444'}; border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; backdrop-filter: blur(16px);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <span style="font-size: 12px;"><strong>${escapeHtml(l.status)}</strong> · ${escapeHtml(new Date(l.ran_at).toLocaleString('fr-FR'))}</span>
+        </div>
+        ${l.result ? `<pre style="font-size: 11px; color: var(--text-2); margin: 8px 0 0; white-space: pre-wrap; word-break: break-all;">${escapeHtml(JSON.stringify(l.result, null, 2))}</pre>` : ''}
+        ${l.error ? `<div style="font-size: 12px; color: #ef4444; margin-top: 6px;">⚠ ${escapeHtml(l.error)}</div>` : ''}
+      </div>
+    `).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error">'+escapeHtml(e.message)+'</div>';
+  }
+}
+
+// Améliore createTechTask : push aussi dans la queue backend
+const _oldCreateTechTask = window.createTechTask;
+window.createTechTask = function(title, detail) {
+  // Garde le comportement localStorage en plus
+  try {
+    const tasks = JSON.parse(localStorage.getItem('pixee_tech_tasks') || '[]');
+    tasks.unshift({ id: Date.now(), title, detail, status: 'todo', createdAt: Date.now() });
+    localStorage.setItem('pixee_tech_tasks', JSON.stringify(tasks.slice(0, 100)));
+  } catch {}
+  // Push dans la queue backend
+  fetch(backendUrl() + '/api/tasks/queue', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, detail: detail || '', priority: 'high' })
+  }).then(() => {
+    alert('✓ Tâche tech créée et ajoutée à la queue background :\n\n' + title);
+  }).catch(() => {
+    alert('✓ Tâche tech créée (local seulement) :\n\n' + title);
+  });
+};
 
 function renderDormantDeals() {
   const el = document.getElementById('dormant-deals');
