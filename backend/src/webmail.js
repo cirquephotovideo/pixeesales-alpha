@@ -4,26 +4,27 @@ import nodemailer from 'nodemailer';
 import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import fetch from 'node-fetch';
+import { getSmtpCreds } from './email.js';
 
 function imapConfig() {
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  if (!user || !pass) return null;
+  const creds = getSmtpCreds();
+  if (!creds.user || !creds.pass) return null;
   return {
     host: process.env.IMAP_HOST || 'imap.gmail.com',
     port: parseInt(process.env.IMAP_PORT || '993'),
     secure: true,
-    auth: { user, pass },
+    auth: { user: creds.user, pass: creds.pass },
     logger: false
   };
 }
 
 function smtpTransporter() {
+  const creds = getSmtpCreds();
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false,
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    auth: { user: creds.user, pass: creds.pass }
   });
 }
 
