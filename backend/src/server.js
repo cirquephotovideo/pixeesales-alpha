@@ -11,6 +11,7 @@ import { pdfRoutes } from './pdf.js';
 import { geminiRoutes } from './gemini.js';
 import { dataRoutes } from './data.js';
 import { autopilotCron } from './autopilot.js';
+import { improvementRoutes, scheduleSelfImprovement } from './improvement.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -40,6 +41,7 @@ app.use('/api/email', emailRoutes(db));
 app.use('/api/pdf', pdfRoutes(db));
 app.use('/api/gemini', geminiRoutes(db));
 app.use('/api/data', dataRoutes(db));
+app.use('/api/improvement', improvementRoutes(db));
 
 // Catch-all errors
 app.use((err, req, res, next) => {
@@ -54,5 +56,6 @@ app.listen(PORT, () => {
   // Crons
   scheduleReports(db);
   autopilotCron(db);
-  console.log(`   Crons : rapports 8h/12h/18h + autopilote toutes les 15min`);
+  scheduleSelfImprovement(db);
+  console.log(`   Crons : rapports 8h/12h/18h + autopilote 15min + self-improve 19h`);
 });
