@@ -566,6 +566,11 @@ body.domain-agent .sales-only { display: none !important; }
         <a class="submenu-item" onclick="navTo('agent-it', this)">💻 IT / DevOps</a>
         <a class="submenu-item" onclick="navTo('agent-finance', this)">💹 Finance / CFO</a>
         <a class="submenu-item" onclick="navTo('agent-ops', this)">⚙️ Operations / SOPs</a>
+        <a class="submenu-item" onclick="navTo('agent-rd', this)">🔬 R&amp;D / Innovation</a>
+        <a class="submenu-item" onclick="navTo('agent-bi', this)">📈 BI &amp; Data</a>
+        <a class="submenu-item" onclick="navTo('agent-compliance', this)">🛡️ Compliance / Risk</a>
+        <a class="submenu-item" onclick="navTo('agent-crisis', this)">🚨 Crisis Mgmt</a>
+        <a class="submenu-item" onclick="navTo('agent-csr', this)">🌱 RSE / CSR</a>
       </div>
     </div>
 
@@ -1657,6 +1662,11 @@ body.domain-agent .sales-only { display: none !important; }
   <div class="view" id="view-agent-it"></div>
   <div class="view" id="view-agent-finance"></div>
   <div class="view" id="view-agent-ops"></div>
+  <div class="view" id="view-agent-rd"></div>
+  <div class="view" id="view-agent-bi"></div>
+  <div class="view" id="view-agent-compliance"></div>
+  <div class="view" id="view-agent-crisis"></div>
+  <div class="view" id="view-agent-csr"></div>
 
   <!-- ============ DEALS PERDUS ============ -->
   <div class="view" id="view-lost-deals">
@@ -4799,6 +4809,61 @@ const AGENTS = {
       { key: 'unit-economics', label: 'Unit economics SaaS', placeholder: 'Métriques actuelles', prompt: (t,c)=>`Analyse unit economics SaaS : "${t}". Calcule : CAC · LTV · LTV/CAC ratio · payback period · gross margin · churn rate · expansion MRR. Compare aux benchmarks SaaS 2026 (Bessemer, OpenView). Identifie les leviers prioritaires.` },
       { key: 'board-deck', label: 'Board deck mensuel', placeholder: 'Mois + faits saillants', prompt: (t,c)=>`Board deck mensuel pour ${c.brand}. Mois : "${t}". 8 slides : Highlights · KPIs vs plan · P&L · Cash position + runway · Product progress · Team · Risks · Asks. Format synthétique, data-driven, asks clairs.` },
       { key: 'budget-annuel', label: 'Budget annuel par département', placeholder: 'Headcount + objectifs CA', prompt: (t,c)=>`Budget annuel détaillé par département pour ${c.brand}. Hypothèses : "${t}". Tableau : Catégorie | Q1 | Q2 | Q3 | Q4 | Total. Catégories : Salaires + charges (par dept) · Outils/SaaS · Marketing · Voyages · Conseil · Bureaux · Autres. Total + % du CA.` }
+    ]
+  },
+  'agent-rd': {
+    title: '🔬 Agent R&D / Innovation',
+    desc: 'Roadmap technique, veille tech, brevet draft, résumé papers académiques.',
+    actions: [
+      { key: 'tech-roadmap', label: 'Roadmap technique 12 mois', placeholder: 'Produit + ambitions', prompt: (t,c)=>`Roadmap technique 12 mois pour : "${t}". Format trimestriel : Q1 (foundations) · Q2 (features) · Q3 (scale) · Q4 (innovation). Pour chaque : objectifs · livrables · risques · dépendances. Inclure tech debt 20% du temps.` },
+      { key: 'patent-draft', label: 'Draft de dépôt de brevet', placeholder: 'Invention + champ technique', prompt: (t,c)=>`Draft de dépôt de brevet pour : "${t}". Sections : Domaine technique · État de l'art · Problème résolu · Résumé de l'invention · Mode de réalisation préféré · Revendications (5 minimum dont 1 principale + 4 dépendantes) · Avantages techniques.` },
+      { key: 'paper-summary', label: 'Résumé paper académique', placeholder: 'Titre/abstract paper', prompt: (t,c)=>`Résumé exécutif d'un paper académique : "${t}". Format : Problème · Méthode (en 3 phrases) · Résultats principaux chiffrés · Limites · Applications business possibles · 1 idée à tester chez nous.` },
+      { key: 'tech-watch', label: 'Veille techno trimestrielle', placeholder: 'Secteur/technologie', prompt: (t,c)=>`Veille technologique sur "${t}" Q ${new Date().getFullYear()}. Format : 10 innovations émergentes · pour chaque : maturité (TRL 1-9) · acteurs · impact prévu · opportunité pour nous · risque si on rate.` },
+      { key: 'proto-spec', label: 'Spec prototype POC', placeholder: 'Idée à prototyper', prompt: (t,c)=>`Spec technique d'un prototype POC pour valider l'idée : "${t}". Format : Hypothèse à tester · Critères de succès · Architecture (3 composants max) · Stack technique · Timeline 2-4 semaines · Budget · KPIs de validation · Plan A/B.` }
+    ]
+  },
+  'agent-bi': {
+    title: '📈 Agent BI &amp; Data',
+    desc: 'Requêtes SQL, dashboards specs, A/B tests, modèles statistiques.',
+    actions: [
+      { key: 'sql-query', label: 'Requête SQL complexe', placeholder: 'Besoin métier + tables', prompt: (t,c)=>`Écris la requête SQL pour répondre à : "${t}". Donne : la requête finale (PostgreSQL) · explication étape par étape · index suggérés pour performance · alternatives (CTE, window functions, materialized view).` },
+      { key: 'dashboard-spec', label: 'Spec de dashboard BI', placeholder: 'Audience + objectif (ex: CEO, ops weekly)', prompt: (t,c)=>`Spec d'un dashboard BI pour : "${t}". Format : 1 KPI hero · 4 KPIs secondaires (cards) · 3 graphiques (avec type recommandé : line/bar/heatmap/funnel) · 1 tableau détaillé · filtres · fréquence de refresh · alertes seuils.` },
+      { key: 'ab-test', label: 'Design d\'A/B test', placeholder: 'Hypothèse à tester', prompt: (t,c)=>`Design A/B test rigoureux pour hypothèse : "${t}". Spec : variants A et B · métrique primaire · métriques secondaires (guard-rails) · taille échantillon (calcul puissance statistique 80%) · durée · stratification · risques de biais.` },
+      { key: 'cohort-analysis', label: 'Analyse de cohortes', placeholder: 'Type de cohorte (signup/achat/...)', prompt: (t,c)=>`Plan d'analyse de cohortes pour "${t}". Sections : Définition cohortes · Métriques à tracker (retention, LTV, expansion) · Périodes (M0 à M12) · Format de visualisation (heatmap) · Insights à chercher · Actions possibles selon résultats.` },
+      { key: 'forecast-model', label: 'Modèle prédictif', placeholder: 'Quoi prédire (churn, conversion, ...)', prompt: (t,c)=>`Plan d'un modèle prédictif pour "${t}". Détaille : variable cible · features candidates (15+) · type de modèle adapté (logistic, gradient boosting, neural) · split train/val/test · métriques d'évaluation · interprétabilité (SHAP) · plan de mise en production · monitoring drift.` }
+    ]
+  },
+  'agent-compliance': {
+    title: '🛡️ Agent Compliance &amp; Risk',
+    desc: 'Audits RGPD, prep SOC2, AML/KYC, ISO 27001, plans de remédiation.',
+    actions: [
+      { key: 'gdpr-audit', label: 'Audit RGPD complet', placeholder: 'Périmètre (app, site, process)', prompt: (t,c)=>`Audit RGPD pour : "${t}". Checklist 25 points : registre de traitement · bases légales · DPO · DPIA · cookies · droits utilisateurs · sous-traitants · transferts hors UE · sécurité technique · breach notification. Statut OK/KO + remédiation par point.` },
+      { key: 'soc2-prep', label: 'Préparation SOC2 Type II', placeholder: 'Stade actuel', prompt: (t,c)=>`Plan de préparation SOC2 Type II en 6 mois pour ${c.brand}. Détaille : 5 trust principles · contrôles à implémenter (50+) · outils nécessaires · ressources humaines · auditeur recommandé · timeline · coût estimé · ROI commercial (deals débloqués).` },
+      { key: 'aml-kyc', label: 'Procédure AML/KYC', placeholder: 'Activité (fintech, marketplace, etc.)', prompt: (t,c)=>`Procédure AML/KYC conforme TRACFIN pour : "${t}". Sections : Identification client · vérification documents · screening listes sanctions · classification de risque (faible/moyen/élevé) · monitoring transactions · déclaration de soupçon (modèle).` },
+      { key: 'risk-matrix', label: 'Matrice des risques', placeholder: 'Périmètre entreprise', prompt: (t,c)=>`Matrice de risques pour ${c.brand} - périmètre : "${t}". Format : 15 risques répartis sur 5 catégories (stratégique, opérationnel, financier, conformité, cyber). Pour chaque : description · probabilité (1-5) · impact (1-5) · score · owner · plan d'atténuation.` },
+      { key: 'iso27001', label: 'Statement of Applicability ISO 27001', placeholder: 'Périmètre SMSI', prompt: (t,c)=>`Statement of Applicability ISO 27001 - périmètre : "${t}". Pour les 93 contrôles de l'annexe A (2022) : applicable Oui/Non + justification + statut actuel (planifié / en cours / implémenté / mature). Format tableau.` }
+    ]
+  },
+  'agent-crisis': {
+    title: '🚨 Agent Crisis Management',
+    desc: 'Communication de crise, plan de continuité, gestion réputation, war rooms.',
+    actions: [
+      { key: 'crisis-comm', label: 'Communiqué de crise', placeholder: 'Type de crise (data breach, panne majeure, scandale)', prompt: (t,c)=>`Communiqué de crise pour ${c.brand}. Situation : "${t}". Ton : transparent, ferme, empathique. Format : 5 paragraphes - reconnaissance des faits · ce qu'on sait · ce qu'on a fait · ce qu'on va faire · à qui s'adresser. Pas de langue de bois. 350 mots max.` },
+      { key: 'bcp', label: 'Plan de continuité (BCP)', placeholder: 'Activité critique', prompt: (t,c)=>`Plan de Continuité d'Activité pour : "${t}". Sections : Identification processus critiques · RTO/RPO par processus · scénarios (panne IT, sinistre locaux, pandémie, cyber) · équipes de crise · procédures de bascule · sites de repli · tests trimestriels.` },
+      { key: 'reputation-recovery', label: 'Plan de remédiation réputation', placeholder: 'Incident + canaux touchés', prompt: (t,c)=>`Plan de remédiation réputation post-crise : "${t}". Étapes 30/60/90j : Listening (sentiment social) · Réponse coordonnée · Storytelling positif · Influence ciblée · SEO ORM · Métriques de retour à la normale.` },
+      { key: 'war-room-runbook', label: 'Runbook War Room', placeholder: 'Type d\'incident', prompt: (t,c)=>`Runbook activation War Room pour "${t}". Spec : Critères de déclenchement · Composition équipe (PM, tech lead, comms, légal, exec) · Cadence (daily standup à H+0, H+6, H+24) · Outils (Slack channel, status page, doc partagé) · Communication interne + externe · Critères de désactivation · Post-mortem post-crise.` },
+      { key: 'stakeholder-map', label: 'Cartographie parties prenantes en crise', placeholder: 'Type de crise', prompt: (t,c)=>`Cartographie des stakeholders à informer en cas de crise "${t}". Tableau : Stakeholder · Niveau d'impact · Timing de comm (immédiat / H+1 / J+1) · Canal (téléphone, email, presse) · Owner · Message clé personnalisé. Inclure : employés, clients critiques, investisseurs, partenaires, autorités, presse.` }
+    ]
+  },
+  'agent-csr': {
+    title: '🌱 Agent RSE / CSR',
+    desc: 'Rapports RSE, bilan carbone, ESG, parité, ODD ONU.',
+    actions: [
+      { key: 'csr-report', label: 'Rapport RSE annuel', placeholder: 'Année + faits saillants', prompt: (t,c)=>`Rapport RSE annuel pour ${c.brand}. Année : "${t}". Format : Engagements (ODD ONU ciblés) · Empreinte environnementale (scope 1/2/3) · Volet social (parité, formation, bien-être) · Gouvernance · Achats responsables · Plan 3 ans. Ton : transparent, chiffré, sincère.` },
+      { key: 'carbon-footprint', label: 'Plan bilan carbone GHG', placeholder: 'Périmètre entreprise', prompt: (t,c)=>`Plan d'établissement du bilan carbone GES (méthodo ADEME) pour "${t}". Sections : Périmètre (scopes 1/2/3) · Sources d'émission par poste · Outils de calcul recommandés · Données à collecter · Facteurs d'émission · Délai estimé · Budget · Plan de réduction associé.` },
+      { key: 'esg-scoring', label: 'Auto-évaluation ESG', placeholder: 'Notation cible (B Corp, EcoVadis...)', prompt: (t,c)=>`Auto-évaluation pour la notation "${t}". Pour chaque pilier (E/S/G) : 5 critères + auto-note 0-10 + preuves disponibles + actions à mener pour passer au niveau supérieur. Score global et benchmark sectoriel.` },
+      { key: 'parity-plan', label: 'Plan d\'égalité H/F', placeholder: 'État actuel équipe', prompt: (t,c)=>`Plan d'égalité professionnelle H/F pour ${c.brand}. État : "${t}". Format : Diagnostic (index égalité) · 5 domaines obligatoires (embauche, formation, promotion, qualifications, articulation vies pro/perso) · Objectifs chiffrés à 3 ans · Indicateurs de suivi · Actions concrètes.` },
+      { key: 'sdg-mapping', label: 'Mapping ODD ONU', placeholder: 'Activité Pixeeplay', prompt: (t,c)=>`Mapping des 17 Objectifs de Développement Durable ONU vs activité : "${t}". Pour chaque ODD pertinent : sous-cibles spécifiques que ${c.brand} peut influencer · contribution actuelle · contribution potentielle · indicateurs de mesure. Identifie les 3-5 ODD prioritaires.` }
     ]
   },
   'agent-ops': {
