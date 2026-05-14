@@ -91,6 +91,18 @@ export function initDB(dbPath) {
       decided_at INTEGER,
       created_at INTEGER DEFAULT (strftime('%s','now'))
     );
+    CREATE TABLE IF NOT EXISTS media_assets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT,                  -- 'image' | 'video'
+      file_name TEXT,             -- nom local sous MEDIA_DIR
+      operation_name TEXT,        -- pour les vidéos Veo (LRO)
+      mime TEXT,
+      prompt TEXT,
+      ratio TEXT,
+      duration INTEGER,
+      status TEXT DEFAULT 'ready',
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );
   `);
 
   return db;
