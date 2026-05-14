@@ -355,6 +355,24 @@ body.domain-agent .sales-only { display: none !important; }
 
 .filter-row { display: flex; gap: 6px; margin-bottom: 12px; }
 .chip { font-size: 12px; padding: 5px 12px; border-radius: 999px; background: var(--surface-2); cursor: pointer; border: 1px solid transparent; font-weight: 500; color: var(--text-2); transition: 0.15s; }
+.otab { padding: 8px 14px; background: transparent; color: var(--text-2); border: 1px solid transparent; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; transition: 0.15s; }
+.otab:hover { background: var(--surface-2); color: var(--text); }
+.otab-active, .otab.otab-active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+.wm-row { padding: 12px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.wm-row:hover { background: var(--surface-2); }
+.wm-row.unread { background: var(--surface-2); }
+.wm-row.unread .wm-from { font-weight: 700; }
+.wm-row.active { background: var(--accent-soft); border-left: 3px solid var(--accent); padding-left: 11px; }
+.wm-from { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wm-subj { font-size: 12px; color: var(--text-2); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wm-preview { font-size: 11px; color: var(--text-3); margin-top: 4px; line-height: 1.3; max-height: 30px; overflow: hidden; }
+.wm-date { font-size: 11px; color: var(--text-3); }
+.wm-cat { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
+.wm-cat-hot { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.wm-cat-lead { background: rgba(168, 139, 250, 0.18); color: #a78bfa; }
+.wm-cat-client { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.wm-cat-support { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.wm-cat-spam { background: rgba(107, 114, 128, 0.2); color: #6b7280; }
 .chip:hover { background: var(--surface-3); }
 .chip.active { background: var(--accent-soft); color: var(--accent); border-color: rgba(109,40,217,0.2); }
 
@@ -610,6 +628,21 @@ body.domain-agent .sales-only { display: none !important; }
       </div>
     </div>
 
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Recherche</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('search', this)">🔍 Recherche globale</a>
+        <a class="submenu-item" onclick="navTo('search', this)">Leads &amp; Clients</a>
+        <a class="submenu-item" onclick="navTo('search', this)">Devis &amp; Factures</a>
+        <a class="submenu-item" onclick="navTo('search', this)">Emails &amp; Messages</a>
+        <a class="submenu-item" onclick="navTo('search', this)">RAG / Cerveau</a>
+      </div>
+    </div>
+
     <div class="menu-group sales-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
@@ -617,10 +650,12 @@ body.domain-agent .sales-only { display: none !important; }
         <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
       <div class="submenu">
-        <a class="submenu-item" onclick="navTo('outreach', this)">Cold emails</a>
-        <a class="submenu-item" onclick="navTo('outreach', this)">Relances</a>
-        <a class="submenu-item" onclick="navTo('outreach', this)">Messages LinkedIn</a>
-        <a class="submenu-item" onclick="navTo('outreach', this)">Scripts d'appel</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'webmail')">📥 Webmail (inbox)</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'analyse')">🧠 Analyse IA des mails</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'cold')">❄️ Cold emails</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'relances')">🔁 Relances</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'linkedin')">💼 Messages LinkedIn</a>
+        <a class="submenu-item" onclick="navTo('outreach', this, 'scripts')">📞 Scripts d'appel</a>
       </div>
     </div>
 
@@ -1071,58 +1106,217 @@ body.domain-agent .sales-only { display: none !important; }
 
   <!-- ============ OUTREACH ============ -->
   <div class="view" id="view-outreach">
-    <div class="card">
-      <h2 class="card-title">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Générer un message
-      </h2>
-      <p class="card-desc">Emails, LinkedIn ou scripts d'appel pour un lead. L'autopilote en génère automatiquement pour les hot leads.</p>
-      <div class="input-row">
-        <div>
-          <p class="field-label">Lead cible</p>
-          <select id="out-lead" class="select"><option value="">— Sélectionner —</option></select>
-        </div>
-        <div>
-          <p class="field-label">Type</p>
-          <select id="out-type" class="select">
-            <option value="cold-email">Cold email</option>
-            <option value="followup">Relance (J+3)</option>
-            <option value="linkedin">Message LinkedIn</option>
-            <option value="call-script">Script d'appel</option>
-            <option value="quote">Argumentaire devis</option>
-          </select>
-        </div>
+    <!-- Onglets Outreach -->
+    <div class="card" style="padding: 8px;">
+      <div id="outreach-tabs" style="display: flex; gap: 4px; flex-wrap: wrap;">
+        <button class="otab otab-active" data-otab="webmail" onclick="switchOutreachTab('webmail')">📥 Webmail</button>
+        <button class="otab" data-otab="analyse" onclick="switchOutreachTab('analyse')">🧠 Analyse IA</button>
+        <button class="otab" data-otab="cold" onclick="switchOutreachTab('cold')">❄️ Cold emails</button>
+        <button class="otab" data-otab="relances" onclick="switchOutreachTab('relances')">🔁 Relances</button>
+        <button class="otab" data-otab="linkedin" onclick="switchOutreachTab('linkedin')">💼 LinkedIn</button>
+        <button class="otab" data-otab="scripts" onclick="switchOutreachTab('scripts')">📞 Scripts d'appel</button>
       </div>
-      <div class="input-row">
-        <div>
-          <p class="field-label">Produit</p>
-          <select id="out-product" class="select">
-            <option>PixeePIM</option>
-            <option>Pixeesite</option>
-            <option>GLD Pixeeplay</option>
-            <option>IA SaaS</option>
-            <option>Bundle complet</option>
-          </select>
-        </div>
-        <div>
-          <p class="field-label">Ton</p>
-          <select id="out-tone" class="select">
-            <option>Direct et data-driven</option>
-            <option>Conversationnel et chaleureux</option>
-            <option>Urgence et FOMO</option>
-            <option>Expertise et autorité</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="generateOutreach()">Générer</button>
-      <div id="out-result"></div>
     </div>
 
-    <!-- Generated messages history -->
+    <!-- TAB : WEBMAIL -->
+    <div class="otab-pane" data-pane="webmail">
+      <div class="card">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <h2 class="card-title" style="margin: 0;">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            Webmail — Inbox
+          </h2>
+          <div style="display: flex; gap: 8px;">
+            <select id="wm-folder" class="select" style="max-width: 160px;" onchange="loadInbox()">
+              <option value="INBOX">📥 Inbox</option>
+              <option value="[Gmail]/Sent Mail">📤 Envoyés</option>
+              <option value="[Gmail]/Spam">🗑 Spam</option>
+              <option value="[Gmail]/All Mail">📚 Tous</option>
+            </select>
+            <input id="wm-search" class="input" placeholder="Rechercher (sujet, expéditeur, contenu)…" style="max-width: 280px;" onkeydown="if(event.key==='Enter') loadInbox()">
+            <button class="btn btn-ghost" onclick="loadInbox()">🔍</button>
+            <button class="btn btn-primary" onclick="analyzeInbox()">🧠 Analyser tout</button>
+          </div>
+        </div>
+        <p class="card-desc" style="margin-top: 8px;">Visualise et réponds à tes mails. Crée un lead/client en 1 clic depuis l'expéditeur. Branché sur ton compte Gmail (IMAP via backend, jamais en clair côté navigateur).</p>
+
+        <div style="display: grid; grid-template-columns: 360px 1fr; gap: 16px; margin-top: 16px; min-height: 500px;">
+          <!-- Liste mails -->
+          <div id="wm-list" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow-y: auto; max-height: 600px;">
+            <div class="empty" style="padding: 30px 12px;">Chargement…</div>
+          </div>
+          <!-- Détail mail -->
+          <div id="wm-detail" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; overflow-y: auto; max-height: 600px;">
+            <div class="empty">Sélectionne un mail à gauche pour voir son contenu, répondre, ou créer un lead/client à partir de l'expéditeur.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : ANALYSE IA -->
+    <div class="otab-pane" data-pane="analyse" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">🧠 Analyse IA de tes emails</h2>
+        <p class="card-desc">L'agent scanne ton inbox récent et catégorise chaque mail : <strong>hot lead</strong>, client, fournisseur, support, spam. Il extrait les entités (nom, société, intent) et te suggère 3 actions prioritaires.</p>
+        <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+          <select id="wm-analyze-window" class="select" style="max-width: 200px;">
+            <option value="7">7 derniers jours</option>
+            <option value="30" selected>30 derniers jours</option>
+            <option value="90">90 derniers jours</option>
+          </select>
+          <select id="wm-analyze-count" class="select" style="max-width: 160px;">
+            <option value="20">20 mails</option>
+            <option value="50" selected>50 mails</option>
+            <option value="100">100 mails</option>
+            <option value="200">200 mails</option>
+          </select>
+          <button class="btn btn-primary" onclick="runInboxAnalysis()">▶ Lancer l'analyse</button>
+        </div>
+        <div id="wm-analysis-result" style="margin-top: 18px;">
+          <div class="empty" style="padding: 30px;">Lance l'analyse pour obtenir une synthèse intelligente de ta boîte mail.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB : COLD EMAILS -->
+    <div class="otab-pane" data-pane="cold" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          ❄️ Cold email
+        </h2>
+        <p class="card-desc">Génère un cold email ciblé pour un lead. L'autopilote en génère automatiquement pour les hot leads.</p>
+        <div class="input-row">
+          <div><p class="field-label">Lead cible</p>
+            <select id="out-lead" class="select"><option value="">— Sélectionner —</option></select>
+          </div>
+          <div><p class="field-label">Produit</p>
+            <select id="out-product" class="select">
+              <option>PixeePIM</option><option>Pixeesite</option><option>GLD Pixeeplay</option><option>IA SaaS</option><option>Bundle complet</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-row">
+          <div><p class="field-label">Ton</p>
+            <select id="out-tone" class="select">
+              <option>Direct et data-driven</option><option>Conversationnel et chaleureux</option><option>Urgence et FOMO</option><option>Expertise et autorité</option>
+            </select>
+          </div>
+          <div>
+            <input type="hidden" id="out-type" value="cold-email">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateOutreach('cold-email')">Générer cold email</button>
+        <div id="out-result"></div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">Messages générés (<span id="messages-count">0</span>)</h2>
+        <p class="card-desc">Tous les messages produits par l'agent. Clique pour copier.</p>
+        <div id="messages-list"></div>
+      </div>
+    </div>
+
+    <!-- TAB : RELANCES -->
+    <div class="otab-pane" data-pane="relances" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">🔁 Relances</h2>
+        <p class="card-desc">Génère des relances J+3 / J+7 / J+15 pour les deals qui dorment, ou des relances de paiement pour les factures en retard.</p>
+        <div class="input-row">
+          <div><p class="field-label">Lead / Client</p>
+            <select id="re-lead" class="select"><option value="">— Sélectionner —</option></select>
+          </div>
+          <div><p class="field-label">Type</p>
+            <select id="re-type" class="select">
+              <option value="followup-soft">Relance soft (J+3)</option>
+              <option value="followup-firm">Relance ferme (J+7)</option>
+              <option value="followup-last">Dernière relance (J+15)</option>
+              <option value="invoice-relance">Relance facture impayée</option>
+              <option value="meeting-noshow">Relance no-show RDV</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateOutreach('followup')">Générer la relance</button>
+        <div id="re-result" style="margin-top: 12px;"></div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">Deals dormants (sans activité &gt; 5 jours)</h2>
+        <div id="dormant-deals"></div>
+      </div>
+    </div>
+
+    <!-- TAB : LINKEDIN -->
+    <div class="otab-pane" data-pane="linkedin" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">💼 Messages LinkedIn</h2>
+        <p class="card-desc">Connexions, intro, follow-up Voice Note, partage de contenu, invitation à un événement. Adapté au ton LinkedIn (300 chars max pour les invitations).</p>
+        <div class="input-row">
+          <div><p class="field-label">Lead cible</p>
+            <select id="li-lead" class="select"><option value="">— Sélectionner —</option></select>
+          </div>
+          <div><p class="field-label">Type</p>
+            <select id="li-type" class="select">
+              <option value="li-connect">Demande de connexion (300 chars)</option>
+              <option value="li-intro">Message intro post-connexion</option>
+              <option value="li-followup">Follow-up après visite profil</option>
+              <option value="li-content">Partage de contenu personnalisé</option>
+              <option value="li-event">Invitation événement / webinar</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateOutreach('linkedin')">Générer le message LinkedIn</button>
+        <div id="li-result" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+
+    <!-- TAB : SCRIPTS D'APPEL -->
+    <div class="otab-pane" data-pane="scripts" style="display: none;">
+      <div class="card">
+        <h2 class="card-title">📞 Scripts d'appel</h2>
+        <p class="card-desc">Script cold call, démo, objection handling, closing. Adapté au persona et au stage du deal.</p>
+        <div class="input-row">
+          <div><p class="field-label">Lead cible</p>
+            <select id="sc-lead" class="select"><option value="">— Sélectionner —</option></select>
+          </div>
+          <div><p class="field-label">Type</p>
+            <select id="sc-type" class="select">
+              <option value="cold-call">Cold call (2 min)</option>
+              <option value="discovery">Discovery call (30 min)</option>
+              <option value="demo">Script démo produit</option>
+              <option value="objection">Réponses objections</option>
+              <option value="closing">Script de closing</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="generateOutreach('call-script')">Générer le script</button>
+        <div id="sc-result" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ RECHERCHE GLOBALE ============ -->
+  <div class="view" id="view-search">
     <div class="card">
-      <h2 class="card-title">Messages générés (<span id="messages-count">0</span>)</h2>
-      <p class="card-desc">Tous les messages produits par l'agent. Clique pour copier.</p>
-      <div id="messages-list"></div>
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Recherche globale
+      </h2>
+      <p class="card-desc">Cherche partout dans ton CRM : leads, clients, devis, factures, deals, emails, messages, base RAG. L'IA peut aussi répondre en langage naturel.</p>
+      <div style="display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap;">
+        <input id="sg-q" class="input" placeholder="Ex : qui est mon meilleur client ce mois ? · DELMARE · factures impayées · cold email plombier" style="flex: 1; min-width: 280px;" onkeydown="if(event.key==='Enter') runGlobalSearch()">
+        <button class="btn btn-primary" onclick="runGlobalSearch()">🔍 Rechercher</button>
+        <button class="btn btn-ghost" onclick="askRagBrain()">🧠 Demander à l'IA</button>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+        <label class="chip"><input type="checkbox" id="sg-leads" checked> Leads</label>
+        <label class="chip"><input type="checkbox" id="sg-clients" checked> Clients</label>
+        <label class="chip"><input type="checkbox" id="sg-devis" checked> Devis</label>
+        <label class="chip"><input type="checkbox" id="sg-factures" checked> Factures</label>
+        <label class="chip"><input type="checkbox" id="sg-deals" checked> Deals</label>
+        <label class="chip"><input type="checkbox" id="sg-messages" checked> Messages</label>
+        <label class="chip"><input type="checkbox" id="sg-emails"> Emails (Webmail)</label>
+        <label class="chip"><input type="checkbox" id="sg-rag"> RAG / Cerveau</label>
+      </div>
+      <div id="sg-results" style="margin-top: 20px;"></div>
     </div>
   </div>
 
@@ -2522,7 +2716,7 @@ function toggleMenu(headerEl) {
   const group = headerEl.parentElement;
   group.classList.toggle('open');
 }
-function navTo(name, itemEl) {
+function navTo(name, itemEl, subTab) {
   // Map de mapping des sous-menus vers vues principales
   const aliases = { 'dashboard-kpis': 'dashboard', 'dashboard-activity': 'dashboard' };
   const target = aliases[name] || name;
@@ -2538,6 +2732,9 @@ function navTo(name, itemEl) {
     }
   }
   switchTab(target);
+  if (target === 'outreach' && subTab) {
+    setTimeout(() => switchOutreachTab(subTab), 50);
+  }
   // Scroll en haut du contenu
   document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -3247,14 +3444,22 @@ function renderLeadDetail(lead) {
 }
 
 /* ============ OUTREACH ============ */
-async function generateOutreach() {
-  const id = document.getElementById('out-lead').value;
-  if (!id) { alert('Sélectionne un lead'); return; }
-  const lead = state.leads.find(l => l.id == id);
-  const type = document.getElementById('out-type').value;
-  const product = document.getElementById('out-product').value;
-  const tone = document.getElementById('out-tone').value;
-  const out = document.getElementById('out-result');
+async function generateOutreach(typeOverride) {
+  // Détermine quel set de selects utiliser selon l'onglet actif
+  const activeTab = document.querySelector('.otab.otab-active')?.dataset?.otab || 'cold';
+  const leadSelectId = ({ cold: 'out-lead', relances: 're-lead', linkedin: 'li-lead', scripts: 'sc-lead' })[activeTab] || 'out-lead';
+  const subTypeId = ({ cold: 'out-type', relances: 're-type', linkedin: 'li-type', scripts: 'sc-type' })[activeTab] || 'out-type';
+  const resultId = ({ cold: 'out-result', relances: 're-result', linkedin: 'li-result', scripts: 'sc-result' })[activeTab] || 'out-result';
+
+  const id = document.getElementById(leadSelectId)?.value;
+  if (!id) { alert('Sélectionne un lead/client'); return; }
+  const lead = (state.leads||[]).find(l => l.id == id) || (state.clients||[]).find(c => 'c-'+c.id == id || c.id == id);
+  if (!lead) { alert('Lead introuvable'); return; }
+  const type = typeOverride || document.getElementById(subTypeId)?.value || 'cold-email';
+  const product = document.getElementById('out-product')?.value || 'Bundle complet';
+  const tone = document.getElementById('out-tone')?.value || 'Direct et data-driven';
+  const out = document.getElementById(resultId);
+  if (!out) return;
   out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération en cours...</div>';
   try {
     const text = await generateOutreachFor(lead, type, product, tone);
@@ -3262,10 +3467,31 @@ async function generateOutreach() {
       <div class="output">${escapeHtml(text)}</div>
       <div class="btn-row">
         <button class="btn btn-ghost" onclick='copyText(${JSON.stringify(text)}, this)'>Copier</button>
+        ${lead.email ? '<button class="btn btn-primary" onclick=\"sendOutreachAsEmail(\''+escapeHtml(lead.email).replace(/'/g,'')+'\', '+JSON.stringify(text).replace(/"/g,'&quot;')+')\">📤 Envoyer par email</button>' : ''}
       </div>
     `;
   } catch(e) {
     out.innerHTML = '<div class="error">Erreur : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function sendOutreachAsEmail(to, body) {
+  // Extrait l'objet si format OBJET: ...
+  const m = body.match(/OBJET\s*:\s*(.+)/i);
+  const subject = m ? m[1].trim() : 'Message de Pixeeplay';
+  const cleanBody = body.replace(/OBJET\s*:.*\n?/i, '').trim();
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, body: cleanBody })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur envoi');
+    alert('✓ Email envoyé à ' + to);
+    if (typeof logAct === 'function') logAct('Outreach envoyé à ' + to, 'success');
+  } catch(e) {
+    alert('Erreur : ' + e.message);
   }
 }
 
@@ -4228,6 +4454,391 @@ async function loadMediaGallery() {
     }).join('');
   } catch(e) {
     el.innerHTML = '<div class="error" style="grid-column: 1 / -1;">Backend injoignable : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+// ============ OUTREACH TABS + WEBMAIL ============
+function switchOutreachTab(tab) {
+  document.querySelectorAll('.otab').forEach(b => b.classList.remove('otab-active'));
+  const btn = document.querySelector('.otab[data-otab="'+tab+'"]');
+  if (btn) btn.classList.add('otab-active');
+  document.querySelectorAll('.otab-pane').forEach(p => p.style.display = 'none');
+  const pane = document.querySelector('.otab-pane[data-pane="'+tab+'"]');
+  if (pane) pane.style.display = '';
+  // Lazy-loads
+  if (tab === 'webmail') loadInbox();
+  if (tab === 'relances') renderDormantDeals();
+  if (tab === 'cold' || tab === 'relances' || tab === 'linkedin' || tab === 'scripts') {
+    // Hydrate les dropdowns lead
+    refreshLeadDropdown();
+    ['re-lead', 'li-lead', 'sc-lead'].forEach(id => {
+      const sel = document.getElementById(id);
+      const src = document.getElementById('out-lead');
+      if (sel && src) sel.innerHTML = src.innerHTML;
+    });
+  }
+}
+
+async function loadInbox() {
+  const list = document.getElementById('wm-list');
+  if (!list) return;
+  list.innerHTML = '<div class="loading" style="padding: 20px;"><div class="spinner"></div>Chargement de l\'inbox…</div>';
+  const folder = document.getElementById('wm-folder')?.value || 'INBOX';
+  const q = (document.getElementById('wm-search')?.value || '').trim();
+
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/list?folder=' + encodeURIComponent(folder) + '&q=' + encodeURIComponent(q) + '&limit=50');
+    if (r.status === 503) {
+      const d = await r.json();
+      list.innerHTML = `<div class="empty" style="padding: 24px;">
+        <div style="font-size: 13px; color: var(--text-2); margin-bottom: 10px;">📭 Webmail non configuré</div>
+        <div style="font-size: 12px; line-height: 1.6;">${escapeHtml(d.hint || 'Configure SMTP_USER + SMTP_PASS sur le backend pour activer l\'IMAP.')}</div>
+      </div>`;
+      return;
+    }
+    if (!r.ok) {
+      const d = await r.json().catch(() => ({}));
+      throw new Error(d.error || ('HTTP '+r.status));
+    }
+    const data = await r.json();
+    const messages = data.messages || [];
+    if (!messages.length) {
+      list.innerHTML = '<div class="empty" style="padding: 24px;">Aucun mail trouvé.</div>';
+      return;
+    }
+    list.innerHTML = messages.map(m => {
+      const dateStr = m.date ? new Date(m.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '';
+      const fromName = m.fromName || (m.from || '').split('@')[0];
+      return `<div class="wm-row ${m.unread ? 'unread' : ''}" data-uid="${m.uid}" data-folder="${escapeHtml(folder)}" onclick="openMessage(${m.uid}, '${escapeHtml(folder).replace(/'/g,'')}')">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
+          <div class="wm-from">${escapeHtml(fromName)} ${m.category ? '<span class="wm-cat wm-cat-'+escapeHtml(m.category)+'">'+escapeHtml(m.category)+'</span>' : ''}</div>
+          <div class="wm-date">${escapeHtml(dateStr)}</div>
+        </div>
+        <div class="wm-subj">${escapeHtml(m.subject || '(sans objet)')}</div>
+        <div class="wm-preview">${escapeHtml((m.preview || '').slice(0, 100))}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = `<div class="empty" style="padding: 24px;"><div style="color: var(--accent);">❌ ${escapeHtml(e.message)}</div><div style="font-size: 11px; margin-top: 10px; color: var(--text-3);">Vérifie que le backend a SMTP_USER + SMTP_PASS configurés (Gmail App Password).</div></div>`;
+  }
+}
+
+async function openMessage(uid, folder) {
+  // Highlight
+  document.querySelectorAll('.wm-row').forEach(r => r.classList.remove('active'));
+  document.querySelector(`.wm-row[data-uid="${uid}"]`)?.classList.add('active');
+
+  const det = document.getElementById('wm-detail');
+  det.innerHTML = '<div class="loading"><div class="spinner"></div>Chargement…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/message?uid=' + uid + '&folder=' + encodeURIComponent(folder));
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const m = await r.json();
+    const fromName = m.fromName || (m.from || '').split('@')[0];
+    const fromEmail = m.fromAddress || m.from || '';
+    const dateStr = m.date ? new Date(m.date).toLocaleString('fr-FR') : '';
+    det.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
+        <div style="flex: 1;">
+          <h3 style="margin: 0 0 8px; font-size: 16px;">${escapeHtml(m.subject || '(sans objet)')}</h3>
+          <div style="font-size: 12px; color: var(--text-2);">
+            <strong>${escapeHtml(fromName)}</strong> &lt;${escapeHtml(fromEmail)}&gt; · ${escapeHtml(dateStr)}
+          </div>
+          ${m.to ? '<div style="font-size: 11px; color: var(--text-3); margin-top: 4px;">À : '+escapeHtml(m.to)+'</div>' : ''}
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" onclick="openReply('${escapeHtml(fromEmail).replace(/'/g,'')}', '${escapeHtml(m.subject||'').replace(/'/g,'')}', '${(m.messageId||'').replace(/'/g,'')}')">↩ Répondre</button>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 11px;" onclick="createLeadFromMail('${escapeHtml(fromName).replace(/'/g,'')}', '${escapeHtml(fromEmail).replace(/'/g,'')}', '${escapeHtml(m.subject||'').replace(/'/g,'')}')">+ Lead</button>
+          <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 11px;" onclick="createClientFromMail('${escapeHtml(fromName).replace(/'/g,'')}', '${escapeHtml(fromEmail).replace(/'/g,'')}')">+ Client</button>
+          <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 11px;" onclick="aiReplyDraft('${escapeHtml(fromEmail).replace(/'/g,'')}', '${escapeHtml(m.subject||'').replace(/'/g,'')}', \`${(m.text||'').replace(/[\\\`$]/g,'').slice(0,2000)}\`)">🧠 Brouillon IA</button>
+        </div>
+      </div>
+      <div style="margin-top: 16px; max-height: 380px; overflow-y: auto; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-word;">${m.html ? '<div>'+m.html+'</div>' : escapeHtml(m.text || '(message vide)')}</div>
+      <div id="wm-reply-form" style="margin-top: 18px;"></div>
+    `;
+  } catch(e) {
+    det.innerHTML = '<div class="empty">❌ ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function openReply(to, subject, messageId) {
+  const form = document.getElementById('wm-reply-form');
+  if (!form) return;
+  const replySubject = (subject && !subject.toLowerCase().startsWith('re:')) ? 'Re: ' + subject : subject;
+  form.innerHTML = `
+    <div style="background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px;">
+      <h4 style="margin: 0 0 10px; font-size: 13px;">Réponse à ${escapeHtml(to)}</h4>
+      <input id="wm-reply-subject" class="input" value="${escapeHtml(replySubject)}" style="margin-bottom: 8px;">
+      <textarea id="wm-reply-body" class="input" rows="6" placeholder="Tape ta réponse… ou clique 🧠 Brouillon IA en haut pour qu'elle soit générée."></textarea>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <button class="btn btn-primary" onclick="sendReply('${escapeHtml(to).replace(/'/g,'')}', '${(messageId||'').replace(/'/g,'')}')">📤 Envoyer</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('wm-reply-form').innerHTML=''">Annuler</button>
+      </div>
+    </div>
+  `;
+}
+
+async function sendReply(to, inReplyTo) {
+  const subject = document.getElementById('wm-reply-subject')?.value || '';
+  const body = document.getElementById('wm-reply-body')?.value || '';
+  if (!body.trim()) { alert('Le corps du message est vide.'); return; }
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, body, in_reply_to: inReplyTo })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur envoi');
+    alert('✓ Réponse envoyée à ' + to);
+    if (typeof logAct === 'function') logAct('Réponse envoyée à ' + to, 'success');
+    document.getElementById('wm-reply-form').innerHTML = '';
+  } catch(e) {
+    alert('Erreur : ' + e.message);
+  }
+}
+
+async function aiReplyDraft(from, subject, originalBody) {
+  const form = document.getElementById('wm-reply-form');
+  if (!form || !form.innerHTML.trim()) openReply(from, subject, '');
+  const bodyEl = document.getElementById('wm-reply-body');
+  if (bodyEl) bodyEl.value = '⏳ Génération du brouillon IA…';
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/ai-reply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, subject, original: originalBody })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'IA error');
+    if (bodyEl) bodyEl.value = d.draft || '(pas de brouillon)';
+  } catch(e) {
+    if (bodyEl) bodyEl.value = '❌ ' + e.message + '\n\nEssaie de répondre manuellement.';
+  }
+}
+
+function createLeadFromMail(name, email, subject) {
+  if (!email) { alert('Pas d\'email expéditeur valide'); return; }
+  const company = name.replace(/\s*[<(].*$/, '').trim() || email.split('@')[0];
+  const sector = email.split('@')[1] || '';
+  const lead = {
+    id: Date.now(), company, sector, size: '', email, phone: '',
+    score: 60, category: 'warm', basketEur: 0,
+    note: 'Créé depuis email · "' + (subject||'').slice(0, 60) + '"',
+    createdAt: Date.now()
+  };
+  if (!Array.isArray(state.leads)) state.leads = [];
+  state.leads.unshift(lead);
+  if (typeof save === 'function') save();
+  if (typeof logAct === 'function') logAct('Lead créé depuis mail : ' + company, 'success');
+  alert('✓ Lead créé : ' + company);
+}
+
+function createClientFromMail(name, email) {
+  if (!email) { alert('Pas d\'email expéditeur valide'); return; }
+  const cname = name.replace(/\s*[<(].*$/, '').trim() || email.split('@')[0];
+  const client = {
+    id: Date.now(), name: cname, contact: cname, email, phone: '', siret: '', address: '',
+    createdAt: Date.now()
+  };
+  if (!Array.isArray(state.clients)) state.clients = [];
+  state.clients.unshift(client);
+  if (typeof saveBiz === 'function') saveBiz();
+  if (typeof logAct === 'function') logAct('Client créé depuis mail : ' + cname, 'success');
+  alert('✓ Client créé : ' + cname);
+}
+
+async function analyzeInbox() {
+  switchOutreachTab('analyse');
+}
+
+async function runInboxAnalysis() {
+  const days = parseInt(document.getElementById('wm-analyze-window')?.value || '30');
+  const count = parseInt(document.getElementById('wm-analyze-count')?.value || '50');
+  const out = document.getElementById('wm-analysis-result');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>L\'IA analyse tes derniers ' + count + ' mails sur ' + days + ' jours…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/webmail/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ days, count })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur analyse');
+    const cats = d.categories || {};
+    const actions = d.actions || [];
+    out.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin-bottom: 20px;">
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid #ef4444; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 11px; color: var(--text-2);">🔥 Hot leads</div>
+          <div style="font-size: 24px; font-weight: 700; color: #ef4444;">${cats.hot || 0}</div>
+        </div>
+        <div style="background: rgba(168,139,250,0.12); border: 1px solid #a78bfa; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 11px; color: var(--text-2);">⭐ Leads</div>
+          <div style="font-size: 24px; font-weight: 700; color: #a78bfa;">${cats.lead || 0}</div>
+        </div>
+        <div style="background: rgba(16,185,129,0.1); border: 1px solid #10b981; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 11px; color: var(--text-2);">✅ Clients</div>
+          <div style="font-size: 24px; font-weight: 700; color: #10b981;">${cats.client || 0}</div>
+        </div>
+        <div style="background: rgba(59,130,246,0.1); border: 1px solid #3b82f6; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 11px; color: var(--text-2);">🛟 Support</div>
+          <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${cats.support || 0}</div>
+        </div>
+        <div style="background: rgba(107,114,128,0.15); border: 1px solid #6b7280; border-radius: 10px; padding: 14px;">
+          <div style="font-size: 11px; color: var(--text-2);">🗑 Spam / Pub</div>
+          <div style="font-size: 24px; font-weight: 700; color: #6b7280;">${cats.spam || 0}</div>
+        </div>
+      </div>
+      <h3 style="margin-top: 20px;">📌 ${actions.length} actions prioritaires suggérées par l'IA</h3>
+      ${actions.map((a,i) => `
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 10px;">
+          <div style="font-weight: 600; font-size: 13px;">${i+1}. ${escapeHtml(a.title || '')}</div>
+          <div style="font-size: 12px; color: var(--text-2); margin-top: 4px;">${escapeHtml(a.detail || '')}</div>
+          ${a.from ? '<div style="font-size: 11px; color: var(--text-3); margin-top: 4px;">📩 '+escapeHtml(a.from)+'</div>' : ''}
+          ${a.suggestion ? '<div style="font-size: 12px; margin-top: 6px; padding: 8px; background: var(--surface-2); border-radius: 6px;">💡 '+escapeHtml(a.suggestion)+'</div>' : ''}
+        </div>
+      `).join('')}
+      ${d.summary ? '<div style="margin-top: 20px; padding: 16px; background: var(--accent-soft); border-radius: 10px;"><strong>🧠 Synthèse :</strong><br>'+escapeHtml(d.summary)+'</div>' : ''}
+    `;
+  } catch(e) {
+    out.innerHTML = '<div class="error">❌ ' + escapeHtml(e.message) + '</div>';
+  }
+}
+
+function renderDormantDeals() {
+  const el = document.getElementById('dormant-deals');
+  if (!el) return;
+  const cutoff = Date.now() - 5 * 86400 * 1000;
+  const dormant = (state.deals || []).filter(d => d.stage !== 'won' && d.stage !== 'lost' && (d.lastActivity || d.createdAt || 0) < cutoff);
+  if (!dormant.length) {
+    el.innerHTML = '<div class="empty">Aucun deal dormant 🎉</div>';
+    return;
+  }
+  el.innerHTML = dormant.map(d => {
+    const days = Math.floor((Date.now() - (d.lastActivity || d.createdAt || 0)) / 86400000);
+    return `<div style="display: flex; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border);">
+      <div><strong>${escapeHtml(d.title || d.company || 'Deal')}</strong> · ${escapeHtml(d.stage)} · ${eur(d.amount||0)}</div>
+      <div style="font-size: 12px; color: var(--text-3);">${days} j sans activité</div>
+    </div>`;
+  }).join('');
+}
+
+// ============ RECHERCHE GLOBALE ============
+async function runGlobalSearch() {
+  const q = (document.getElementById('sg-q')?.value || '').trim().toLowerCase();
+  const out = document.getElementById('sg-results');
+  if (!q) { out.innerHTML = '<div class="empty">Tape une requête puis Entrée.</div>'; return; }
+  const checks = {
+    leads: document.getElementById('sg-leads')?.checked,
+    clients: document.getElementById('sg-clients')?.checked,
+    devis: document.getElementById('sg-devis')?.checked,
+    factures: document.getElementById('sg-factures')?.checked,
+    deals: document.getElementById('sg-deals')?.checked,
+    messages: document.getElementById('sg-messages')?.checked,
+    emails: document.getElementById('sg-emails')?.checked,
+    rag: document.getElementById('sg-rag')?.checked
+  };
+  const matches = (s) => s && String(s).toLowerCase().includes(q);
+  const results = [];
+
+  if (checks.leads) (state.leads||[]).forEach(l => {
+    if (matches(l.company) || matches(l.sector) || matches(l.email) || matches(l.url) || matches(l.note)) {
+      results.push({ kind: 'lead', title: l.company, sub: l.sector + ' · ' + l.email, score: l.score, badge: l.category });
+    }
+  });
+  if (checks.clients) (state.clients||[]).forEach(c => {
+    if (matches(c.name) || matches(c.email) || matches(c.contact) || matches(c.siret)) {
+      results.push({ kind: 'client', title: c.name, sub: c.contact + ' · ' + c.email });
+    }
+  });
+  if (checks.devis) (state.devis||[]).forEach(d => {
+    if (matches(d.ref) || matches(d.clientName) || matches(JSON.stringify(d.items||[]))) {
+      results.push({ kind: 'devis', title: d.ref + ' — ' + (d.clientName||''), sub: eur(d.totalTtc||0) + ' · ' + (d.status||''), badge: d.status });
+    }
+  });
+  if (checks.factures) (state.factures||[]).forEach(f => {
+    if (matches(f.ref) || matches(f.clientName)) {
+      results.push({ kind: 'facture', title: f.ref + ' — ' + (f.clientName||''), sub: eur(f.totalTtc||0) + ' · ' + (f.status||''), badge: f.status });
+    }
+  });
+  if (checks.deals) (state.deals||[]).forEach(d => {
+    if (matches(d.title) || matches(d.company) || matches(d.stage)) {
+      results.push({ kind: 'deal', title: d.title || d.company, sub: d.stage + ' · ' + eur(d.amount||0), badge: d.stage });
+    }
+  });
+  if (checks.messages) (state.messages||[]).forEach(m => {
+    if (matches(m.subject) || matches(m.body) || matches(m.to)) {
+      results.push({ kind: 'message', title: m.subject || m.type, sub: (m.to||'') + ' · ' + new Date(m.createdAt).toLocaleDateString('fr-FR'), preview: (m.body||'').slice(0,140) });
+    }
+  });
+
+  // Async sources (emails + RAG)
+  if (checks.emails || checks.rag) {
+    out.innerHTML = `<div class="loading"><div class="spinner"></div>Recherche locale + backend…</div>`;
+    if (checks.emails) {
+      try {
+        const r = await fetch(backendUrl() + '/api/webmail/list?folder=INBOX&q=' + encodeURIComponent(q) + '&limit=20');
+        if (r.ok) {
+          const d = await r.json();
+          (d.messages||[]).forEach(m => results.push({
+            kind: 'email', title: m.subject || '(sans objet)', sub: (m.fromName || m.from || '') + ' · ' + (m.date ? new Date(m.date).toLocaleDateString('fr-FR'): ''),
+            preview: (m.preview||'').slice(0,140)
+          }));
+        }
+      } catch {}
+    }
+    if (checks.rag) {
+      try {
+        const r = await fetch(backendUrl() + '/api/gemini/rag-search?q=' + encodeURIComponent(q));
+        if (r.ok) {
+          const d = await r.json();
+          (d.results || d.docs || []).forEach(doc => results.push({
+            kind: 'rag', title: doc.title || 'Doc', sub: doc.source || '', preview: (doc.content||'').slice(0,140)
+          }));
+        }
+      } catch {}
+    }
+  }
+
+  if (!results.length) {
+    out.innerHTML = `<div class="empty" style="padding: 30px;">Aucun résultat pour "<strong>${escapeHtml(q)}</strong>". Essaie avec un autre mot, ou clique <strong>🧠 Demander à l'IA</strong>.</div>`;
+    return;
+  }
+  const iconMap = { lead: '⭐', client: '✅', devis: '📄', facture: '🧾', deal: '💼', message: '💬', email: '📩', rag: '🧠' };
+  out.innerHTML = `<div style="margin-bottom: 12px; font-size: 12px; color: var(--text-2);">${results.length} résultats pour "${escapeHtml(q)}"</div>` +
+    results.slice(0, 80).map(r => `
+      <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; display: flex; gap: 12px; align-items: start;">
+        <div style="font-size: 22px;">${iconMap[r.kind]||'•'}</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="font-weight: 600; font-size: 13px;">${escapeHtml(r.title || '')} ${r.badge ? '<span class="badge" style="font-size: 10px; padding: 1px 6px; margin-left: 4px;">'+escapeHtml(r.badge)+'</span>' : ''}</div>
+          <div style="font-size: 11px; color: var(--text-2); margin-top: 2px;">${escapeHtml(r.sub || '')}</div>
+          ${r.preview ? '<div style="font-size: 11px; color: var(--text-3); margin-top: 4px;">'+escapeHtml(r.preview)+'</div>' : ''}
+        </div>
+        <div style="font-size: 10px; padding: 2px 8px; background: var(--surface-2); border-radius: 4px; color: var(--text-3);">${r.kind}</div>
+      </div>
+    `).join('');
+}
+
+async function askRagBrain() {
+  const q = (document.getElementById('sg-q')?.value || '').trim();
+  if (!q) { alert('Tape une question'); return; }
+  const out = document.getElementById('sg-results');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Le Cerveau réfléchit…</div>';
+  try {
+    const r = await fetch(backendUrl() + '/api/gemini/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, context: { leads: state.leads?.length||0, deals: state.deals?.length||0, clients: state.clients?.length||0 } })
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'Erreur IA');
+    out.innerHTML = `<div style="padding: 18px; background: var(--accent-soft); border-radius: 12px; line-height: 1.7;">
+      <div style="font-size: 11px; color: var(--text-2); margin-bottom: 8px;">🧠 Réponse du Cerveau</div>
+      <div>${escapeHtml(d.answer || d.text || '(pas de réponse)').replace(/\n/g, '<br>')}</div>
+    </div>`;
+  } catch(e) {
+    out.innerHTML = '<div class="error">' + escapeHtml(e.message) + '</div>';
   }
 }
 
