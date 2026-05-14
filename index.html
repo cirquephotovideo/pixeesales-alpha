@@ -1369,15 +1369,20 @@ body.domain-agent .sales-only { display: none !important; }
           <p class="field-label">1️⃣ Adresse Gmail (expéditeur)</p>
           <input id="conn-gmail-user" class="input" placeholder="ton@gmail.com" style="margin-bottom: 12px;">
           <p class="field-label">2️⃣ Mot de passe d'application Google (16 caractères)</p>
-          <input id="conn-gmail-pass" type="password" class="input" placeholder="xxxx xxxx xxxx xxxx" style="margin-bottom: 8px;">
+          <div style="margin-bottom: 8px; padding: 10px 14px; background: rgba(251,191,36,0.12); border-left: 3px solid #FBBF24; color: #FBBF24; font-size: 12px; border-radius: 6px;">
+            ⚠ <strong>Pas ton mot de passe Google normal !</strong> Il faut un <strong>mot de passe d'application</strong> de 16 caractères généré spécifiquement.
+            <br><a href="https://myaccount.google.com/apppasswords" target="_blank" style="color: var(--accent); font-weight: 600;">👉 Le créer ici : myaccount.google.com/apppasswords</a>
+          </div>
+          <input id="conn-gmail-pass" type="password" class="input" placeholder="xxxx xxxx xxxx xxxx (16 caractères)" style="margin-bottom: 8px;" autocomplete="new-password">
           <details style="margin-bottom: 12px;">
-            <summary style="cursor: pointer; font-size: 12px; color: var(--accent);">📖 Comment obtenir le mot de passe d'application Google (1 minute)</summary>
+            <summary style="cursor: pointer; font-size: 12px; color: var(--accent);">📖 Pas-à-pas détaillé (1 minute)</summary>
             <ol style="font-size: 12px; color: var(--text-2); margin: 8px 0 0 16px; padding: 0;">
+              <li>Active la validation en 2 étapes : <a href="https://myaccount.google.com/security" target="_blank" style="color: var(--accent);">myaccount.google.com/security</a></li>
               <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color: var(--accent);">myaccount.google.com/apppasswords</a></li>
-              <li>(La validation en 2 étapes doit être active sur ton compte Google)</li>
-              <li>Crée un mot de passe pour "PixeeSales-Alpha"</li>
-              <li>Copie les 16 caractères affichés (avec ou sans espaces)</li>
-              <li>Colle ci-dessus + clique "Sauvegarder & déployer"</li>
+              <li>Nom : <code>PixeeSales</code> → clique "Créer"</li>
+              <li>Google affiche un mot de passe genre <code>abcd efgh ijkl mnop</code> (16 caractères, 4 groupes de 4)</li>
+              <li>Copie ces 16 caractères et colle ci-dessous (espaces optionnels)</li>
+              <li>Clique "Sauvegarder &amp; déployer" puis "Envoyer un email test"</li>
             </ol>
           </details>
           <p class="field-label">3️⃣ Email de "from" (visible par le destinataire)</p>
@@ -3501,10 +3506,15 @@ function showZapierBlueprint() {
 /* === Gmail SMTP NATIF via backend === */
 async function saveGmailNative() {
   const user = document.getElementById('conn-gmail-user').value.trim();
-  const pass = document.getElementById('conn-gmail-pass').value.trim();
+  let pass = document.getElementById('conn-gmail-pass').value.trim();
   const from = document.getElementById('conn-gmail-from').value.trim() || `"PixeeSales-Alpha" <${user}>`;
   const out = document.getElementById('gmail-test-result');
   if (!user || !pass) { alert('Email + mot de passe requis'); return; }
+  // Nettoyer les espaces du mot de passe d'app (Google affiche avec espaces)
+  pass = pass.replace(/\s+/g, '');
+  if (pass.length !== 16) {
+    if (!confirm('⚠️ Le mot de passe ne fait pas 16 caractères ('+pass.length+'). Tu utilises peut-être ton mot de passe Google normal au lieu d\'un mot de passe d\'application.\n\nIl faut créer un mot de passe d\'app sur :\nmyaccount.google.com/apppasswords\n\nContinuer quand même ?')) return;
+  }
   if (out) out.innerHTML = '<span class="badge badge-neutral">Déploiement...</span>';
   try {
     const r = await fetch(BACKEND_URL + '/api/email/config', {
@@ -3514,11 +3524,19 @@ async function saveGmailNative() {
     });
     if (!r.ok) throw new Error('Backend HTTP '+r.status);
     const data = await r.json();
-    // Stocker aussi en local (label affiché)
     state.connectors.gmail = { user, pass: '***stored-on-backend***', from, configured: true };
     saveConnectors(); updateConnectorBadges();
-    if (out) out.innerHTML = '<span class="badge badge-success">✓ Déployé sur backend</span>';
-    logAct('SMTP Gmail configuré natif sur backend : '+user, 'success');
+    if (data.message && data.message.includes('Invalid login')) {
+      // SMTP a refusé les credentials
+      if (out) out.innerHTML = '<span class="badge badge-hot">⚠ Credentials refusés par Gmail</span>';
+      alert('❌ Gmail a refusé tes credentials.\n\nRaison probable : tu utilises ton mot de passe Google normal au lieu d\'un mot de passe d\'application.\n\n👉 Va sur https://myaccount.google.com/apppasswords pour créer un mot de passe spécifique de 16 caractères, puis colle-le ici.\n\n(La validation en 2 étapes doit être active sur ton compte Google)');
+    } else if (data.message && data.message.includes('verify a échoué')) {
+      if (out) out.innerHTML = '<span class="badge badge-warm">⚠ '+escapeHtml(data.message.slice(0,80))+'</span>';
+      alert('⚠ Sauvegardé mais Gmail a renvoyé : '+data.message);
+    } else {
+      if (out) out.innerHTML = '<span class="badge badge-success">✓ SMTP configuré et vérifié</span>';
+      logAct('SMTP Gmail configuré natif : '+user, 'success');
+    }
   } catch(e) {
     if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
     alert('Erreur déploiement SMTP : '+e.message+'\n\nAssure-toi que api.pixeeplay.com est joignable.');
