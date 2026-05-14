@@ -66,15 +66,30 @@ export function bridgeRoutes(db) {
 
       if (!bridgeUuid) {
         try {
-          const user = await bridgeRequest('/v2/users', {
+          // Bridge v3 (2025-01-15) : /v3/aggregation/users
+          const user = await bridgeRequest('/v3/aggregation/users', {
             method: 'POST',
             body: JSON.stringify({ external_user_id })
           }, env);
           bridgeUuid = user.uuid;
         } catch(e) {
-          if (e.data?.error_code === 'user_already_exists') {
-            const list = await bridgeRequest(`/v2/users?external_user_id=${encodeURIComponent(external_user_id)}`, {}, env);
-            bridgeUuid = list.resources?.[0]?.uuid;
+          if (e.data?.error_code === 'user_already_exists' || e.status === 409) {
+            const list = await bridgeRequest(`/v3/aggregation/users?external_user_id=${encodeURIComponent(external_user_id)}`, {}, env);
+            bridgeUuid = list.resources?.[0]?.uuid || list.users?.[0]?.uuid;
+          } else if (e.status === 404) {
+            // Fallback v2 si v3 indispo (rétro-compat)
+            try {
+              const userV2 = await bridgeRequest('/v2/users', {
+                method: 'POST',
+                body: JSON.stringify({ external_user_id })
+              }, env);
+              bridgeUuid = userV2.uuid;
+            } catch(e2) {
+              if (e2.data?.error_code === 'user_already_exists') {
+                const listV2 = await bridgeRequest(`/v2/users?external_user_id=${encodeURIComponent(external_user_id)}`, {}, env);
+                bridgeUuid = listV2.resources?.[0]?.uuid;
+              } else throw e2;
+            }
           } else throw e;
         }
       }
