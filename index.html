@@ -1174,6 +1174,12 @@ body.domain-agent .sales-only { display: none !important; }
         <button class="btn btn-secondary" onclick="testBackend()">Tester /health</button>
       </div>
       <div class="config-row">
+        <span class="config-label">Synchronisation données</span>
+        <button class="btn btn-primary" onclick="doSync('push')">⬆ Push (local → backend)</button>
+        <button class="btn btn-secondary" onclick="doSync('pull')">⬇ Pull (backend → local)</button>
+        <span id="sync-result" style="font-size: 12px;"></span>
+      </div>
+      <div class="config-row">
         <span class="config-label">Forcer domaine</span>
         <select id="cfg-domain-override" class="select" onchange="setDomainOverride(this.value)">
           <option value="">Auto (selon URL : sales.* / agent.*)</option>
@@ -1291,22 +1297,41 @@ body.domain-agent .sales-only { display: none !important; }
         <span>Certains services bloquent les appels directs depuis un navigateur (CORS). Si "Tester" échoue, configure ton webhook Zapier ci-dessus — il relayera les actions.</span>
       </div>
 
-      <!-- Gmail / SMTP -->
-      <details class="card" style="margin: 0 0 12px; padding: 12px 16px; background: var(--surface-2); box-shadow: none;">
+      <!-- Gmail / SMTP NATIVE via backend -->
+      <details class="card" style="margin: 0 0 12px; padding: 12px 16px; background: var(--surface-2); box-shadow: none;" open>
         <summary style="cursor: pointer; font-weight: 600; display: flex; justify-content: space-between; align-items: center;">
-          <span><span style="color: #EA4335;">●</span> Gmail / SMTP — Envoi cold emails et rapports</span>
+          <span><span style="color: #EA4335;">●</span> Gmail SMTP — Envoi cold emails et rapports (natif via backend)</span>
           <span class="badge badge-neutral" id="badge-gmail">non configuré</span>
         </summary>
         <div style="margin-top: 12px;">
-          <p class="field-label">Adresse Gmail (expéditeur)</p>
-          <input id="conn-gmail-user" class="input" placeholder="votre@gmail.com" style="margin-bottom: 8px;">
-          <p class="field-label">Mot de passe d'application Gmail (16 chars)</p>
-          <input id="conn-gmail-pass" type="password" class="input" placeholder="xxxx xxxx xxxx xxxx" style="margin-bottom: 8px;">
-          <p style="font-size: 11px; color: var(--text-3); margin: 0 0 8px;">Crée un mot de passe d'app sur myaccount.google.com → Sécurité → Validation en 2 étapes → Mots de passe d'application</p>
-          <div class="btn-row">
-            <button class="btn btn-primary" onclick="saveConnector('gmail')">Sauvegarder</button>
-            <button class="btn btn-secondary" onclick="testConnector('gmail')">Tester</button>
+          <div class="success-notice" style="margin-bottom: 12px;">
+            <strong>✓ Envoi SMTP natif activé via le backend</strong><br>
+            Le backend Node.js déployé sur <code>api.pixeeplay.com</code> utilise Nodemailer pour envoyer directement via Gmail SMTP. Pas de Zapier, pas d'intermédiaire, c'est ton serveur qui parle directement à smtp.gmail.com:587.
           </div>
+          <p class="field-label">1️⃣ Adresse Gmail (expéditeur)</p>
+          <input id="conn-gmail-user" class="input" placeholder="ton@gmail.com" style="margin-bottom: 12px;">
+          <p class="field-label">2️⃣ Mot de passe d'application Google (16 caractères)</p>
+          <input id="conn-gmail-pass" type="password" class="input" placeholder="xxxx xxxx xxxx xxxx" style="margin-bottom: 8px;">
+          <details style="margin-bottom: 12px;">
+            <summary style="cursor: pointer; font-size: 12px; color: var(--accent);">📖 Comment obtenir le mot de passe d'application Google (1 minute)</summary>
+            <ol style="font-size: 12px; color: var(--text-2); margin: 8px 0 0 16px; padding: 0;">
+              <li>Va sur <a href="https://myaccount.google.com/apppasswords" target="_blank" style="color: var(--accent);">myaccount.google.com/apppasswords</a></li>
+              <li>(La validation en 2 étapes doit être active sur ton compte Google)</li>
+              <li>Crée un mot de passe pour "PixeeSales-Alpha"</li>
+              <li>Copie les 16 caractères affichés (avec ou sans espaces)</li>
+              <li>Colle ci-dessus + clique "Sauvegarder & déployer"</li>
+            </ol>
+          </details>
+          <p class="field-label">3️⃣ Email de "from" (visible par le destinataire)</p>
+          <input id="conn-gmail-from" class="input" placeholder='"PixeeSales-Alpha" &lt;ton@gmail.com&gt;' style="margin-bottom: 12px;">
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="saveGmailNative()">💾 Sauvegarder &amp; déployer sur backend</button>
+            <button class="btn btn-secondary" onclick="testGmailNative()">📧 Envoyer un email test</button>
+            <span id="gmail-test-result" style="font-size: 12px; align-self: center;"></span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-3); margin: 12px 0 0;">
+            ⚠ Le mot de passe d'application est transmis au backend api.pixeeplay.com qui le stocke comme env var. Régénère-le sur Google Account si tu le compromets.
+          </p>
         </div>
       </details>
 
@@ -3323,7 +3348,15 @@ async function testConnector(name) {
         });
         alert(r.ok ? 'Test Gmail relayé via webhook ('+r.status+')' : 'Webhook a répondu '+r.status);
       } else {
-        alert('Pour envoyer en SMTP natif, configure d\'abord le webhook Zapier/Make dans la section ci-dessus — il relaie les emails vers Gmail. C\'est la méthode standard et fiable. Sans webhook, l\'envoi se fait via le client mail local (mailto).');
+        // Envoi natif via backend api.pixeeplay.com
+        try {
+          const r = await fetch(BACKEND_URL + '/api/email/test');
+          const data = await r.json();
+          if (data.ok) alert('✅ SMTP backend OK · user: ' + (data.user || 'configuré'));
+          else alert('⚠ Backend dispo mais SMTP pas encore configuré côté serveur. Sauvegarde tes credentials Gmail ci-dessus.');
+        } catch(e) {
+          alert('Backend inaccessible (' + e.message + '). Sauvegarde tes credentials Gmail ci-dessus pour les déployer.');
+        }
       }
     } else if (name === 'phantombuster') {
       if (!cfg.key) throw new Error('Clé API requise');
@@ -3405,6 +3438,59 @@ function showZapierBlueprint() {
 }</pre>
     </div>
   `;
+}
+
+/* === Gmail SMTP NATIF via backend === */
+async function saveGmailNative() {
+  const user = document.getElementById('conn-gmail-user').value.trim();
+  const pass = document.getElementById('conn-gmail-pass').value.trim();
+  const from = document.getElementById('conn-gmail-from').value.trim() || `"PixeeSales-Alpha" <${user}>`;
+  const out = document.getElementById('gmail-test-result');
+  if (!user || !pass) { alert('Email + mot de passe requis'); return; }
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Déploiement...</span>';
+  try {
+    const r = await fetch(BACKEND_URL + '/api/email/config', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ smtp_user: user, smtp_pass: pass, smtp_from: from })
+    });
+    if (!r.ok) throw new Error('Backend HTTP '+r.status);
+    const data = await r.json();
+    // Stocker aussi en local (label affiché)
+    state.connectors.gmail = { user, pass: '***stored-on-backend***', from, configured: true };
+    saveConnectors(); updateConnectorBadges();
+    if (out) out.innerHTML = '<span class="badge badge-success">✓ Déployé sur backend</span>';
+    logAct('SMTP Gmail configuré natif sur backend : '+user, 'success');
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+    alert('Erreur déploiement SMTP : '+e.message+'\n\nAssure-toi que api.pixeeplay.com est joignable.');
+  }
+}
+
+async function testGmailNative() {
+  const out = document.getElementById('gmail-test-result');
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Envoi test...</span>';
+  try {
+    const to = state.email || 'arnaud@pixeeplay.com';
+    const r = await fetch(BACKEND_URL + '/api/email/send', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        to,
+        subject: '🎉 Test SMTP PixeeSales-Alpha',
+        body: 'Si tu vois cet email, ton SMTP natif via api.pixeeplay.com fonctionne parfaitement !\n\nLes rapports 8h/12h/18h et les propositions self-improvement vont commencer à arriver automatiquement.\n\n— PixeeSales-Alpha 🤖'
+      })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      if (out) out.innerHTML = '<span class="badge badge-success">✓ Email envoyé à '+escapeHtml(to)+'</span>';
+      logAct('Email test SMTP envoyé à '+to, 'success');
+    } else {
+      throw new Error(data.error || 'unknown');
+    }
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+  }
 }
 
 /* === Connector action functions === */
@@ -4986,6 +5072,19 @@ async function testBackend() {
     alert('❌ ' + url + ' inaccessible : ' + e.message);
   }
 }
+async function doSync(direction) {
+  const out = document.getElementById('sync-result');
+  if (!USE_BACKEND) { alert('Active d\'abord le Mode Backend ci-dessus'); return; }
+  if (out) out.innerHTML = '<span class="badge badge-neutral">Sync en cours...</span>';
+  try {
+    const result = direction === 'push' ? await syncToBackend() : await pullFromBackend();
+    const summary = Object.entries(result.items || {}).map(([k,v]) => k+': '+v).join(' · ');
+    if (out) out.innerHTML = '<span class="badge badge-success">✓ '+escapeHtml(summary)+'</span>';
+  } catch(e) {
+    if (out) out.innerHTML = '<span class="badge badge-hot">❌ '+escapeHtml(e.message)+'</span>';
+  }
+}
+
 function setDomainOverride(val) {
   if (val) localStorage.setItem('pixee_domain_override', val);
   else localStorage.removeItem('pixee_domain_override');
@@ -5074,6 +5173,50 @@ if (DOMAIN_MODE === 'dual') document.body.classList.remove('domain-dual');
 // Backend API config
 const BACKEND_URL = localStorage.getItem('pixee_backend_url') || 'https://api.pixeeplay.com';
 const USE_BACKEND = localStorage.getItem('pixee_use_backend') === 'true';
+
+// ============ FRONTEND ↔ BACKEND SYNC ============
+async function syncToBackend() {
+  if (!USE_BACKEND) return { synced: false, reason: 'Backend mode disabled' };
+  const results = { synced: true, items: {} };
+  for (const table of ['leads', 'deals', 'factures', 'clients']) {
+    const items = state[table] || [];
+    let success = 0;
+    for (const item of items.slice(0, 100)) { // cap pour ne pas saturer
+      try {
+        await fetch(BACKEND_URL + '/api/data/' + table, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+        success++;
+      } catch(e) {}
+    }
+    results.items[table] = success + '/' + items.length;
+  }
+  logAct('Sync backend : ' + Object.entries(results.items).map(([k,v]) => k+' '+v).join(' · '), 'success');
+  return results;
+}
+
+async function pullFromBackend() {
+  if (!USE_BACKEND) return { pulled: false };
+  const results = { pulled: true, items: {} };
+  for (const table of ['leads', 'deals', 'factures', 'clients']) {
+    try {
+      const r = await fetch(BACKEND_URL + '/api/data/' + table);
+      if (!r.ok) continue;
+      const rows = await r.json();
+      // Merge avec local : on garde le local et on ajoute ce qui n'est pas dans local
+      const localIds = new Set(state[table].map(i => i.id));
+      const remote = rows.map(row => row.data || row).filter(it => it && !localIds.has(it.id));
+      state[table] = [...state[table], ...remote];
+      results.items[table] = remote.length + ' nouveaux';
+    } catch(e) {}
+  }
+  save();
+  refresh();
+  logAct('Pull backend : ' + Object.entries(results.items).map(([k,v]) => k+' '+v).join(' · '), 'success');
+  return results;
+}
 
 // Wrapper Gemini : passe par backend si configuré, sinon direct
 async function callGeminiBackend(prompt, opts) {
