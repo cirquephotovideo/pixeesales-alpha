@@ -103,6 +103,32 @@ export function initDB(dbPath) {
       status TEXT DEFAULT 'ready',
       created_at INTEGER DEFAULT (strftime('%s','now'))
     );
+    CREATE TABLE IF NOT EXISTS task_runs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      task_name TEXT NOT NULL,
+      status TEXT,
+      result TEXT,
+      error TEXT,
+      ran_at INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS task_queue (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      detail TEXT,
+      priority TEXT DEFAULT 'normal',
+      status TEXT DEFAULT 'todo',
+      created_at INTEGER,
+      done_at INTEGER
+    );
+    CREATE TABLE IF NOT EXISTS processed_actions (
+      action_key TEXT PRIMARY KEY,    -- hash unique (uid+title ou fromEmail+title)
+      title TEXT,
+      mail_uid INTEGER,
+      from_email TEXT,
+      status TEXT,                    -- 'done' | 'snoozed'
+      snooze_until INTEGER,
+      processed_at INTEGER
+    );
   `);
 
   return db;
