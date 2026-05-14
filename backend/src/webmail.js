@@ -220,7 +220,7 @@ Rédige UNIQUEMENT le corps de la réponse (sans "Objet :", sans signature — l
   });
 
   // ----------- AI ANALYZE INBOX -----------
-  // POST /api/webmail/analyze { days, count }
+  // POST /api/webmail/analyze { days, count, excludeUids?, onlyNew? }
   r.post('/analyze', async (req, res) => {
     const cfg = imapConfig();
     if (!cfg) return res.status(503).json({ error: 'IMAP non configuré' });
@@ -228,6 +228,15 @@ Rédige UNIQUEMENT le corps de la réponse (sans "Objet :", sans signature — l
 
     const days = parseInt(req.body?.days || 30);
     const count = Math.min(parseInt(req.body?.count || 50), 200);
+    const onlyNew = req.body?.onlyNew !== false; // par défaut on n'analyse que les nouveaux
+    let excludeUids = Array.isArray(req.body?.excludeUids) ? req.body.excludeUids.map(Number).filter(Boolean) : [];
+
+    // Récupère aussi les uids déjà processés en DB (actions marquées done)
+    try {
+      const rows = db.prepare(`SELECT mail_uid FROM processed_actions WHERE status='done' OR (status='snoozed' AND snooze_until > ?)`).all(Date.now());
+      const dbUids = rows.map(r => r.mail_uid).filter(Boolean);
+      excludeUids = Array.from(new Set([...excludeUids, ...dbUids]));
+    } catch {}
     const since = new Date(Date.now() - days * 86400 * 1000);
 
     const client = new ImapFlow(cfg);
@@ -235,7 +244,12 @@ Rédige UNIQUEMENT le corps de la réponse (sans "Objet :", sans signature — l
     try {
       await client.connect();
       await client.mailboxOpen('INBOX');
-      const uids = await client.search({ since });
+      let uids = await client.search({ since });
+      // Exclus les uids déjà traités
+      if (excludeUids.length) {
+        const exSet = new Set(excludeUids);
+        uids = (uids || []).filter(u => !exSet.has(u));
+      }
       const slice = (uids || []).slice(-count);
       const fetched = await client.fetch(slice, { envelope: true, bodyParts: ['TEXT'], uid: true });
       for await (const msg of fetched) {
@@ -321,6 +335,28 @@ Retourne UNIQUEMENT le JSON array, rien d'autre. Max 5 actions. Si rien d'urgent
     } catch(e) {
       res.status(500).json({ error: 'IA : ' + e.message, categories });
     }
+  });
+
+  // ----------- ACTIONS PROCESSED (sync done/snoozed) -----------
+  r.post('/action/mark', (req, res) => {
+    const { key, title, mailUid, fromEmail, status, snoozeDays } = req.body || {};
+    if (!key) return res.status(400).json({ error: 'key required' });
+    const snoozeUntil = (status === 'snoozed' && snoozeDays) ? Date.now() + snoozeDays * 86400000 : 0;
+    try {
+      db.prepare(`INSERT INTO processed_actions (action_key, title, mail_uid, from_email, status, snooze_until, processed_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?)
+                  ON CONFLICT(action_key) DO UPDATE SET status=?, snooze_until=?, processed_at=?`)
+        .run(key, title || '', mailUid || null, fromEmail || '', status || 'done', snoozeUntil, Date.now(),
+             status || 'done', snoozeUntil, Date.now());
+      res.json({ ok: true });
+    } catch(e) { res.status(500).json({ error: e.message }); }
+  });
+
+  r.get('/action/list', (req, res) => {
+    try {
+      const rows = db.prepare(`SELECT * FROM processed_actions ORDER BY processed_at DESC LIMIT 200`).all();
+      res.json({ actions: rows });
+    } catch(e) { res.json({ actions: [] }); }
   });
 
   return r;
