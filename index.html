@@ -487,6 +487,25 @@ html, body {
 
     <div class="menu-group">
       <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10m11-11h-6M7 12H1m17.5-6.5l-4.24 4.24M9.76 14.24l-4.24 4.24m13-13l-4.24 4.24M9.76 9.76L5.51 5.51"/></svg>
+        <span>Agents IA</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('agent-social', this)">📱 Social Media</a>
+        <a class="submenu-item" onclick="navTo('agent-newsletter', this)">✉️ Newsletter</a>
+        <a class="submenu-item" onclick="navTo('agent-seo', this)">🔍 SEO &amp; Content</a>
+        <a class="submenu-item" onclick="navTo('agent-ads', this)">🎯 Marketing Ads</a>
+        <a class="submenu-item" onclick="navTo('agent-cs', this)">🤝 Customer Success</a>
+        <a class="submenu-item" onclick="navTo('agent-pr', this)">📰 PR &amp; Presse</a>
+        <a class="submenu-item" onclick="navTo('agent-influence', this)">⭐ Influenceurs</a>
+        <a class="submenu-item" onclick="navTo('agent-hr', this)">👤 RH &amp; Recrutement</a>
+        <a class="submenu-item" onclick="navTo('agent-support', this)">💬 Support client</a>
+      </div>
+    </div>
+
+    <div class="menu-group">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13M9 9l12-2"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
         <span>Cerveau RAG</span>
         <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1481,6 +1500,17 @@ html, body {
     </div>
   </div>
 
+  <!-- ============ AGENTS IA (9 agents factorisés) ============ -->
+  <div class="view" id="view-agent-social"></div>
+  <div class="view" id="view-agent-newsletter"></div>
+  <div class="view" id="view-agent-seo"></div>
+  <div class="view" id="view-agent-ads"></div>
+  <div class="view" id="view-agent-cs"></div>
+  <div class="view" id="view-agent-pr"></div>
+  <div class="view" id="view-agent-influence"></div>
+  <div class="view" id="view-agent-hr"></div>
+  <div class="view" id="view-agent-support"></div>
+
   <!-- ============ DEALS PERDUS ============ -->
   <div class="view" id="view-lost-deals">
     <div class="card">
@@ -1825,12 +1855,13 @@ function switchTab(name) {
   if (name === 'segments') segmentClients();
   if (name === 'bilans') {/* bouton manuel pour générer */}
   if (name === 'fec') {
-    // Pré-remplit les dates : du 1er jan au today
     const today = new Date().toISOString().slice(0,10);
     const jan = new Date().getFullYear()+'-01-01';
     if (!document.getElementById('fec-from').value) document.getElementById('fec-from').value = jan;
     if (!document.getElementById('fec-to').value) document.getElementById('fec-to').value = today;
   }
+  // Agents IA : 9 vues factorisées
+  if (name.startsWith('agent-')) renderAgentView(name);
 }
 
 // MEGA MENU navigation
@@ -4109,6 +4140,221 @@ function seedPixeeplayProducts() {
     };
   }
   saveBiz();
+}
+
+/* ============ AGENTS IA (9 agents) ============ */
+const AGENTS = {
+  'agent-social': {
+    title: '📱 Agent Social Media',
+    desc: 'Génère et planifie des posts pour LinkedIn, Twitter/X, Instagram, Facebook. Adapté au ton de chaque plateforme.',
+    actions: [
+      { key: 'linkedin-post', label: 'Post LinkedIn pro', placeholder: 'ex: Annoncer le lancement de PixeePIM Growth', prompt: (t,c)=>`Rédige un post LinkedIn engageant en français pour ${c.brand} (PME tech FR). Sujet : "${t}". Format : 3-4 paragraphes, hook fort, storytelling, hashtags pertinents en fin, 1 CTA. 200-300 mots max.` },
+      { key: 'twitter-thread', label: 'Thread Twitter/X', placeholder: 'Sujet du thread', prompt: (t,c)=>`Écris un thread Twitter/X (10 tweets max, 280 chars chacun) en français. Sujet : "${t}". Hook viral en tweet 1. Numérote 1/10, 2/10... Pas de hashtags. Termine par un CTA.` },
+      { key: 'instagram-caption', label: 'Légende Instagram', placeholder: 'Sujet du post', prompt: (t,c)=>`Légende Instagram pour ${c.brand} : "${t}". 80-120 mots, ton chaleureux + emojis pertinents (pas trop), hashtags optimisés (12-15) à la fin, 1 CTA.` },
+      { key: 'fb-ad', label: 'Pub Facebook/Meta', placeholder: 'Produit/offre', prompt: (t,c)=>`Pub Facebook pour ${c.brand} sur "${t}". Format : Titre punchy (40 chars max) + Texte principal (125 chars) + Description (30 chars) + CTA. Optimisé conversion.` },
+      { key: 'content-calendar', label: 'Calendrier 30 jours', placeholder: 'Thématique', prompt: (t,c)=>`Calendrier éditorial sur 30 jours pour ${c.brand} sur thématique "${t}". Tableau : Jour | Plateforme | Type (post/story/reel/article) | Sujet | Hook. Mix LinkedIn / Insta / Twitter. Rythme : 1 post/jour ouvré.` }
+    ]
+  },
+  'agent-newsletter': {
+    title: '✉️ Agent Newsletter',
+    desc: 'Rédige des newsletters captivantes, séquences nurture, ré-engagement clients.',
+    actions: [
+      { key: 'newsletter-weekly', label: 'Newsletter hebdo', placeholder: 'Thème principal de la semaine', prompt: (t,c)=>`Newsletter hebdomadaire en français pour ${c.brand}. Thème : "${t}". Format : Objet accrocheur (50 chars) · 1 intro perso · 3 sections (insight / produit highlight / actu secteur) · 1 CTA final. 500 mots max.` },
+      { key: 'welcome-sequence', label: 'Séquence de bienvenue', placeholder: 'Type de prospect (ex: a téléchargé un livre blanc)', prompt: (t,c)=>`Séquence email de bienvenue (4 emails sur 14 jours) pour un nouveau lead qui ${t}. Pour chaque email : objet + corps (200 mots max) + CTA. Progression : intro → valeur → preuve → demande RDV.` },
+      { key: 'reengage', label: 'Ré-engagement (lead froid)', placeholder: 'Contexte (ex: pas ouvert depuis 60j)', prompt: (t,c)=>`Email de ré-engagement pour ${c.brand}. Contexte : "${t}". Ton : honnête, pas culpabilisant. Format : objet curieux · 1 question ouverte · proposition de valeur reformulée · CTA simple "tu es toujours intéressé ? oui/non".` },
+      { key: 'product-launch', label: 'Annonce nouveau produit', placeholder: 'Nom du produit + bénéfice principal', prompt: (t,c)=>`Email d'annonce produit pour la base ${c.brand}. Produit : "${t}". Format : objet excitant · histoire de pourquoi on l'a créé · 3 bénéfices clés en bullets · social proof · CTA pré-vente avec offre limitée.` },
+      { key: 'monthly-roundup', label: 'Récap mensuel', placeholder: 'Mois + faits saillants', prompt: (t,c)=>`Récap mensuel pour la newsletter ${c.brand}. Mois : "${t}". Format : Top 3 actu interne · 3 articles externes utiles secteur · 1 sondage rapide · CTA RDV pour les hot leads.` }
+    ]
+  },
+  'agent-seo': {
+    title: '🔍 Agent SEO & Content',
+    desc: 'Articles de blog SEO-optimisés, fiches produit, landing pages, méta-tags.',
+    actions: [
+      { key: 'blog-article', label: 'Article de blog SEO', placeholder: 'Mot-clé cible (ex: gestion produit B2B)', prompt: (t,c)=>`Article de blog SEO complet en français pour ${c.brand}. Mot-clé principal : "${t}". Structure : Title H1 (60 chars max) · Meta description (155 chars) · 5 H2 · paragraphes 80-120 mots chacun · mots-clés sémantiques · 1 CTA produit en milieu · FAQ en fin. 1200-1500 mots. Format Markdown.` },
+      { key: 'product-sheet', label: 'Fiche produit e-commerce', placeholder: 'Produit', prompt: (t,c)=>`Fiche produit e-commerce optimisée pour "${t}". Format : Titre SEO (60 chars) · Sous-titre bénéfice · Description longue 200 mots · 5 bullets caractéristiques · 3 cas d'usage · Specs techniques · FAQ 3 questions. Mots-clés naturels.` },
+      { key: 'landing-page', label: 'Landing page conversion', placeholder: 'Offre / produit', prompt: (t,c)=>`Copywriting landing page pour "${t}" (${c.brand}). Sections : Hero (titre + sous-titre + CTA) · Problème · Solution · 3 features avec bénéfices · Social proof · 2e CTA · FAQ · CTA final. Frame AIDA. Punchy, conversion-driven.` },
+      { key: 'meta-tags', label: 'Méta-tags + Schema.org', placeholder: 'URL ou sujet de la page', prompt: (t,c)=>`Génère les méta-tags HTML optimisés pour : "${t}". Inclure : <title>, <meta description>, OpenGraph (og:title, og:description, og:image), Twitter card, Schema.org JSON-LD adapté (Product/Article/LocalBusiness selon le contexte).` },
+      { key: 'cluster-topic', label: 'Cluster de contenu (topic cluster)', placeholder: 'Pillar topic', prompt: (t,c)=>`Plan de cluster de contenu SEO autour du pillar "${t}". Liste : 1 pillar page (3000 mots) + 8 cluster posts (1000 mots chacun) avec leur titre, mot-clé long-tail, intent de recherche, et lien interne vers le pillar. Format tableau.` }
+    ]
+  },
+  'agent-ads': {
+    title: '🎯 Agent Marketing Ads',
+    desc: 'Copywriting Google Ads, Meta Ads, LinkedIn Ads avec variantes A/B test.',
+    actions: [
+      { key: 'google-ads', label: '5 variantes Google Ads', placeholder: 'Produit + mot-clé', prompt: (t,c)=>`5 variantes d'annonce Google Ads pour "${t}". Pour chaque : 3 titres (30 chars max chacun) + 2 descriptions (90 chars max). Mots-clés intégrés naturellement. Ton : différent par variante (rationnel, émotionnel, urgence, expertise, social proof).` },
+      { key: 'meta-ads', label: '5 variantes Meta Ads', placeholder: 'Cible + offre', prompt: (t,c)=>`5 variantes pub Meta (FB/Insta) pour cible "${t}". Pour chaque : Titre court · Texte principal 125 chars · Description 30 chars · CTA · Concept de visuel (1 phrase). Tests A/B sur hooks.` },
+      { key: 'linkedin-ads', label: '3 variantes LinkedIn Ads', placeholder: 'Persona B2B', prompt: (t,c)=>`3 variantes LinkedIn Ads pour persona "${t}". Format Sponsored Content : Headline 150 chars · Body 600 chars · CTA. Tone B2B pro, basé sur pain points spécifiques du persona.` },
+      { key: 'campaign-plan', label: 'Plan campagne 360°', placeholder: 'Produit + budget mensuel + objectif', prompt: (t,c)=>`Plan campagne marketing 360° : "${t}". Détaille : objectifs SMART · audiences (3 personas) · canaux (mix Google/Meta/LinkedIn/SEO) · budget split par canal · KPIs · timeline 4 semaines · creative concept.` },
+      { key: 'retargeting', label: 'Séquence retargeting', placeholder: 'Action de l\'audience (ex: visité pricing, pas acheté)', prompt: (t,c)=>`Séquence retargeting pour audience qui ${t}. 5 touches sur 14 jours, sur Meta + Google Display. Pour chaque : timing · creative concept · message principal · CTA. Évolution émotionnelle.` }
+    ]
+  },
+  'agent-cs': {
+    title: '🤝 Agent Customer Success',
+    desc: 'Onboarding séquences, détection churn, NPS, expansion revenue.',
+    actions: [
+      { key: 'onboarding', label: 'Plan onboarding 30 jours', placeholder: 'Type de client', prompt: (t,c)=>`Plan onboarding 30 jours pour nouveau client ${c.brand} type "${t}". Format : Semaine 1 (kick-off + setup) · Semaine 2 (formation + premiers usages) · Semaine 3 (cas avancés) · Semaine 4 (review + plan croissance). Pour chaque jour clé : action + responsable + livrable.` },
+      { key: 'churn-detect', label: 'Email d\'alerte churn', placeholder: 'Signaux observés', prompt: (t,c)=>`Email proactif à un client qui montre ces signaux de churn : "${t}". Ton : empathique, sans culpabilisation. Format : reconnaissance du problème · question ouverte · proposition de RDV 15 min · garantie de réactivité.` },
+      { key: 'nps-followup', label: 'Suivi post-NPS', placeholder: 'Score NPS + commentaire', prompt: (t,c)=>`Email de suivi post-NPS. Réponse client : "${t}". Si score ≥9 : demande de témoignage + referral. Si 7-8 : creuser ce qui manque. Si ≤6 : empathie + plan de remédiation + offre de RDV escalade.` },
+      { key: 'upsell-trigger', label: 'Proposition upsell', placeholder: 'Usage actuel + plafond atteint', prompt: (t,c)=>`Email upsell pour un client qui : "${t}". Ton : non-pushy, data-driven. Format : observation factuelle · bénéfice immédiat de l'upgrade · ROI calculé · proposition d'appel 10 min · offre d'essai gratuit du tier supérieur.` },
+      { key: 'qbr', label: 'Quarterly Business Review', placeholder: 'Client + métriques trimestre', prompt: (t,c)=>`Document QBR pour client : "${t}". Sections : Récap usage Q · KPIs vs objectifs · ROI mesuré · feedback principal · roadmap Q+1 · nouveaux features pertinents · expansion opportunities. Format présentation 8 slides bullet-points.` }
+    ]
+  },
+  'agent-pr': {
+    title: '📰 Agent PR & Presse',
+    desc: 'Communiqués de presse, pitch journalistes, cas clients, awards.',
+    actions: [
+      { key: 'press-release', label: 'Communiqué de presse', placeholder: 'Annonce / actualité', prompt: (t,c)=>`Communiqué de presse en français pour ${c.brand}. Annonce : "${t}". Structure : Titre accrocheur · Sous-titre · Lieu + date · Lead paragraphe (qui/quoi/où/quand/pourquoi) · 2-3 paragraphes développement · 1 citation dirigeant · À propos de ${c.brand} · Contact presse. 400-600 mots.` },
+      { key: 'journalist-pitch', label: 'Pitch journaliste', placeholder: 'Sujet + média ciblé', prompt: (t,c)=>`Email pitch à un journaliste sur "${t}". Format : Objet précis (60 chars) · Bonjour [Nom] · phrase d'accroche personnalisée sur leur travail · 1 paragraphe sur l'angle exclusif que j'offre · données chiffrées surprenantes · proposition d'interview/donnée · signature courte. 150 mots max.` },
+      { key: 'case-study', label: 'Cas client (success story)', placeholder: 'Nom client + résultat clé', prompt: (t,c)=>`Étude de cas client pour ${c.brand}. Sujet : "${t}". Structure : Le client (présentation 100 mots) · Le défi (problème avant) · La solution (notre approche) · Les résultats (3 KPIs chiffrés) · Citation client · Conclusion + appel à reproduire. 600-800 mots.` },
+      { key: 'awards-submission', label: 'Dossier candidature award', placeholder: 'Award visé + axe différenciation', prompt: (t,c)=>`Dossier de candidature à l'award "${t}". Format : Résumé exécutif (200 mots) · Innovation (qu'est-ce qui nous différencie) · Impact mesuré (chiffres, témoignages) · Équipe · Vision · Pourquoi nous méritons cet award. Ton ambitieux et factuel.` },
+      { key: 'media-list', label: 'Liste journalistes par sujet', placeholder: 'Thème (ex: SaaS B2B France)', prompt: (t,c)=>`Liste de 15 journalistes français à pitcher sur "${t}". Pour chaque : Nom · Média · Beat précis · Style éditorial (data-driven, narratif, scoop) · meilleur canal de contact (email/Twitter). Privilégier ceux qui ont écrit récemment sur le sujet.` }
+    ]
+  },
+  'agent-influence': {
+    title: '⭐ Agent Influenceurs',
+    desc: 'Recherche niche, outreach, brief créatif, mesure ROI.',
+    actions: [
+      { key: 'influencer-list', label: 'Liste 10 influenceurs niche', placeholder: 'Niche + audience cible', prompt: (t,c)=>`Liste de 10 influenceurs sur la niche "${t}" pour ${c.brand}. Pour chaque : Nom · Plateforme principale · Followers · Niche précise · Style · Pourquoi ils matchent · Estimation tarif post. Privilégier micro-influenceurs (10-100k) qui ont meilleur engagement.` },
+      { key: 'outreach-influencer', label: 'Email outreach influenceur', placeholder: 'Influenceur + contexte', prompt: (t,c)=>`Email d'outreach à un influenceur. Contexte : "${t}". Format : Objet curieux non-spammy · compliment précis sur un de leurs contenus récents · pourquoi notre produit/marque colle à leur audience · proposition concrète (rémunération + produit gratuit + freedom créative) · CTA simple. 180 mots max.` },
+      { key: 'creative-brief', label: 'Brief créatif détaillé', placeholder: 'Campagne + influenceur', prompt: (t,c)=>`Brief créatif détaillé pour collab influenceur. Campagne : "${t}". Inclure : objectif · message clé · do's & don'ts · format (post/story/reel) · CTA + tracking link · timing · liberté créative laissée · livrables attendus.` },
+      { key: 'roi-analysis', label: 'Analyse ROI campagne', placeholder: 'Campagne + métriques observées', prompt: (t,c)=>`Analyse ROI de campagne influence. Données : "${t}". Calculer : CPM · taux engagement · clics · conversions estimées · CAC influence vs autres canaux. Recommandation : reconduire / ajuster / arrêter, et pourquoi.` }
+    ]
+  },
+  'agent-hr': {
+    title: '👤 Agent RH & Recrutement',
+    desc: 'Job descriptions, screening CV, scripts d\'entretien, feedback candidats.',
+    actions: [
+      { key: 'job-description', label: 'Fiche de poste attractive', placeholder: 'Poste + niveau', prompt: (t,c)=>`Fiche de poste attractive pour ${c.brand}. Poste : "${t}". Format : Titre · 1 punchline · Pourquoi nous · Le poste (responsabilités concrètes) · Profil recherché (must-have vs nice-to-have) · Stack tech si tech · Process recrutement (étapes + délais) · Salaire (afficher fourchette) · Bénéfices.` },
+      { key: 'screening-cv', label: 'Grille de screening CV', placeholder: 'Poste + CV ou résumé', prompt: (t,c)=>`Évalue ce CV pour le poste : "${t}". Grille : Match must-have (oui/non par critère) · Forces apparentes (3) · Drapeaux rouges (3) · Questions à poser en pré-qualification · Score 0-10 · Recommandation : passer en entretien / refus argumenté.` },
+      { key: 'interview-script', label: 'Script d\'entretien structuré', placeholder: 'Poste', prompt: (t,c)=>`Script d'entretien structuré 45 min pour : "${t}". Sections : Brise-glace 5min · Parcours 10min · Cas pratique 15min (proposer un cas concret) · Motivation + culture fit 10min · Questions candidat 5min. Pour chaque question : ce qu'on veut entendre + red flags.` },
+      { key: 'feedback-candidate', label: 'Feedback candidat (refus)', placeholder: 'Raison + qualités', prompt: (t,c)=>`Email de refus respectueux à un candidat. Contexte : "${t}". Ton : sincère, humain. Format : merci pour le temps · décision · 2 qualités sincèrement appréciées · 1 axe d'amélioration (si pertinent) · invitation à postuler ailleurs ou rester en contact.` }
+    ]
+  },
+  'agent-support': {
+    title: '💬 Agent Support client',
+    desc: 'Réponses support ticketing, base de connaissances, escalation.',
+    actions: [
+      { key: 'support-reply', label: 'Réponse ticket support', placeholder: 'Question/problème client', prompt: (t,c)=>`Réponse support client professionnelle pour ${c.brand}. Question : "${t}". Format : remerciement bref · réponse claire en steps numérotés si procédure · screenshot mention si pertinent · proposition d'alternative si problème · CTA pour aller plus loin si besoin. Ton : empathique, expert.` },
+      { key: 'kb-article', label: 'Article base de connaissances', placeholder: 'Sujet question récurrente', prompt: (t,c)=>`Article de KB pour ${c.brand}. Sujet : "${t}". Format : Titre clair · Résumé en 1 phrase · Pré-requis · Étapes numérotées (avec captures suggérées) · Cas particuliers · Erreurs courantes + résolutions · Articles liés. Format Markdown.` },
+      { key: 'escalation', label: 'Email escalation', placeholder: 'Problème critique', prompt: (t,c)=>`Email d'escalation interne pour un problème critique. Contexte : "${t}". Format : sujet alerte rouge · synthèse en 3 bullets (problème / impact / urgence) · ce qui a déjà été tenté · demande précise (qui doit faire quoi quand) · ETA besoin.` },
+      { key: 'apology', label: 'Email d\'excuses incident', placeholder: 'Incident + impact', prompt: (t,c)=>`Email d'excuses post-incident. Contexte : "${t}". Format : reconnaissance immédiate · ce qui s'est passé (factuel) · ce qu'on a fait pour résoudre · ce qu'on met en place pour ne pas que ça se reproduise · geste commercial · contact direct du CEO/responsable.` }
+    ]
+  }
+};
+
+let currentAgent = null;
+function renderAgentView(agentKey) {
+  const agent = AGENTS[agentKey];
+  if (!agent) return;
+  currentAgent = agentKey;
+  const view = document.getElementById('view-'+agentKey);
+  view.innerHTML = `
+    <div class="card">
+      <h2 class="card-title">${agent.title}</h2>
+      <p class="card-desc">${escapeHtml(agent.desc)}</p>
+    </div>
+    <div class="row-2">
+      <div class="card">
+        <h3 style="margin: 0 0 12px;">Actions disponibles</h3>
+        <div id="agent-actions-list">
+          ${agent.actions.map((a,i) => `
+            <div class="lead-row" style="cursor: pointer;" onclick="selectAgentAction('${agentKey}', ${i})">
+              <div class="score-circle" style="font-size: 14px;">${i+1}</div>
+              <div class="lead-info">
+                <p class="lead-name">${escapeHtml(a.label)}</p>
+                <p class="lead-meta">${escapeHtml(a.placeholder)}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin: 0 0 12px;">Exécution</h3>
+        <p id="agent-action-label" class="field-label">Sélectionne une action à gauche</p>
+        <input id="agent-action-input" class="input" placeholder="Saisis le contexte/sujet" style="margin-bottom: 10px;">
+        <button class="btn btn-primary btn-full" onclick="runAgent()">
+          <svg class="ico-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Générer
+        </button>
+        <div id="agent-result" style="margin-top: 12px;"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin: 0 0 12px;">Productions précédentes (<span id="agent-history-count">0</span>)</h3>
+      <div id="agent-history"></div>
+    </div>
+  `;
+  renderAgentHistory(agentKey);
+}
+
+state.agentHistory = JSON.parse(localStorage.getItem('pixee_agent_history') || '{}');
+function saveAgentHistory() { localStorage.setItem('pixee_agent_history', JSON.stringify(state.agentHistory)); }
+
+let currentActionIdx = null;
+function selectAgentAction(agentKey, idx) {
+  currentActionIdx = idx;
+  const action = AGENTS[agentKey].actions[idx];
+  document.getElementById('agent-action-label').textContent = action.label;
+  document.getElementById('agent-action-input').placeholder = action.placeholder;
+}
+
+async function runAgent() {
+  if (!state.geminiKey) { alert('Configure ta clé Gemini'); switchTab('settings'); return; }
+  if (currentActionIdx === null) { alert('Sélectionne une action à gauche'); return; }
+  const input = document.getElementById('agent-action-input').value.trim();
+  if (!input) { alert('Saisis un contexte'); return; }
+  const action = AGENTS[currentAgent].actions[currentActionIdx];
+  const ctx = { brand: state.branding.company || 'Pixeeplay', products: state.produits };
+  const prompt = action.prompt(input, ctx);
+  const out = document.getElementById('agent-result');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération en cours...</div>';
+  try {
+    const text = await callGemini(prompt);
+    out.innerHTML = `
+      <div class="output">${escapeHtml(text)}</div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick='copyText(${JSON.stringify(text)}, this)'>Copier</button>
+        <button class="btn btn-secondary" onclick='saveAgentOutput("${currentAgent}", ${currentActionIdx}, ${JSON.stringify(input)}, ${JSON.stringify(text)})'>Sauvegarder</button>
+      </div>
+    `;
+    logAct(AGENTS[currentAgent].title+' : '+action.label+' généré', 'success');
+  } catch(e) {
+    out.innerHTML = '<div class="error">Erreur : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+function saveAgentOutput(agentKey, idx, input, text) {
+  if (!state.agentHistory[agentKey]) state.agentHistory[agentKey] = [];
+  state.agentHistory[agentKey].unshift({
+    time: new Date().toISOString(),
+    action: AGENTS[agentKey].actions[idx].label,
+    input, text
+  });
+  state.agentHistory[agentKey] = state.agentHistory[agentKey].slice(0, 50);
+  saveAgentHistory();
+  renderAgentHistory(agentKey);
+  alert('✓ Sauvegardé');
+}
+
+function renderAgentHistory(agentKey) {
+  const el = document.getElementById('agent-history');
+  if (!el) return;
+  const history = state.agentHistory[agentKey] || [];
+  document.getElementById('agent-history-count').textContent = history.length;
+  if (!history.length) { el.innerHTML = '<div class="empty">Aucune production sauvegardée pour cet agent.</div>'; return; }
+  el.innerHTML = history.slice(0, 20).map(h => `
+    <div style="padding: 12px; background: var(--surface-2); border-radius: var(--radius-sm); margin-bottom: 8px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+        <strong style="font-size: 13px;">${escapeHtml(h.action)}</strong>
+        <span style="font-size: 11px; color: var(--text-3);">${new Date(h.time).toLocaleString('fr-FR')}</span>
+      </div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 6px;">Input : ${escapeHtml(h.input)}</div>
+      <details><summary style="cursor: pointer; font-size: 12px; color: var(--accent);">Voir la production</summary>
+      <div style="margin-top: 8px; font-size: 13px; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">${escapeHtml(h.text)}</div>
+      <button class="btn btn-ghost" style="margin-top: 6px; padding: 4px 10px; font-size: 11px;" onclick='copyText(${JSON.stringify(h.text)}, this)'>Copier</button>
+      </details>
+    </div>
+  `).join('');
 }
 
 /* ============ AVOIRS ============ */
