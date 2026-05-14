@@ -1611,7 +1611,13 @@ body.domain-agent .sales-only { display: none !important; }
 
       <div class="input-row">
         <div>
-          <p class="field-label">Client / Lead</p>
+          <p class="field-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Client / Lead</span>
+            <span style="display: flex; gap: 6px;">
+              <button onclick="openQuickAddLead()" style="background: var(--accent-soft); color: var(--accent); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 11px; cursor: pointer; font-family: inherit;">+ Lead</button>
+              <button onclick="openQuickAddClient()" style="background: var(--accent-2-soft); color: var(--accent-2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-size: 11px; cursor: pointer; font-family: inherit;">+ Client</button>
+            </span>
+          </p>
           <select id="devis-client" class="select"><option value="">— Sélectionner —</option></select>
         </div>
         <div>
@@ -2129,6 +2135,80 @@ body.domain-agent .sales-only { display: none !important; }
     </p>
   </footer>
 
+</div>
+
+<!-- Quick Add Lead Modal -->
+<div id="quick-add-lead-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+  <div class="card" style="max-width: 480px; width: 90%; margin: 0;">
+    <h3 style="margin: 0 0 4px;">⚡ Nouveau lead</h3>
+    <p class="card-desc">Création rapide pour ce devis</p>
+    <p class="field-label">Entreprise *</p>
+    <input id="qal-company" class="input" placeholder="ex: BTP Solutions Aquitaine" style="margin-bottom: 10px;">
+    <div class="input-row">
+      <div>
+        <p class="field-label">Secteur</p>
+        <input id="qal-sector" class="input" placeholder="Bâtiment B2B">
+      </div>
+      <div>
+        <p class="field-label">Taille</p>
+        <select id="qal-size" class="select">
+          <option>TPE</option><option selected>PME</option><option>ETI</option><option>GE</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-row">
+      <div>
+        <p class="field-label">Email contact</p>
+        <input id="qal-email" type="email" class="input" placeholder="contact@...">
+      </div>
+      <div>
+        <p class="field-label">Téléphone</p>
+        <input id="qal-phone" class="input" placeholder="+33 ...">
+      </div>
+    </div>
+    <p class="field-label">Score initial</p>
+    <input id="qal-score" type="number" min="0" max="100" value="50" class="input">
+    <div class="btn-row" style="margin-top: 16px;">
+      <button class="btn btn-ghost" onclick="closeQuickAdd('lead')">Annuler</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="createQuickLead()">+ Créer et utiliser</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Add Client Modal -->
+<div id="quick-add-client-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+  <div class="card" style="max-width: 480px; width: 90%; margin: 0;">
+    <h3 style="margin: 0 0 4px;">⚡ Nouveau client</h3>
+    <p class="card-desc">Création rapide pour ce devis</p>
+    <p class="field-label">Raison sociale *</p>
+    <input id="qac-name" class="input" placeholder="ex: Maison Lévêque SARL" style="margin-bottom: 10px;">
+    <div class="input-row">
+      <div>
+        <p class="field-label">Contact</p>
+        <input id="qac-contact" class="input" placeholder="Prénom Nom">
+      </div>
+      <div>
+        <p class="field-label">SIRET</p>
+        <input id="qac-siret" class="input" placeholder="123 456 789 00012">
+      </div>
+    </div>
+    <div class="input-row">
+      <div>
+        <p class="field-label">Email facturation</p>
+        <input id="qac-email" type="email" class="input" placeholder="compta@...">
+      </div>
+      <div>
+        <p class="field-label">Téléphone</p>
+        <input id="qac-phone" class="input" placeholder="+33 ...">
+      </div>
+    </div>
+    <p class="field-label">Adresse de facturation</p>
+    <textarea id="qac-address" class="textarea" placeholder="Adresse complète multi-lignes" style="min-height: 60px;"></textarea>
+    <div class="btn-row" style="margin-top: 16px;">
+      <button class="btn btn-ghost" onclick="closeQuickAdd('client')">Annuler</button>
+      <button class="btn btn-primary" style="flex: 1;" onclick="createQuickClient()">+ Créer et utiliser</button>
+    </div>
+  </div>
 </div>
 
 <!-- ============ CHAT WIDGET FLOATING ============ -->
@@ -3886,6 +3966,76 @@ function refreshDevisDropdowns() {
   recalcDevisTotals();
 }
 
+// Quick-add lead / client depuis le formulaire de devis
+function openQuickAddLead() {
+  const m = document.getElementById('quick-add-lead-modal');
+  if (m) m.style.display = 'flex';
+}
+function openQuickAddClient() {
+  const m = document.getElementById('quick-add-client-modal');
+  if (m) m.style.display = 'flex';
+}
+function closeQuickAdd(type) {
+  const m = document.getElementById('quick-add-' + type + '-modal');
+  if (m) m.style.display = 'none';
+}
+function createQuickLead() {
+  const company = (document.getElementById('qal-company')?.value || '').trim();
+  if (!company) { alert('Entreprise requise'); return; }
+  const lead = {
+    id: Date.now(),
+    company,
+    sector: document.getElementById('qal-sector')?.value || '',
+    size: document.getElementById('qal-size')?.value || '',
+    email: document.getElementById('qal-email')?.value || '',
+    phone: document.getElementById('qal-phone')?.value || '',
+    score: parseInt(document.getElementById('qal-score')?.value) || 50,
+    category: 'warm',
+    basketEur: 0,
+    createdAt: Date.now()
+  };
+  if (!Array.isArray(state.leads)) state.leads = [];
+  state.leads.unshift(lead);
+  if (typeof save === 'function') save();
+  refreshDevisDropdowns();
+  const sel = document.getElementById('devis-client');
+  if (sel) sel.value = 'l-' + lead.id;
+  closeQuickAdd('lead');
+  ['qal-company','qal-sector','qal-size','qal-email','qal-phone','qal-score'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (typeof logAct === 'function') logAct('Lead créé depuis devis : ' + company, 'success');
+  if (typeof renderLeads === 'function') try { renderLeads(); } catch {}
+}
+function createQuickClient() {
+  const name = (document.getElementById('qac-name')?.value || '').trim();
+  if (!name) { alert('Raison sociale requise'); return; }
+  const client = {
+    id: Date.now(),
+    name,
+    contact: document.getElementById('qac-contact')?.value || '',
+    siret: document.getElementById('qac-siret')?.value || '',
+    email: document.getElementById('qac-email')?.value || '',
+    phone: document.getElementById('qac-phone')?.value || '',
+    address: document.getElementById('qac-address')?.value || '',
+    createdAt: Date.now()
+  };
+  if (!Array.isArray(state.clients)) state.clients = [];
+  state.clients.unshift(client);
+  if (typeof saveBiz === 'function') saveBiz();
+  refreshDevisDropdowns();
+  const sel = document.getElementById('devis-client');
+  if (sel) sel.value = 'c-' + client.id;
+  closeQuickAdd('client');
+  ['qac-name','qac-contact','qac-siret','qac-email','qac-phone','qac-address'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (typeof logAct === 'function') logAct('Client créé depuis devis : ' + name, 'success');
+  if (typeof renderClientsList === 'function') try { renderClientsList(); } catch {}
+}
+
 function renderCatalogDraggable() {
   const el = document.getElementById('catalog-draggable');
   if (!el) return;
@@ -4454,20 +4604,63 @@ async function bridgeConnect() {
     return;
   }
   const env = cfg.env || 'sandbox';
-  const baseUrl = env === 'sandbox' ? 'https://api.bridgeapi.io' : 'https://api.bridgeapi.io';
-
-  // Étape 1 : créer un user Bridge (POST /v2/users)
-  // Étape 2 : créer une connect session (POST /v3/aggregation/connect-sessions)
-  // Étape 3 : rediriger vers l'URL renvoyée
-  //
-  // ⚠ Cet appel nécessite normalement le Client Secret côté backend.
-  // En sandbox, Bridge tolère les appels CORS si l'origin est dans les domaines autorisés.
+  const externalUserId = 'pixeesales_' + (state.email || 'admin').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  const backend = (state.backend && state.backend.url) || 'https://api.pixeeplay.com';
 
   const out = document.getElementById('bank-config');
-  out.innerHTML += '<div class="loading" style="margin-top: 12px;"><div class="spinner"></div>Initialisation du flow Bridge Connect...</div>';
+  out.innerHTML += '<div class="loading" style="margin-top: 12px;"><div class="spinner"></div>Initialisation du flow Bridge Connect via backend...</div>';
 
+  // 1) Voie recommandée : passer par le backend (Client-Secret côté serveur, pas de CORS)
   try {
-    // Headers requis par Bridge
+    const r = await fetch(backend + '/api/bridge/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        external_user_id: externalUserId,
+        email: state.email,
+        env
+      })
+    });
+    if (r.ok) {
+      const data = await r.json();
+      if (data.connect_url) {
+        state.bank.bridge.user_uuid = data.bridge_uuid;
+        state.bank.bridge.connected = true;
+        saveBiz();
+        out.innerHTML = `
+          <div class="success-notice" style="margin-top: 12px;">
+            <strong>✅ Bridge initialisé (via backend) !</strong><br>
+            User UUID : <code>${escapeHtml(data.bridge_uuid || '')}</code><br><br>
+            <a href="${data.connect_url}" target="_blank"><button class="btn btn-primary">🔗 Ouvrir Bridge Connect → Choisir ma banque</button></a>
+          </div>
+        `;
+        logAct('Bridge Connect prêt (backend) : '+data.bridge_uuid, 'success');
+        return;
+      }
+    }
+    // Si le backend répond mais sans connect_url ou en erreur, on tente le fallback direct seulement en sandbox
+    const errText = await r.text().catch(() => '');
+    console.warn('[bridge] backend a répondu sans connect_url :', errText);
+    if (env !== 'sandbox') {
+      throw new Error('Backend Bridge KO ('+r.status+') : '+errText.slice(0,200)+'. Vérifie BRIDGE_CLIENT_ID/SECRET sur api.pixeeplay.com.');
+    }
+  } catch(backendErr) {
+    console.warn('[bridge] backend unreachable, tentative directe (sandbox uniquement)', backendErr);
+    if (env !== 'sandbox') {
+      out.innerHTML = `
+        <div class="error" style="margin-top: 12px;">
+          Backend (${escapeHtml(backend)}) injoignable et mode <strong>production</strong> sélectionné. Vérifie que api.pixeeplay.com est up et que les variables d'env <code>BRIDGE_CLIENT_ID</code> + <code>BRIDGE_CLIENT_SECRET</code> sont configurées sur Coolify.<br><br>
+          Détail : ${escapeHtml(backendErr.message)}
+        </div>
+      `;
+      logAct('Bridge backend KO : '+backendErr.message, 'error');
+      return;
+    }
+  }
+
+  // 2) Fallback direct browser → Bridge (sandbox uniquement, nécessite domaine autorisé)
+  const baseUrl = 'https://api.bridgeapi.io';
+  try {
     const headers = {
       'Content-Type': 'application/json',
       'Bridge-Version': '2025-01-15',
@@ -4475,74 +4668,61 @@ async function bridgeConnect() {
       'Client-Secret': cfg.secret
     };
 
-    // 1. Créer un Bridge user (idempotent via external_user_id)
-    const externalUserId = 'pixeesales_' + (state.email || 'admin').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     let user;
-    try {
-      const userRes = await fetch(baseUrl + '/v2/users', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ external_user_id: externalUserId })
-      });
-      user = await userRes.json();
-      if (!userRes.ok && user.error_code !== 'user_already_exists') {
-        throw new Error('Création user : '+JSON.stringify(user));
-      }
-      // Si user existe déjà, récupère-le
-      if (user.error_code === 'user_already_exists') {
-        const listRes = await fetch(baseUrl + '/v2/users?external_user_id='+encodeURIComponent(externalUserId), { headers });
-        const list = await listRes.json();
-        user = (list.resources || [])[0];
-      }
-    } catch(e) {
-      throw new Error('Étape 1 (user) : '+e.message);
+    const userRes = await fetch(baseUrl + '/v2/users', {
+      method: 'POST', headers,
+      body: JSON.stringify({ external_user_id: externalUserId })
+    });
+    user = await userRes.json();
+    if (!userRes.ok && user.error_code !== 'user_already_exists') {
+      throw new Error('Création user : '+JSON.stringify(user));
     }
-
+    if (user.error_code === 'user_already_exists') {
+      const listRes = await fetch(baseUrl + '/v2/users?external_user_id='+encodeURIComponent(externalUserId), { headers });
+      const list = await listRes.json();
+      user = (list.resources || [])[0];
+    }
     if (!user || !user.uuid) throw new Error('Impossible de récupérer le user UUID Bridge');
 
-    // 2. Créer un access token pour ce user (Bridge v3)
     const tokenRes = await fetch(baseUrl + '/v3/aggregation/authorization/token', {
-      method: 'POST',
-      headers,
+      method: 'POST', headers,
       body: JSON.stringify({ user_uuid: user.uuid })
     });
     const tokenData = await tokenRes.json();
     if (!tokenData.access_token) throw new Error('Token : '+JSON.stringify(tokenData));
 
-    // 3. Créer une connect session
     const sessionRes = await fetch(baseUrl + '/v3/aggregation/connect-sessions', {
       method: 'POST',
       headers: { ...headers, 'Authorization': 'Bearer '+tokenData.access_token },
-      body: JSON.stringify({
-        user_email: state.email,
-        country_code: 'fr'
-      })
+      body: JSON.stringify({ user_email: state.email, country_code: 'fr' })
     });
     const session = await sessionRes.json();
     if (!session.url) throw new Error('Session : '+JSON.stringify(session));
 
-    // Stocker user_uuid + token pour les appels futurs
     state.bank.bridge.user_uuid = user.uuid;
     state.bank.bridge.access_token = tokenData.access_token;
     state.bank.bridge.connected = true;
     saveBiz();
 
-    // 4. Rediriger l'utilisateur vers le Connect Bridge
     out.innerHTML = `
       <div class="success-notice" style="margin-top: 12px;">
-        <strong>✅ Bridge initialisé !</strong><br>
+        <strong>✅ Bridge initialisé (direct sandbox) !</strong><br>
         User UUID : <code>${escapeHtml(user.uuid)}</code><br>
         Token valide pour 2h.<br><br>
         <a href="${session.url}" target="_blank"><button class="btn btn-primary">🔗 Ouvrir Bridge Connect → Choisir ma banque</button></a>
       </div>
     `;
-    logAct('Bridge Connect prêt : '+user.uuid, 'success');
+    logAct('Bridge Connect prêt (direct) : '+user.uuid, 'success');
   } catch(e) {
     out.innerHTML = `
       <div class="error" style="margin-top: 12px;">
-        Bridge a refusé l'appel direct depuis le navigateur (CORS attendu en prod).<br>
+        Bridge a refusé l'appel direct depuis le navigateur (CORS).<br>
         Détail : ${escapeHtml(e.message)}<br><br>
-        <strong>Solution :</strong> en mode sandbox, ajoute https://sales.pixeeplay.com dans tes "Domaines autorisés" Bridge. En prod, le backend Phase 1 fera ces appels côté serveur.
+        <strong>Solution recommandée :</strong> passe par le backend Phase 1.<br>
+        1. Sur Coolify → backend → Environment Variables, ajoute <code>BRIDGE_CLIENT_ID</code> et <code>BRIDGE_CLIENT_SECRET</code>.<br>
+        2. Redéploie le backend.<br>
+        3. Re-clique "Connect Bridge" — l'appel passera côté serveur.<br><br>
+        <em>Alternative sandbox :</em> ajoute <code>https://sales.pixeeplay.com</code> dans les "Domaines autorisés" du dashboard Bridge.
       </div>
     `;
     logAct('Bridge connect erreur : '+e.message, 'error');
