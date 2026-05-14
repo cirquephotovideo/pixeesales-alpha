@@ -4,43 +4,86 @@ import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import fetch from 'node-fetch';
 
+// Config SMTP en mémoire (override les env vars), persistée dans DB
+let SMTP_RUNTIME = { user: null, pass: null, from: null };
+
 function transporter() {
+  const user = SMTP_RUNTIME.user || process.env.SMTP_USER;
+  const pass = SMTP_RUNTIME.pass || process.env.SMTP_PASS;
   return nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
+    auth: { user, pass }
   });
 }
 
+export function getSmtpFrom() {
+  return SMTP_RUNTIME.from || process.env.SMTP_FROM || `"PixeeSales-Alpha" <${SMTP_RUNTIME.user || process.env.SMTP_USER}>`;
+}
+
+export function loadSmtpConfigFromDB(db) {
+  try {
+    const rows = db.prepare(`SELECT key, value FROM config WHERE key LIKE 'smtp_%'`).all();
+    rows.forEach(r => {
+      const k = r.key.replace('smtp_', '');
+      SMTP_RUNTIME[k] = r.value;
+    });
+    if (SMTP_RUNTIME.user) console.log('[email] SMTP runtime loaded from DB:', SMTP_RUNTIME.user);
+  } catch(e) { console.error('[email] loadSmtpConfigFromDB:', e.message); }
+}
+
 export function emailRoutes(db) {
+  loadSmtpConfigFromDB(db);
   const r = express.Router();
+
+  // Config dynamique SMTP (frontend → backend)
+  r.post('/config', async (req, res) => {
+    try {
+      const { smtp_user, smtp_pass, smtp_from } = req.body;
+      if (!smtp_user || !smtp_pass) return res.status(400).json({ error: 'smtp_user + smtp_pass required' });
+      SMTP_RUNTIME.user = smtp_user;
+      SMTP_RUNTIME.pass = smtp_pass;
+      SMTP_RUNTIME.from = smtp_from || `"PixeeSales-Alpha" <${smtp_user}>`;
+      // Persiste en DB
+      const stmt = db.prepare(`INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?`);
+      stmt.run('smtp_user', smtp_user, smtp_user);
+      stmt.run('smtp_pass', smtp_pass, smtp_pass);
+      stmt.run('smtp_from', SMTP_RUNTIME.from, SMTP_RUNTIME.from);
+      // Verify connection
+      try {
+        await transporter().verify();
+        res.json({ ok: true, message: 'SMTP configuré et vérifié', user: smtp_user });
+      } catch(e) {
+        res.json({ ok: true, message: 'Sauvegardé mais verify a échoué : '+e.message, user: smtp_user });
+      }
+    } catch(e) { res.status(500).json({ error: e.message }); }
+  });
 
   r.post('/send', async (req, res) => {
     try {
       const { to, subject, body, html } = req.body;
       if (!to || !subject) return res.status(400).json({ error: 'to + subject required' });
       const info = await transporter().sendMail({
-        from: process.env.SMTP_FROM || `"PixeeSales-Alpha" <${process.env.SMTP_USER}>`,
+        from: getSmtpFrom(),
         to, subject,
         text: body,
         html: html || `<pre style="font-family: sans-serif; white-space: pre-wrap;">${(body||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')}</pre>`
       });
       res.json({ ok: true, messageId: info.messageId });
     } catch(e) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: e.message, ok: false });
     }
   });
 
   r.get('/test', async (req, res) => {
     try {
+      const user = SMTP_RUNTIME.user || process.env.SMTP_USER;
+      if (!user) return res.json({ ok: false, error: 'SMTP not configured' });
       await transporter().verify();
-      res.json({ ok: true, smtp: process.env.SMTP_HOST, user: process.env.SMTP_USER });
+      res.json({ ok: true, smtp: process.env.SMTP_HOST || 'smtp.gmail.com', user });
     } catch(e) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ ok: false, error: e.message });
     }
   });
 
