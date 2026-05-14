@@ -544,9 +544,11 @@ body.domain-agent .sales-only { display: none !important; }
 
 <!-- ========== SIDEBAR MEGA MENU ========== -->
 <aside class="sidebar">
-  <div class="sidebar-logo">
+  <div class="sidebar-logo" id="sidebar-logo-link" onclick="goHome()" style="cursor: pointer;" title="Retour au dashboard">
     <div class="sidebar-logo-mark" id="sidebar-logo-container">
-      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+      <!-- Logo dynamique : si state.branding.logo est défini, on l'affiche, sinon fallback SVG -->
+      <img id="sidebar-logo-img" src="" alt="Logo" style="width:100%;height:100%;object-fit:contain;display:none;">
+      <svg id="sidebar-logo-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
         <defs>
           <linearGradient id="sbPetalMain" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98"/>
@@ -4228,6 +4230,40 @@ async function loadMediaGallery() {
     el.innerHTML = '<div class="error" style="grid-column: 1 / -1;">Backend injoignable : '+escapeHtml(e.message)+'</div>';
   }
 }
+
+// Clic sur le logo de la sidebar → retour au dashboard
+function goHome() {
+  // Reset menu active
+  document.querySelectorAll('.submenu-item').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.menu-group-header').forEach(h => h.classList.remove('active'));
+  switchTab('dashboard');
+  document.querySelector('.main-content')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Sync auto du logo sidebar avec state.branding.logo
+function syncSidebarLogo() {
+  try {
+    const url = state?.branding?.logo;
+    const img = document.getElementById('sidebar-logo-img');
+    const svg = document.getElementById('sidebar-logo-svg');
+    if (!img || !svg) return;
+    if (url && typeof url === 'string' && url.length > 4) {
+      img.src = url;
+      img.style.display = 'block';
+      svg.style.display = 'none';
+      img.onerror = () => {
+        img.style.display = 'none';
+        svg.style.display = '';
+      };
+    } else {
+      img.style.display = 'none';
+      svg.style.display = '';
+    }
+  } catch {}
+}
+// Lance au démarrage et après chaque save branding
+setTimeout(syncSidebarLogo, 200);
+setInterval(syncSidebarLogo, 3000); // au cas où l'utilisateur upload un logo
 
 // Quick-add lead / client depuis le formulaire de devis
 function openQuickAddLead() {
