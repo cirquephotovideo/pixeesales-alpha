@@ -96,6 +96,14 @@ html, body {
 /* Main content area */
 .main-content { padding: 24px 32px; max-width: 100%; min-width: 0; overflow-x: hidden; }
 
+/* DOMAIN-BASED VISIBILITY */
+body.domain-sales .agent-only { display: none !important; }
+body.domain-agent .sales-only { display: none !important; }
+.domain-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.domain-badge.sales { background: linear-gradient(135deg, #10B981, #34D399); color: white; }
+.domain-badge.agent { background: linear-gradient(135deg, #EC4899, #F472B6); color: white; }
+.domain-badge.dual { background: linear-gradient(135deg, #7C3AED, #A78BFA); color: white; }
+
 .hero {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; margin-bottom: 24px;
@@ -384,7 +392,7 @@ html, body {
     </div>
     <div>
       <div class="sidebar-logo-text">PIXEE PLAY</div>
-      <div class="sidebar-logo-sub">Sales Alpha</div>
+      <div class="sidebar-logo-sub" id="sidebar-domain-label">Sales Alpha</div>
     </div>
   </div>
 
@@ -402,7 +410,7 @@ html, body {
       </div>
     </div>
 
-    <div class="menu-group">
+    <div class="menu-group sales-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span>Prospection</span>
@@ -415,7 +423,7 @@ html, body {
       </div>
     </div>
 
-    <div class="menu-group">
+    <div class="menu-group sales-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         <span>Outreach</span>
@@ -429,7 +437,7 @@ html, body {
       </div>
     </div>
 
-    <div class="menu-group">
+    <div class="menu-group sales-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
         <span>Pipeline</span>
@@ -485,7 +493,7 @@ html, body {
       </div>
     </div>
 
-    <div class="menu-group">
+    <div class="menu-group agent-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10m11-11h-6M7 12H1m17.5-6.5l-4.24 4.24M9.76 14.24l-4.24 4.24m13-13l-4.24 4.24M9.76 9.76L5.51 5.51"/></svg>
         <span>Agents IA</span>
@@ -501,6 +509,11 @@ html, body {
         <a class="submenu-item" onclick="navTo('agent-influence', this)">⭐ Influenceurs</a>
         <a class="submenu-item" onclick="navTo('agent-hr', this)">👤 RH &amp; Recrutement</a>
         <a class="submenu-item" onclick="navTo('agent-support', this)">💬 Support client</a>
+        <a class="submenu-item" onclick="navTo('agent-legal', this)">⚖️ Legal / Contrats</a>
+        <a class="submenu-item" onclick="navTo('agent-procurement', this)">🛒 Achats / Procurement</a>
+        <a class="submenu-item" onclick="navTo('agent-it', this)">💻 IT / DevOps</a>
+        <a class="submenu-item" onclick="navTo('agent-finance', this)">💹 Finance / CFO</a>
+        <a class="submenu-item" onclick="navTo('agent-ops', this)">⚙️ Operations / SOPs</a>
       </div>
     </div>
 
@@ -956,6 +969,36 @@ html, body {
 
   <!-- ============ SETTINGS ============ -->
   <div class="view" id="view-settings">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+        Mode d'exécution
+      </h2>
+      <p class="card-desc">Direct = appels Gemini/Bridge depuis le navigateur. Backend = passe par https://api.pixeeplay.com (recommandé pour prod : clés cachées + cron + persistance).</p>
+      <div class="config-row">
+        <span class="config-label">Mode actif</span>
+        <select id="cfg-mode" class="select" onchange="toggleBackendMode(this.value)">
+          <option value="false">Mode Direct (100% navigateur)</option>
+          <option value="true">Mode Backend (api.pixeeplay.com)</option>
+        </select>
+        <span id="backend-status" style="font-size: 12px;"></span>
+      </div>
+      <div class="config-row">
+        <span class="config-label">URL backend</span>
+        <input id="cfg-backend-url" class="input" value="https://api.pixeeplay.com">
+        <button class="btn btn-secondary" onclick="testBackend()">Tester /health</button>
+      </div>
+      <div class="config-row">
+        <span class="config-label">Forcer domaine</span>
+        <select id="cfg-domain-override" class="select" onchange="setDomainOverride(this.value)">
+          <option value="">Auto (selon URL : sales.* / agent.*)</option>
+          <option value="sales">Sales (ventes uniquement)</option>
+          <option value="agent">Agent (marketing/ops uniquement)</option>
+          <option value="dual">Dual (tout afficher)</option>
+        </select>
+      </div>
+    </div>
+
     <div class="card">
       <h2 class="card-title">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
@@ -1510,6 +1553,11 @@ html, body {
   <div class="view" id="view-agent-influence"></div>
   <div class="view" id="view-agent-hr"></div>
   <div class="view" id="view-agent-support"></div>
+  <div class="view" id="view-agent-legal"></div>
+  <div class="view" id="view-agent-procurement"></div>
+  <div class="view" id="view-agent-it"></div>
+  <div class="view" id="view-agent-finance"></div>
+  <div class="view" id="view-agent-ops"></div>
 
   <!-- ============ DEALS PERDUS ============ -->
   <div class="view" id="view-lost-deals">
@@ -4071,6 +4119,29 @@ function applyLogoEverywhere() {
   // si pas d'URL, les SVG d'origine restent (rechargement de page si on retire)
 }
 
+/* === BACKEND MODE + DOMAIN OVERRIDE === */
+function toggleBackendMode(val) {
+  localStorage.setItem('pixee_use_backend', val);
+  const status = document.getElementById('backend-status');
+  if (status) status.innerHTML = val === 'true' ? '<span class="badge badge-success">Backend actif (rechargez)</span>' : '<span class="badge badge-neutral">Direct</span>';
+}
+async function testBackend() {
+  const url = (document.getElementById('cfg-backend-url').value || BACKEND_URL).replace(/\/$/, '');
+  localStorage.setItem('pixee_backend_url', url);
+  try {
+    const r = await fetch(url + '/health');
+    const data = await r.json();
+    alert('✓ ' + url + ' répond : ' + JSON.stringify(data));
+  } catch(e) {
+    alert('❌ ' + url + ' inaccessible : ' + e.message);
+  }
+}
+function setDomainOverride(val) {
+  if (val) localStorage.setItem('pixee_domain_override', val);
+  else localStorage.removeItem('pixee_domain_override');
+  if (confirm('Recharger pour appliquer le changement de domaine ?')) location.reload();
+}
+
 /* === Objectif modifiable === */
 function editGoal() {
   const cur = state.monthlyGoal;
@@ -4142,7 +4213,52 @@ function seedPixeeplayProducts() {
   saveBiz();
 }
 
-/* ============ AGENTS IA (9 agents) ============ */
+/* ============ DOMAIN DETECTION + BACKEND TOGGLE ============ */
+const HOST = location.hostname;
+const OVERRIDE = localStorage.getItem('pixee_domain_override');
+const DOMAIN_MODE = OVERRIDE || (HOST.startsWith('agent.') ? 'agent' : (HOST.startsWith('sales.') ? 'sales' : 'dual'));
+document.body.classList.add('domain-' + DOMAIN_MODE);
+// Si "dual" (localhost/preview), on affiche tout
+if (DOMAIN_MODE === 'dual') document.body.classList.remove('domain-dual');
+
+// Backend API config
+const BACKEND_URL = localStorage.getItem('pixee_backend_url') || 'https://api.pixeeplay.com';
+const USE_BACKEND = localStorage.getItem('pixee_use_backend') === 'true';
+
+// Wrapper Gemini : passe par backend si configuré, sinon direct
+async function callGeminiBackend(prompt, opts) {
+  if (USE_BACKEND) {
+    try {
+      const r = await fetch(BACKEND_URL + '/api/gemini/complete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ prompt, model: opts?.model || state.geminiModel, temperature: opts?.temperature, search: opts?.search })
+      });
+      if (!r.ok) throw new Error('Backend HTTP ' + r.status);
+      const data = await r.json();
+      return data.text;
+    } catch(e) {
+      logAct('Backend fallback (direct Gemini) : ' + e.message, 'warn');
+    }
+  }
+  return await callGemini(prompt, opts);
+}
+
+function updateDomainUI() {
+  const label = document.getElementById('sidebar-domain-label');
+  const map = { sales: 'Sales Alpha', agent: 'Agent Omega', dual: 'Full (admin)' };
+  if (label) label.textContent = map[DOMAIN_MODE];
+  // Header sub : ajoute un badge
+  const statusText = document.getElementById('status-text');
+  if (statusText && !document.getElementById('domain-badge-inline')) {
+    statusText.insertAdjacentHTML('afterend',
+      ` <span id="domain-badge-inline" class="domain-badge ${DOMAIN_MODE}">${map[DOMAIN_MODE]}</span>`
+    );
+  }
+}
+setTimeout(updateDomainUI, 50);
+
+/* ============ AGENTS IA (14 agents) ============ */
 const AGENTS = {
   'agent-social': {
     title: '📱 Agent Social Media',
@@ -4239,6 +4355,61 @@ const AGENTS = {
       { key: 'escalation', label: 'Email escalation', placeholder: 'Problème critique', prompt: (t,c)=>`Email d'escalation interne pour un problème critique. Contexte : "${t}". Format : sujet alerte rouge · synthèse en 3 bullets (problème / impact / urgence) · ce qui a déjà été tenté · demande précise (qui doit faire quoi quand) · ETA besoin.` },
       { key: 'apology', label: 'Email d\'excuses incident', placeholder: 'Incident + impact', prompt: (t,c)=>`Email d'excuses post-incident. Contexte : "${t}". Format : reconnaissance immédiate · ce qui s'est passé (factuel) · ce qu'on a fait pour résoudre · ce qu'on met en place pour ne pas que ça se reproduise · geste commercial · contact direct du CEO/responsable.` }
     ]
+  },
+  'agent-legal': {
+    title: '⚖️ Agent Legal',
+    desc: 'Contrats, CGV, NDA, RGPD, conformité. Premier jet pour validation par avocat.',
+    actions: [
+      { key: 'cgv', label: 'CGV SaaS', placeholder: 'Type de service (B2B SaaS, marketplace, etc.)', prompt: (t,c)=>`Rédige des Conditions Générales de Vente complètes pour ${c.brand} (${t}). Format : 12 articles minimum. Inclure : objet · contractualisation · prix · paiement · résiliation · responsabilité · données personnelles · propriété intellectuelle · litiges. ⚠ premier jet à faire valider par un avocat.` },
+      { key: 'nda', label: 'Accord de confidentialité (NDA)', placeholder: 'Contexte (mutuel ou unilatéral)', prompt: (t,c)=>`NDA en français pour ${c.brand}. Contexte : "${t}". Format : préambule · définitions · obligations · durée · pénalités · juridiction. Style standard et défendable.` },
+      { key: 'rgpd-privacy', label: 'Politique de confidentialité RGPD', placeholder: 'Type de site/app', prompt: (t,c)=>`Politique de confidentialité RGPD complète pour "${t}". Inclure : responsable de traitement · données collectées · finalités · bases légales · destinataires · durées · droits (accès/rectif/suppression/portabilité) · sous-traitants · cookies · contact DPO.` },
+      { key: 'contract-mission', label: 'Contrat de mission freelance', placeholder: 'Mission + montant + durée', prompt: (t,c)=>`Contrat de mission freelance entre ${c.brand} et un prestataire. Mission : "${t}". Format : objet · prestations · durée · livrables · prix + modalités paiement · propriété intellectuelle · confidentialité · résiliation · juridiction.` },
+      { key: 'mentions-legales', label: 'Mentions légales site', placeholder: 'Type de site + entité', prompt: (t,c)=>`Mentions légales conformes à la loi française pour "${t}". Inclure : éditeur · directeur publication · hébergeur · responsable rédaction · contact · propriété intellectuelle · responsabilité · droit applicable.` }
+    ]
+  },
+  'agent-procurement': {
+    title: '🛒 Agent Procurement / Achats',
+    desc: 'Appel d\'offres, négociation fournisseur, comparatif, contrats cadres.',
+    actions: [
+      { key: 'rfp', label: 'Cahier des charges (RFP)', placeholder: 'Besoin / catégorie achat', prompt: (t,c)=>`Cahier des charges (RFP) pour achat "${t}". Format : Contexte ${c.brand} · Objectifs · Périmètre · Spécifications fonctionnelles · Specs techniques · Critères de sélection (pondérés) · Calendrier · Format de réponse · Conditions commerciales.` },
+      { key: 'supplier-eval', label: 'Grille évaluation fournisseur', placeholder: 'Catégorie fournisseur', prompt: (t,c)=>`Grille d'évaluation fournisseur pour catégorie "${t}". Critères pondérés (somme=100) : Qualité/Conformité · Prix/Coût total · Délais · Solidité financière · RSE · Innovation · Service après-vente · Références. Échelle 0-5 par critère.` },
+      { key: 'negotiation-letter', label: 'Lettre de négociation tarifaire', placeholder: 'Fournisseur + leverage', prompt: (t,c)=>`Lettre de négociation pour obtenir une réduction. Contexte : "${t}". Ton : ferme mais respectueux. Inclure : rappel relation · argumentaire chiffré · leverage (volume futur, concurrence, contrat long) · demande précise · échéance de réponse.` },
+      { key: 'po', label: 'Bon de commande', placeholder: 'Article + quantité + fournisseur', prompt: (t,c)=>`Bon de commande professionnel pour ${c.brand}. Détail : "${t}". Format : Référence BC · Date · Fournisseur · Adresse livraison · Tableau lignes (réf, désignation, qté, PU HT, total HT) · Total HT + TVA + TTC · Conditions de paiement · Délai livraison · Signature.` },
+      { key: 'framework-contract', label: 'Contrat cadre fournisseur', placeholder: 'Type prestation + durée + volume estimé', prompt: (t,c)=>`Contrat cadre annuel avec un fournisseur. Détail : "${t}". Inclure : objet · durée · prix unitaires + remise volume · conditions commandes au fil de l'eau · délais · pénalités · révision tarifaire · résiliation.` }
+    ]
+  },
+  'agent-it': {
+    title: '💻 Agent IT / DevOps',
+    desc: 'Incident response, runbooks, audits sécurité, architecture decisions.',
+    actions: [
+      { key: 'incident-postmortem', label: 'Post-mortem incident', placeholder: 'Incident (qq lignes)', prompt: (t,c)=>`Post-mortem blameless pour l'incident : "${t}". Format : Résumé · Timeline (UTC) · Impact (durée + utilisateurs/CA) · Root cause analysis (5 whys) · Détection (comment on s'en est rendu compte) · Résolution · Action items (préventif/réactif) · Lessons learned.` },
+      { key: 'runbook', label: 'Runbook ops', placeholder: 'Scénario / alerte', prompt: (t,c)=>`Runbook ops pour scénario : "${t}". Format : Trigger · Pré-requis (accès, outils) · Étapes numérotées avec commandes exactes · Vérifications après chaque étape · Rollback · Escalation si échec · Tests réguliers à faire.` },
+      { key: 'security-audit', label: 'Audit sécurité (checklist)', placeholder: 'Périmètre (web app, API, infra...)', prompt: (t,c)=>`Checklist d'audit sécurité pour : "${t}". Format : 30 contrôles minimum couvrant OWASP Top 10 + authentification + chiffrement + secrets management + RGPD + supply chain (CVE deps) + monitoring + DR/backup. Par contrôle : statut OK/KO/N-A + remédiation.` },
+      { key: 'adr', label: 'Architecture Decision Record', placeholder: 'Décision (ex: Postgres vs Mongo)', prompt: (t,c)=>`ADR (Architecture Decision Record) pour : "${t}". Format : Status (proposed/accepted) · Context · Decision · Consequences (positives, negatives, neutrals) · Alternatives considered · Date.` },
+      { key: 'sre-slos', label: 'SLOs + SLIs', placeholder: 'Service à monitorer', prompt: (t,c)=>`Définis des SLOs (Service Level Objectives) pour "${t}". Inclure : 3-5 SLIs (latency, availability, error rate, throughput, freshness) · SLO chiffré pour chaque · Error budget mensuel · Alertes seuils · Actions par dépassement.` }
+    ]
+  },
+  'agent-finance': {
+    title: '💹 Agent Finance / CFO',
+    desc: 'Forecast, budgets, fundraising deck, business plan, indicateurs board.',
+    actions: [
+      { key: 'forecast-12m', label: 'Forecast P&L 12 mois', placeholder: 'Hypothèses (ARR cible, headcount, etc.)', prompt: (t,c)=>`Forecast P&L 12 mois pour ${c.brand}. Hypothèses : "${t}". Format tableau Markdown : Mois | Revenue | COGS | Gross margin | Sales | Marketing | Tech | G&A | EBITDA. Identifie le break-even mensuel. Hypothèses détaillées en commentaires.` },
+      { key: 'fundraising-deck', label: 'Pitch deck levée de fonds', placeholder: 'Stade (Seed/A/B) + montant visé', prompt: (t,c)=>`Plan détaillé d'un pitch deck levée de fonds. Contexte : "${t}". 12 slides : Problem · Solution · Why now · Market size · Product · Traction · Business model · Competition · Team · Use of funds · Vision · Ask. Pour chaque : titre + 3 bullets de contenu + visuel suggéré.` },
+      { key: 'unit-economics', label: 'Unit economics SaaS', placeholder: 'Métriques actuelles', prompt: (t,c)=>`Analyse unit economics SaaS : "${t}". Calcule : CAC · LTV · LTV/CAC ratio · payback period · gross margin · churn rate · expansion MRR. Compare aux benchmarks SaaS 2026 (Bessemer, OpenView). Identifie les leviers prioritaires.` },
+      { key: 'board-deck', label: 'Board deck mensuel', placeholder: 'Mois + faits saillants', prompt: (t,c)=>`Board deck mensuel pour ${c.brand}. Mois : "${t}". 8 slides : Highlights · KPIs vs plan · P&L · Cash position + runway · Product progress · Team · Risks · Asks. Format synthétique, data-driven, asks clairs.` },
+      { key: 'budget-annuel', label: 'Budget annuel par département', placeholder: 'Headcount + objectifs CA', prompt: (t,c)=>`Budget annuel détaillé par département pour ${c.brand}. Hypothèses : "${t}". Tableau : Catégorie | Q1 | Q2 | Q3 | Q4 | Total. Catégories : Salaires + charges (par dept) · Outils/SaaS · Marketing · Voyages · Conseil · Bureaux · Autres. Total + % du CA.` }
+    ]
+  },
+  'agent-ops': {
+    title: '⚙️ Agent Operations',
+    desc: 'SOPs, process docs, scaling playbooks, OKRs, RACI.',
+    actions: [
+      { key: 'sop', label: 'SOP (Standard Operating Procedure)', placeholder: 'Processus à documenter', prompt: (t,c)=>`SOP détaillé pour le processus : "${t}". Format : Objectif · Périmètre · Responsable · Outils requis · Étapes numérotées (avec décisions if/else) · Outputs attendus · Métriques de qualité · Fréquence · Dernière révision. Format pour intégration Notion.` },
+      { key: 'okr', label: 'OKRs trimestriels', placeholder: 'Département + ambition', prompt: (t,c)=>`OKRs trimestriels pour le département : "${t}". Format : 3 Objectives (ambitieux, qualitatifs) avec pour chacun 3-5 Key Results (chiffrés, ambitieux mais atteignables). Aligner sur les objectifs ${c.brand}. Difficulté visée : 0.7/1.0.` },
+      { key: 'raci', label: 'Matrice RACI', placeholder: 'Projet/processus + équipe', prompt: (t,c)=>`Matrice RACI pour : "${t}". Tableau Markdown : Tâches en lignes (15 minimum), Rôles en colonnes. R=Responsible · A=Accountable · C=Consulted · I=Informed. Une seule personne A par tâche. Couvre tout le cycle.` },
+      { key: 'hiring-plan', label: 'Plan de scaling équipe', placeholder: 'Cible team size + horizon', prompt: (t,c)=>`Plan de scaling team pour ${c.brand}. Cible : "${t}". Détaille trimestre par trimestre : Profils à recruter · Junior/Senior · Coût annuel chargé · Onboarding plan · Métriques de productivité attendues · Risques d'over-hiring.` },
+      { key: 'process-audit', label: 'Audit processus existant', placeholder: 'Processus à auditer + symptômes', prompt: (t,c)=>`Audit du processus : "${t}". Méthode : Mesurer le baseline actuel · Identifier 5 goulets d'étranglement · Quick wins (semaine) · Refonte majeure (trimestre) · Métriques de suivi post-changement · Ownership.` }
+    ]
   }
 };
 
@@ -4309,7 +4480,7 @@ async function runAgent() {
   const out = document.getElementById('agent-result');
   out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération en cours...</div>';
   try {
-    const text = await callGemini(prompt);
+    const text = await callGeminiBackend(prompt);
     out.innerHTML = `
       <div class="output">${escapeHtml(text)}</div>
       <div class="btn-row">
@@ -4774,6 +4945,14 @@ if (!state.log.length) {
 // Resume autopilot if was on
 if (state.autopilotOn && state.geminiKey) startAutopilot();
 if (state.branding && state.branding.logoBase64) setTimeout(applyLogoEverywhere, 100);
+
+// Restore mode toggle + domain override
+setTimeout(() => {
+  const m = document.getElementById('cfg-mode'); if (m) m.value = USE_BACKEND ? 'true' : 'false';
+  const bu = document.getElementById('cfg-backend-url'); if (bu) bu.value = BACKEND_URL;
+  const dv = document.getElementById('cfg-domain-override'); if (dv) dv.value = OVERRIDE || '';
+  toggleBackendMode(USE_BACKEND ? 'true' : 'false');
+}, 200);
 // Update countdown every second
 setInterval(() => { if (state.autopilotOn) updateAutopilotUI(); }, 1000);
 // Update report email display when changed
