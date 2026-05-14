@@ -6,32 +6,39 @@
 <title>PixeeSales-Alpha — Agent Commercial Autonome</title>
 <style>
 :root {
-  --bg: #FAFAF7;
-  --surface: #FFFFFF;
-  --surface-2: #F5F4EF;
-  --surface-3: #ECEAE2;
-  --border: rgba(15, 23, 42, 0.08);
-  --border-strong: rgba(15, 23, 42, 0.15);
-  --text: #0F172A;
-  --text-2: #475569;
-  --text-3: #94A3B8;
-  --accent: #6D28D9;
-  --accent-soft: #EEEBFE;
+  color-scheme: dark;
+  --bg: #0A0510;
+  --surface: #15101F;
+  --surface-2: #1F1830;
+  --surface-3: #2A2243;
+  --border: rgba(167, 139, 250, 0.12);
+  --border-strong: rgba(167, 139, 250, 0.22);
+  --text: #F5F3FF;
+  --text-2: #C4B5FD;
+  --text-3: #8B7AB8;
+  --accent: #A78BFA;
+  --accent-soft: rgba(139, 92, 246, 0.18);
   --accent-2: #EC4899;
-  --accent-2-soft: #FCE7F3;
-  --success: #059669;
-  --success-soft: #D1FAE5;
-  --warn: #D97706;
-  --warn-soft: #FEF3C7;
-  --danger: #DC2626;
-  --danger-soft: #FEE2E2;
-  --info: #2563EB;
-  --info-soft: #DBEAFE;
+  --accent-2-soft: rgba(236, 72, 153, 0.18);
+  --success: #34D399;
+  --success-soft: rgba(52, 211, 153, 0.15);
+  --warn: #FBBF24;
+  --warn-soft: rgba(251, 191, 36, 0.15);
+  --danger: #F87171;
+  --danger-soft: rgba(248, 113, 113, 0.15);
+  --info: #60A5FA;
+  --info-soft: rgba(96, 165, 250, 0.15);
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 16px;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(124, 58, 237, 0.08);
+  --shadow-md: 0 8px 24px rgba(124, 58, 237, 0.15);
+}
+body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 0%, rgba(124, 58, 237, 0.15), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 100%, rgba(236, 72, 153, 0.10), transparent 60%);
+  background-attachment: fixed;
 }
 * { box-sizing: border-box; }
 html, body {
@@ -52,11 +59,11 @@ html, body {
 }
 .hero-left { display: flex; align-items: center; gap: 16px; }
 .logo {
-  width: 44px; height: 44px; border-radius: 12px;
-  background: linear-gradient(135deg, #6D28D9 0%, #EC4899 100%);
-  color: white; display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 20px;
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 4px 16px rgba(167, 139, 250, 0.4));
 }
+.logo svg { width: 100%; height: 100%; }
 .hero h1 { font-size: 18px; font-weight: 600; margin: 0; }
 .hero-sub { font-size: 13px; color: var(--text-2); margin: 2px 0 0; display: flex; align-items: center; gap: 6px; }
 .pulse { width: 8px; height: 8px; border-radius: 50%; background: #10B981; animation: pulse 2s ease-in-out infinite; }
@@ -265,12 +272,62 @@ html, body {
 </head>
 <body>
 
-<div class="app">
+<!-- LOGIN SCREEN OVERLAY -->
+<div id="login-screen" style="position: fixed; inset: 0; background: #0A0510; background-image: radial-gradient(ellipse at 50% 50%, rgba(124, 58, 237, 0.25), transparent 60%); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+  <div style="background: rgba(21, 16, 31, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(167, 139, 250, 0.2); border-radius: 20px; padding: 48px 40px; max-width: 420px; width: 90%; text-align: center; box-shadow: 0 20px 60px rgba(124, 58, 237, 0.3);">
+    <div style="width: 80px; height: 80px; margin: 0 auto 24px; filter: drop-shadow(0 8px 24px rgba(167, 139, 250, 0.5));">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+        <defs>
+          <linearGradient id="loginPetalGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F5F3FF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient>
+          <linearGradient id="loginPlayGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+          <radialGradient id="loginGlow" cx="50%" cy="50%"><stop offset="0%" stop-color="#A78BFA" stop-opacity="0.4"/><stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/></radialGradient>
+        </defs>
+        <circle cx="50" cy="50" r="48" fill="url(#loginGlow)"/>
+        <path d="M 30 18 Q 22 18 22 26 L 22 82 Q 22 90 30 90 L 38 90 Q 38 86 38 60 L 38 26 Q 38 18 30 18 Z" fill="url(#loginPetalGrad)" stroke="#A78BFA" stroke-width="0.5"/>
+        <path d="M 42 18 Q 50 18 56 22 Q 64 28 64 38 L 64 42 Q 64 50 60 54 L 50 60 Q 46 60 42 60 L 38 60 L 38 18 Z" fill="url(#loginPetalGrad)" stroke="#A78BFA" stroke-width="0.5"/>
+        <path d="M 60 54 Q 64 50 64 42 L 78 42 Q 78 50 74 56 Q 70 62 64 64 L 56 64 Z" fill="url(#loginPetalGrad)" stroke="#A78BFA" stroke-width="0.5" opacity="0.85"/>
+        <path d="M 42 42 L 60 50 L 42 58 Z" fill="url(#loginPlayGrad)" stroke="#C4B5FD" stroke-width="0.6"/>
+      </svg>
+    </div>
+    <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 4px; background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1px;">PIXEE PLAY</h1>
+    <p style="font-size: 13px; color: #8B7AB8; margin: 0 0 32px; letter-spacing: 2px; text-transform: uppercase;">PixeeSales-Alpha</p>
+    <p style="font-size: 14px; color: #C4B5FD; margin: 0 0 24px;">Accès super admin · Identifie-toi</p>
+    <input id="login-email" type="email" placeholder="Email" autocomplete="username" style="width: 100%; padding: 14px 18px; background: rgba(10, 5, 16, 0.6); border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 12px; color: #F5F3FF; font-size: 15px; font-family: inherit; outline: none; transition: 0.2s; margin-bottom: 10px;" onkeypress="if(event.key==='Enter')document.getElementById('login-password').focus()">
+    <input id="login-password" type="password" placeholder="Mot de passe" autocomplete="current-password" style="width: 100%; padding: 14px 18px; background: rgba(10, 5, 16, 0.6); border: 1px solid rgba(167, 139, 250, 0.3); border-radius: 12px; color: #F5F3FF; font-size: 15px; font-family: inherit; outline: none; transition: 0.2s;" onkeypress="if(event.key==='Enter')checkPassword()">
+    <button onclick="checkPassword()" style="width: 100%; margin-top: 14px; padding: 14px; background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%); border: none; border-radius: 12px; color: white; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; transition: 0.2s;">Se connecter</button>
+    <p id="login-error" style="display: none; color: #F87171; font-size: 13px; margin: 12px 0 0;">Identifiants incorrects</p>
+    <p style="font-size: 11px; color: #5D4E80; margin: 24px 0 0;">© Pixeeplay 2026 · Tous droits réservés</p>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display: none;">
 
   <!-- Hero -->
   <div class="hero">
     <div class="hero-left">
-      <div class="logo">P</div>
+      <div class="logo">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="petalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#F5F3FF"/>
+              <stop offset="100%" stop-color="#A78BFA"/>
+            </linearGradient>
+            <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#A78BFA"/>
+              <stop offset="100%" stop-color="#7C3AED"/>
+            </linearGradient>
+            <radialGradient id="glow" cx="50%" cy="50%">
+              <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="50" cy="50" r="48" fill="url(#glow)"/>
+          <path d="M 30 18 Q 22 18 22 26 L 22 82 Q 22 90 30 90 L 38 90 Q 38 86 38 60 L 38 26 Q 38 18 30 18 Z" fill="url(#petalGrad)" stroke="#A78BFA" stroke-width="0.5"/>
+          <path d="M 42 18 Q 50 18 56 22 Q 64 28 64 38 L 64 42 Q 64 50 60 54 L 50 60 Q 46 60 42 60 L 38 60 L 38 18 Z" fill="url(#petalGrad)" stroke="#A78BFA" stroke-width="0.5"/>
+          <path d="M 60 54 Q 64 50 64 42 L 78 42 Q 78 50 74 56 Q 70 62 64 64 L 56 64 Z" fill="url(#petalGrad)" stroke="#A78BFA" stroke-width="0.5" opacity="0.85"/>
+          <path d="M 42 42 L 60 50 L 42 58 Z" fill="url(#playGrad)" stroke="#C4B5FD" stroke-width="0.6"/>
+        </svg>
+      </div>
       <div>
         <h1>PixeeSales-Alpha</h1>
         <p class="hero-sub"><span class="pulse" id="status-pulse"></span> <span id="status-text">Agent commercial autonome · En attente de clé Gemini</span></p>
@@ -854,7 +911,71 @@ html, body {
     </div>
   </div>
 
+  <!-- Footer Pixeeplay -->
+  <footer style="margin-top: 40px; padding: 32px 0; text-align: center; border-top: 1px solid var(--border);">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 12px;">
+      <div style="width: 28px; height: 28px;">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+          <defs>
+            <linearGradient id="footPetal" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#F5F3FF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient>
+            <linearGradient id="footPlay" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#7C3AED"/></linearGradient>
+          </defs>
+          <path d="M 30 18 Q 22 18 22 26 L 22 82 Q 22 90 30 90 L 38 90 Q 38 86 38 60 L 38 26 Q 38 18 30 18 Z" fill="url(#footPetal)"/>
+          <path d="M 42 18 Q 50 18 56 22 Q 64 28 64 38 L 64 42 Q 64 50 60 54 L 50 60 Q 46 60 42 60 L 38 60 L 38 18 Z" fill="url(#footPetal)"/>
+          <path d="M 60 54 Q 64 50 64 42 L 78 42 Q 78 50 74 56 Q 70 62 64 64 L 56 64 Z" fill="url(#footPetal)" opacity="0.85"/>
+          <path d="M 42 42 L 60 50 L 42 58 Z" fill="url(#footPlay)"/>
+        </svg>
+      </div>
+      <span style="font-size: 14px; font-weight: 700; background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px;">PIXEE PLAY</span>
+    </div>
+    <p style="font-size: 12px; color: var(--text-3); margin: 0 0 6px;">PixeeSales-Alpha · Agent commercial augmenté</p>
+    <p style="font-size: 11px; color: var(--text-3); margin: 0;">© 2026 Pixeeplay · Tous droits réservés · <a href="https://pixeeplay.com" target="_blank" style="color: var(--accent);">pixeeplay.com</a></p>
+    <p style="font-size: 10px; color: var(--text-3); margin: 8px 0 0; opacity: 0.6;">
+      <a href="#" onclick="sessionStorage.removeItem('pixee_auth_v1'); location.reload(); return false;" style="color: var(--text-3); text-decoration: none;">Déconnexion</a>
+    </p>
+  </footer>
+
 </div>
+
+<!-- LOGIN GATE -->
+<script>
+// Super admin Pixeeplay
+const PIXEE_ADMIN_EMAIL = 'arnaud@pixeeplay.com';
+const PIXEE_PASSWORD_HASH = 'bc758157209a3620d4e41f55f59e67e02489aee4073b6e7c7077e3a295a73fbc'; // Nusmob2710$
+const PIXEE_AUTH_KEY = 'pixee_auth_v1';
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function checkPassword() {
+  const email = (document.getElementById('login-email').value || '').trim().toLowerCase();
+  const pwd = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  if (!email || !pwd) { err.style.display = 'block'; return; }
+  const hash = await sha256(pwd);
+  if (email === PIXEE_ADMIN_EMAIL && hash === PIXEE_PASSWORD_HASH) {
+    sessionStorage.setItem(PIXEE_AUTH_KEY, email);
+    localStorage.setItem('pixee_admin_email', email);
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('main-app').style.display = 'block';
+    err.style.display = 'none';
+  } else {
+    err.style.display = 'block';
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-password').focus();
+  }
+}
+
+// Auto-login si déjà authentifié dans cette session
+if (sessionStorage.getItem(PIXEE_AUTH_KEY) === PIXEE_ADMIN_EMAIL) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('main-app').style.display = 'block';
+} else {
+  setTimeout(() => document.getElementById('login-email')?.focus(), 100);
+}
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <script>
