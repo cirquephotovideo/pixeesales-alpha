@@ -680,6 +680,20 @@ body.domain-agent .sales-only { display: none !important; }
 
     <div class="menu-group agent-only">
       <div class="menu-group-header" onclick="toggleMenu(this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Studio Media</span>
+        <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="submenu">
+        <a class="submenu-item" onclick="navTo('studio-media', this)">🎬 Studio (images + vidéos)</a>
+        <a class="submenu-item" onclick="navTo('studio-media', this)">🍌 Nano Banana (image)</a>
+        <a class="submenu-item" onclick="navTo('studio-media', this)">🎞️ Veo (vidéo)</a>
+        <a class="submenu-item" onclick="navTo('studio-media', this)">📁 Galerie</a>
+      </div>
+    </div>
+
+    <div class="menu-group agent-only">
+      <div class="menu-group-header" onclick="toggleMenu(this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v10m11-11h-6M7 12H1m17.5-6.5l-4.24 4.24M9.76 14.24l-4.24 4.24m13-13l-4.24 4.24M9.76 9.76L5.51 5.51"/></svg>
         <span>Agents IA</span>
         <svg class="menu-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -1917,6 +1931,104 @@ body.domain-agent .sales-only { display: none !important; }
     </div>
   </div>
 
+  <!-- ============ STUDIO MEDIA (Nano Banana + Veo) ============ -->
+  <div class="view" id="view-studio-media">
+    <div class="card">
+      <h2 class="card-title">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><polyline points="21 15 16 10 5 21"/></svg>
+        🎬 Studio Media — Génération IA images &amp; vidéos
+      </h2>
+      <p class="card-desc">Génère des visuels (Nano Banana = Gemini 2.5 Flash Image) et des vidéos (Veo 2 / 3) directement depuis ton dashboard. Tous les appels passent par le backend, ta clé Gemini reste sur le serveur.</p>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px;">
+        <!-- Génération image -->
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px;">
+          <h3 style="margin: 0 0 12px; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            🍌 Image — Nano Banana
+            <span style="font-size: 10px; padding: 2px 8px; background: var(--accent-soft); color: var(--accent); border-radius: 999px;">Gemini 2.5 Flash Image</span>
+          </h3>
+          <p class="field-label">Prompt</p>
+          <textarea id="img-prompt" class="input" rows="4" placeholder="Ex : Affiche minimaliste pour PixeePIM Growth, palette violet / blanc cassé, typographie moderne, espace négatif, style premium B2B SaaS"></textarea>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <div>
+              <p class="field-label">Format</p>
+              <select id="img-ratio" class="select">
+                <option value="1:1">Carré 1:1</option>
+                <option value="16:9">Paysage 16:9</option>
+                <option value="9:16">Portrait 9:16</option>
+                <option value="4:5">Insta 4:5</option>
+                <option value="3:2">Photo 3:2</option>
+              </select>
+            </div>
+            <div>
+              <p class="field-label">Nombre</p>
+              <select id="img-count" class="select">
+                <option value="1">1 image</option>
+                <option value="2">2 variantes</option>
+                <option value="3">3 variantes</option>
+                <option value="4">4 variantes</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="generateImage()">
+            🎨 Générer image(s)
+          </button>
+          <div id="img-output" style="margin-top: 14px;"></div>
+        </div>
+
+        <!-- Génération vidéo -->
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px;">
+          <h3 style="margin: 0 0 12px; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            🎞️ Vidéo — Veo
+            <span style="font-size: 10px; padding: 2px 8px; background: var(--accent-2-soft); color: var(--accent-2); border-radius: 999px;">Google Veo 2 / 3</span>
+          </h3>
+          <p class="field-label">Prompt</p>
+          <textarea id="vid-prompt" class="input" rows="4" placeholder="Ex : Plan séquence d'une équipe entrepreneur·e travaillant en open-space lumineux, caméra qui tourne lentement autour, lumière naturelle dorée fin de journée, style cinématographique épuré"></textarea>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px;">
+            <div>
+              <p class="field-label">Modèle</p>
+              <select id="vid-model" class="select">
+                <option value="veo-2.0-generate-001">Veo 2 (rapide)</option>
+                <option value="veo-3.0-generate-preview">Veo 3 (preview)</option>
+              </select>
+            </div>
+            <div>
+              <p class="field-label">Ratio</p>
+              <select id="vid-ratio" class="select">
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
+                <option value="1:1">1:1</option>
+              </select>
+            </div>
+            <div>
+              <p class="field-label">Durée</p>
+              <select id="vid-duration" class="select">
+                <option value="5">5 s</option>
+                <option value="6">6 s</option>
+                <option value="8">8 s</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="margin-top: 14px; width: 100%; background: linear-gradient(135deg, var(--accent), var(--accent-2));" onclick="generateVideo()">
+            🎬 Générer la vidéo
+          </button>
+          <div id="vid-output" style="margin-top: 14px;"></div>
+        </div>
+      </div>
+
+      <!-- Galerie -->
+      <div style="margin-top: 24px;">
+        <h3 style="margin: 0 0 12px; font-size: 14px; display: flex; align-items: center; justify-content: space-between;">
+          <span>📁 Galerie des médias générés</span>
+          <button class="btn btn-ghost" style="padding: 4px 12px; font-size: 11px;" onclick="loadMediaGallery()">Rafraîchir</button>
+        </h3>
+        <div id="media-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
+          <div class="empty" style="grid-column: 1 / -1; padding: 30px;">Aucun média encore — lance ta première génération.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ AGENTS IA (9 agents factorisés) ============ -->
   <div class="view" id="view-agent-social"></div>
   <div class="view" id="view-agent-newsletter"></div>
@@ -2399,6 +2511,8 @@ function switchTab(name) {
   }
   // Agents IA : 9 vues factorisées
   if (name.startsWith('agent-')) renderAgentView(name);
+  // Studio Media : galerie auto
+  if (name === 'studio-media') loadMediaGallery();
 }
 
 // MEGA MENU navigation
@@ -3964,6 +4078,155 @@ function refreshDevisDropdowns() {
   renderCatalogDraggable();
   renderDevisItems();
   recalcDevisTotals();
+}
+
+// ============ STUDIO MEDIA (Nano Banana + Veo via backend) ============
+function backendUrl() {
+  return (state.backend && state.backend.url) || 'https://api.pixeeplay.com';
+}
+
+async function generateImage() {
+  const prompt = (document.getElementById('img-prompt')?.value || '').trim();
+  if (!prompt) { alert('Décris ton image dans le prompt.'); return; }
+  const ratio = document.getElementById('img-ratio')?.value || '1:1';
+  const n = parseInt(document.getElementById('img-count')?.value || '1');
+  const out = document.getElementById('img-output');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Nano Banana génère ton image…</div>';
+
+  // Composer un prompt qui force le ratio via la description (Nano Banana steer par texte)
+  const ratioHint = ratio !== '1:1' ? `, aspect ratio ${ratio}, image au format ${ratio}` : '';
+  const fullPrompt = prompt + ratioHint;
+
+  try {
+    const r = await fetch(backendUrl() + '/api/media/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: fullPrompt, ratio, n })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur backend');
+    const imgs = (data.results || []).filter(x => x.url || x.dataUrl);
+    if (!imgs.length) {
+      out.innerHTML = `<div class="error">Aucune image renvoyée. ${escapeHtml(data.results?.[0]?.text || JSON.stringify(data).slice(0,200))}</div>`;
+      return;
+    }
+    out.innerHTML = `
+      <div style="display: grid; grid-template-columns: repeat(${Math.min(imgs.length,2)}, 1fr); gap: 10px;">
+        ${imgs.map((im,i) => {
+          const src = im.url ? backendUrl() + im.url : im.dataUrl;
+          return `<div style="background: var(--surface-3); border-radius: 10px; overflow: hidden; position: relative;">
+            <img src="${src}" alt="Image ${i+1}" style="width: 100%; display: block;">
+            <a href="${src}" download="pixee-image-${Date.now()}-${i}.png" style="position: absolute; top: 8px; right: 8px; padding: 6px 12px; background: rgba(0,0,0,0.6); color: white; border-radius: 6px; text-decoration: none; font-size: 11px;">⬇ Télécharger</a>
+          </div>`;
+        }).join('')}
+      </div>
+      <p style="margin-top: 10px; font-size: 11px; color: var(--text-2);">✓ ${imgs.length} image(s) générée(s) · modèle : ${escapeHtml(data.model || 'gemini-2.5-flash-image')}</p>
+    `;
+    logAct(`Image générée : ${prompt.slice(0,40)}…`, 'success');
+    setTimeout(loadMediaGallery, 600);
+  } catch(e) {
+    out.innerHTML = `<div class="error">Erreur : ${escapeHtml(e.message)}<br><br>Vérifie que GEMINI_API_KEY est configurée sur api.pixeeplay.com (Coolify → backend → Environment Variables).</div>`;
+    logAct('Erreur génération image : '+e.message, 'error');
+  }
+}
+
+async function generateVideo() {
+  const prompt = (document.getElementById('vid-prompt')?.value || '').trim();
+  if (!prompt) { alert('Décris ta vidéo dans le prompt.'); return; }
+  const model = document.getElementById('vid-model')?.value || 'veo-2.0-generate-001';
+  const ratio = document.getElementById('vid-ratio')?.value || '16:9';
+  const duration = parseInt(document.getElementById('vid-duration')?.value || '5');
+  const out = document.getElementById('vid-output');
+  out.innerHTML = '<div class="loading"><div class="spinner"></div>Lancement de Veo (les vidéos prennent 30-120 s)…</div>';
+
+  try {
+    const r = await fetch(backendUrl() + '/api/media/video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, model, ratio, duration })
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur backend');
+    if (!data.operation_name) throw new Error('Pas d\'operation_name renvoyé');
+
+    out.innerHTML = `<div class="loading"><div class="spinner"></div>Veo travaille (op : <code>${escapeHtml(data.operation_name.slice(-12))}</code>)… <span id="vid-progress"></span></div>`;
+    logAct('Veo lancé : '+prompt.slice(0,40)+'…', 'info');
+
+    // Polling toutes les 8 s, timeout 5 min
+    const opName = data.operation_name;
+    const start = Date.now();
+    const poll = async () => {
+      if (Date.now() - start > 5 * 60 * 1000) {
+        out.innerHTML = '<div class="error">Veo timeout 5 min. Vérifie la galerie plus tard.</div>';
+        return;
+      }
+      try {
+        const sr = await fetch(backendUrl() + '/api/media/video/status?op=' + encodeURIComponent(opName));
+        const sdata = await sr.json();
+        if (!sdata.done) {
+          if (sdata.progress != null) document.getElementById('vid-progress')?.replaceChildren(document.createTextNode(' · '+sdata.progress+'%'));
+          setTimeout(poll, 8000);
+          return;
+        }
+        const vids = (sdata.videos || []).filter(v => v.url || v.dataUrl || v.remoteUri);
+        if (!vids.length) {
+          out.innerHTML = '<div class="error">Veo terminé mais aucune vidéo retournée.</div>';
+          return;
+        }
+        out.innerHTML = vids.map((v,i) => {
+          const src = v.url ? backendUrl() + v.url : (v.dataUrl || v.remoteUri);
+          return `<div style="background: var(--surface-3); border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
+            <video src="${src}" controls style="width: 100%; display: block;" autoplay muted loop></video>
+            <div style="padding: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+              <span>✓ Vidéo ${i+1} · ${escapeHtml(model)}</span>
+              <a href="${src}" download="pixee-video-${Date.now()}-${i}.mp4" style="color: var(--accent);">⬇ Télécharger</a>
+            </div>
+          </div>`;
+        }).join('');
+        logAct('Vidéo Veo prête : '+prompt.slice(0,40)+'…', 'success');
+        setTimeout(loadMediaGallery, 600);
+      } catch(err) {
+        out.innerHTML = `<div class="error">Erreur polling : ${escapeHtml(err.message)}</div>`;
+      }
+    };
+    setTimeout(poll, 5000);
+  } catch(e) {
+    out.innerHTML = `<div class="error">Erreur : ${escapeHtml(e.message)}<br><br>Si l'erreur dit "model not found", essaie l'autre modèle (Veo 2 vs Veo 3). Veo 3 nécessite un compte avec accès preview.</div>`;
+    logAct('Erreur génération vidéo : '+e.message, 'error');
+  }
+}
+
+async function loadMediaGallery() {
+  const el = document.getElementById('media-gallery');
+  if (!el) return;
+  try {
+    const r = await fetch(backendUrl() + '/api/media/list');
+    const items = await r.json();
+    if (!items.length) {
+      el.innerHTML = '<div class="empty" style="grid-column: 1 / -1; padding: 30px;">Aucun média encore — lance ta première génération.</div>';
+      return;
+    }
+    el.innerHTML = items.slice(0, 24).map(m => {
+      if (m.kind === 'image' && m.file_name) {
+        const src = backendUrl() + '/api/media/file/' + m.file_name;
+        return `<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;" title="${escapeHtml(m.prompt||'')}">
+          <img src="${src}" style="width: 100%; height: 140px; object-fit: cover; display: block;">
+          <div style="padding: 8px; font-size: 11px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml((m.prompt||'').slice(0,40))}</div>
+        </div>`;
+      } else if (m.kind === 'video' && m.file_name) {
+        const src = backendUrl() + '/api/media/file/' + m.file_name;
+        return `<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;" title="${escapeHtml(m.prompt||'')}">
+          <video src="${src}" muted style="width: 100%; height: 140px; object-fit: cover; display: block;" onmouseover="this.play()" onmouseout="this.pause();this.currentTime=0;"></video>
+          <div style="padding: 8px; font-size: 11px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">🎞️ ${escapeHtml((m.prompt||'').slice(0,40))}</div>
+        </div>`;
+      } else if (m.kind === 'video') {
+        return `<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-size: 11px; color: var(--text-2);">⏳ Vidéo en cours · ${escapeHtml((m.prompt||'').slice(0,40))}</div>`;
+      }
+      return '';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="error" style="grid-column: 1 / -1;">Backend injoignable : '+escapeHtml(e.message)+'</div>';
+  }
 }
 
 // Quick-add lead / client depuis le formulaire de devis
