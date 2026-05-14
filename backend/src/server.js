@@ -16,6 +16,7 @@ import { telegramRoutes } from './telegram.js';
 import { mediaRoutes } from './media.js';
 import { webmailRoutes } from './webmail.js';
 import { tasksRoutes, scheduleAllTasks } from './tasks.js';
+import { devplansRoutes, scheduleDevPlans } from './devplans.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -50,6 +51,7 @@ app.use('/api/telegram', telegramRoutes(db));
 app.use('/api/media', mediaRoutes(db));
 app.use('/api/webmail', webmailRoutes(db));
 app.use('/api/tasks', tasksRoutes(db));
+app.use('/api/devplans', devplansRoutes(db));
 
 // Catch-all errors
 app.use((err, req, res, next) => {
@@ -66,5 +68,6 @@ app.listen(PORT, () => {
   autopilotCron(db);
   scheduleSelfImprovement(db);
   scheduleAllTasks(db);
-  console.log(`   Crons : rapports 8h/12h/18h + autopilote 15min + self-improve 19h + 5 tâches background`);
+  scheduleDevPlans(db);
+  console.log(`   Crons : rapports 8h/12h/18h + autopilote 15min + self-improve 19h + 5 tâches background + auto-dev-plans 7h`);
 });
