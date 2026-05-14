@@ -537,7 +537,7 @@ html, body {
     </div>
     <div class="hero-right">
       <div>
-        <p class="hero-target">Objectif mensuel</p>
+        <p class="hero-target">Objectif mensuel <button onclick="editGoal()" style="background: none; border: none; color: var(--accent); cursor: pointer; font-size: 11px; margin-left: 6px;">✎ modifier</button></p>
         <p class="hero-revenue" id="hero-revenue">0 € / 10 000 €</p>
       </div>
     </div>
@@ -836,7 +836,8 @@ html, body {
       <div class="config-row">
         <input id="gemini-key" type="password" class="input" placeholder="AIzaSy..." style="font-family: ui-monospace, monospace;">
         <select id="gemini-model" class="select" style="max-width: 240px;">
-          <optgroup label="Gemini 3.x (si disponible)">
+          <optgroup label="Gemini 3.x (latest)">
+            <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (GA, recommandé)</option>
             <option value="gemini-3.1-flash">gemini-3.1-flash</option>
             <option value="gemini-3.0-flash">gemini-3.0-flash</option>
             <option value="gemini-3.0-pro">gemini-3.0-pro</option>
@@ -1322,6 +1323,10 @@ html, body {
         <input id="brand-tva" class="input" placeholder="N° TVA intracom (ex: FR12345678901)">
         <input id="brand-iban" class="input" placeholder="IBAN pour réception paiements">
       </div>
+      <div class="input-row">
+        <input id="brand-email" type="email" class="input" placeholder="Email contact (apparaît sur les devis)">
+        <input id="brand-phone" class="input" placeholder="Téléphone contact">
+      </div>
       <button class="btn btn-primary" onclick="saveBranding()">Sauvegarder le branding</button>
     </div>
   </div>
@@ -1436,6 +1441,7 @@ const state = {
     minScore: 70, search: true
   })),
   lastReports: JSON.parse(localStorage.getItem(LS.lastReports) || '{"morning":null,"noon":null,"evening":null}'),
+  monthlyGoal: parseInt(localStorage.getItem('pixee_monthly_goal') || '10000'),
   filter: 'all',
   autopilotInterval: null,
   autopilotNextRun: null,
@@ -1524,7 +1530,7 @@ function computeStats() {
   const pipeline = state.deals.filter(d=>d.stage!=='won').reduce((s,d)=>s+d.amount,0);
   return {
     revenue, pipeline,
-    pct: Math.min(100, Math.round((revenue/10000)*100)),
+    pct: Math.min(100, Math.round((revenue/state.monthlyGoal)*100)),
     leads: state.leads.length,
     hot: state.leads.filter(l=>l.category==='hot').length,
     meetings: state.deals.filter(d=>['meeting','quote','won'].includes(d.stage)).length,
@@ -1534,7 +1540,7 @@ function computeStats() {
 
 function refresh() {
   const s = computeStats();
-  document.getElementById('hero-revenue').textContent = eur(s.revenue) + ' / 10 000 €';
+  document.getElementById('hero-revenue').textContent = eur(s.revenue) + ' / ' + eur(state.monthlyGoal);
   document.getElementById('kpi-revenue').textContent = eur(s.revenue);
   document.getElementById('kpi-pct').textContent = s.pct;
   document.getElementById('kpi-progress').style.width = s.pct + '%';
@@ -2986,6 +2992,56 @@ function renderBanqueView() {
   }, 100);
 }
 
+/* === Objectif modifiable === */
+function editGoal() {
+  const cur = state.monthlyGoal;
+  const v = window.prompt('Nouvel objectif mensuel (en €) :', cur);
+  if (v === null) return;
+  const n = parseInt(v.replace(/\D/g,''));
+  if (isNaN(n) || n < 0) { alert('Valeur invalide'); return; }
+  state.monthlyGoal = n;
+  localStorage.setItem('pixee_monthly_goal', n);
+  refresh();
+  logAct('Objectif mensuel mis à jour : '+eur(n), 'success');
+}
+
+/* === Pré-chargement catalogue Pixeeplay réel === */
+function seedPixeeplayProducts() {
+  if (state.produits.length > 0) return; // déjà fait
+  state.produits = [
+    { id: 1, name: 'Refonte site web — Forfait complet', logo: '', price: 1250, recurrence: 'once', desc: 'Design & UX + Dev React/Next.js + Multilingue + SEO + Mise en ligne + Garantie 6 mois (lots 1 à 7)' },
+    { id: 2, name: 'Lot 1 — Design & UX', logo: '', price: 350, recurrence: 'once', desc: 'Direction artistique, maquette haute-fidélité, system de design réutilisable, responsive, WCAG 2.1 AA' },
+    { id: 3, name: 'Lot 2 — Développement technique', logo: '', price: 450, recurrence: 'once', desc: 'React 19 + Next.js 16 + Tailwind + shadcn/ui · 7 pages · Framer Motion · code documenté GitHub' },
+    { id: 4, name: 'Lot 3 — Multilingue (4 langues)', logo: '', price: 200, recurrence: 'once', desc: 'FR / EN / NL / DE · routes localisées · hreflang · sélecteur de langue' },
+    { id: 5, name: 'Lot 4 — Intégration moteur résa HotSoft', logo: '', price: 150, recurrence: 'once', desc: 'Widget Hoist HotelEngine · 3 emplacements (hero, sticky, modal)' },
+    { id: 6, name: 'Lot 5 — SEO complet', logo: '', price: 250, recurrence: 'once', desc: 'Audit + plan 301 + Schema.org + Core Web Vitals + GA4 + Search Console' },
+    { id: 7, name: 'Lot 6 — Mise en ligne & hébergement', logo: '', price: 150, recurrence: 'once', desc: 'Déploiement Vercel/OVH · DNS · SSL · RGPD · sauvegardes auto' },
+    { id: 8, name: 'Lot 7 — Garantie 6 mois', logo: '', price: 0, recurrence: 'once', desc: 'Correction bugs · MAJ sécurité · support email <48h ouvrées' },
+    { id: 9, name: 'PixeePIM — Setup initial', logo: '', price: 1500, recurrence: 'once', desc: 'Mise en place gestion centralisée des données produit, import catalogue, mapping attributs' },
+    { id: 10, name: 'PixeePIM — Abonnement mensuel', logo: '', price: 99, recurrence: 'monthly', desc: 'Hébergement PIM + MAJ + support · jusqu\'à 5 000 SKU' },
+    { id: 11, name: 'Pixeesite — Site vitrine', logo: '', price: 2900, recurrence: 'once', desc: 'Site sur-mesure haute performance React/Next.js · optimisé SEO et conversion' },
+    { id: 12, name: 'GLD Pixeeplay — Module logistique', logo: '', price: 4500, recurrence: 'once', desc: 'Solution logistique multi-entrepôts · sync stocks temps réel · intégration ERP' },
+    { id: 13, name: 'IA SaaS — Pack automatisation', logo: '', price: 990, recurrence: 'monthly', desc: 'Lead scoring auto · génération contenus · chatbot support · personnalisé selon métier' },
+    { id: 14, name: 'Traduction DeepL — Pack 4 langues', logo: '', price: 450, recurrence: 'once', desc: 'Option : traduction assistée DeepL après validation FR (EN + NL + DE)' },
+    { id: 15, name: 'Maintenance évolutive — Forfait mensuel', logo: '', price: 290, recurrence: 'monthly', desc: 'Après garantie 6 mois · 4h/mois · évolutions mineures + monitoring' }
+  ];
+  // Branding Pixeeplay par défaut
+  if (!state.branding.tva && !state.branding.iban) {
+    state.branding = {
+      company: 'PIXEEPLAY',
+      siret: '',
+      logo: '',
+      color: '#7C3AED',
+      address: 'Sébastien de Miollis\nLoos · France',
+      tva: '',
+      iban: '',
+      email: 'smiollis@gmail.com',
+      phone: '+33 6 73 18 82 96'
+    };
+  }
+  saveBiz();
+}
+
 /* === Branding === */
 function loadBrandingForm() {
   document.getElementById('brand-company').value = state.branding.company || 'Pixeeplay';
@@ -2995,6 +3051,8 @@ function loadBrandingForm() {
   document.getElementById('brand-address').value = state.branding.address || '';
   document.getElementById('brand-tva').value = state.branding.tva || '';
   document.getElementById('brand-iban').value = state.branding.iban || '';
+  const em = document.getElementById('brand-email'); if (em) em.value = state.branding.email || '';
+  const ph = document.getElementById('brand-phone'); if (ph) ph.value = state.branding.phone || '';
 }
 function saveBranding() {
   state.branding = {
@@ -3004,7 +3062,9 @@ function saveBranding() {
     color: document.getElementById('brand-color').value,
     address: document.getElementById('brand-address').value,
     tva: document.getElementById('brand-tva').value,
-    iban: document.getElementById('brand-iban').value
+    iban: document.getElementById('brand-iban').value,
+    email: document.getElementById('brand-email')?.value || '',
+    phone: document.getElementById('brand-phone')?.value || ''
   };
   saveBiz();
   logAct('Branding sauvegardé : '+state.branding.company, 'success');
@@ -3065,6 +3125,7 @@ function hydrateConnectors() {
   updateConnectorBadges();
 }
 hydrateConnectors();
+seedPixeeplayProducts(); // Pré-charge le catalogue Pixeeplay + branding
 
 refresh();
 if (!state.log.length) {
