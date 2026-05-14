@@ -13,6 +13,7 @@ import { dataRoutes } from './data.js';
 import { autopilotCron } from './autopilot.js';
 import { improvementRoutes, scheduleSelfImprovement } from './improvement.js';
 import { telegramRoutes } from './telegram.js';
+import { mediaRoutes } from './media.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -44,6 +45,7 @@ app.use('/api/gemini', geminiRoutes(db));
 app.use('/api/data', dataRoutes(db));
 app.use('/api/improvement', improvementRoutes(db));
 app.use('/api/telegram', telegramRoutes(db));
+app.use('/api/media', mediaRoutes(db));
 
 // Catch-all errors
 app.use((err, req, res, next) => {
