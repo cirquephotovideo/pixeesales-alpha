@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PixeeSales — L'agent commercial augmenté qui ne dort jamais</title>
+<meta name="description" content="Prospecte, qualifie, écrit tes emails, suit ton pipeline et te facture — pendant que tu dors. 22 agents IA. PME françaises et au-delà. Essai gratuit.">
+<meta property="og:title" content="PixeeSales — Agent commercial IA 24/7">
+<meta property="og:image" content="https://sales.pixeeplay.com/og.png">
+<style>
+:root { color-scheme: light; --bg: #0A0510; --fg: #F5F3FF; --muted: #C4B5FD; --dim: #8B7AB8; --accent: #A78BFA; --pink: #EC4899; --card: rgba(167,139,250,0.08); --border: rgba(167,139,250,0.18); }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg); font-family: -apple-system, "Inter", sans-serif; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+body { background-image: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(124,58,237,0.25), transparent 60%), radial-gradient(ellipse 70% 50% at 80% 100%, rgba(236,72,153,0.15), transparent 60%); background-attachment: fixed; }
+a { color: var(--accent); text-decoration: none; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+/* Nav */
+.nav { display: flex; align-items: center; justify-content: space-between; padding: 24px 0; }
+.nav-logo { display: flex; align-items: center; gap: 12px; }
+.nav-logo .mark { width: 40px; height: 40px; filter: drop-shadow(0 0 12px rgba(167,139,250,0.5)); }
+.nav-brand { font-size: 16px; font-weight: 700; letter-spacing: 1px; background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.nav-links { display: flex; gap: 28px; align-items: center; font-size: 14px; }
+.nav-links a { color: var(--muted); }
+.nav-cta { padding: 10px 22px; border-radius: 12px; background: linear-gradient(135deg, #7C3AED, #EC4899); color: white !important; font-weight: 600; transition: 0.2s; }
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.5); }
+
+/* Hero */
+.hero { padding: 80px 0 100px; text-align: center; }
+.hero-pill { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); padding: 6px 16px; border-radius: 999px; font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+.hero-pill::before { content: '●'; color: #10B981; }
+.hero h1 { font-size: 64px; line-height: 1.05; margin: 0 0 24px; letter-spacing: -2px; }
+.hero h1 .gradient { background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p.sub { font-size: 20px; color: var(--muted); margin: 0 auto 36px; max-width: 720px; line-height: 1.5; }
+.hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn-hero-primary { padding: 14px 32px; border-radius: 14px; background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; font-weight: 600; font-size: 16px; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 10px 30px rgba(124,58,237,0.4); }
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(124,58,237,0.6); }
+.btn-hero-ghost { padding: 14px 28px; border-radius: 14px; background: transparent; color: var(--fg); border: 1px solid var(--border); font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; }
+.btn-hero-ghost:hover { background: var(--card); }
+
+/* Sections */
+section { padding: 80px 0; }
+section h2 { font-size: 42px; margin: 0 0 16px; letter-spacing: -1px; text-align: center; }
+section h2 .gradient { background: linear-gradient(135deg, #F5F3FF, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+section p.lead { text-align: center; color: var(--muted); font-size: 18px; max-width: 700px; margin: 0 auto 60px; }
+
+/* Features grid */
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.feature { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; transition: 0.2s; backdrop-filter: blur(10px); }
+.feature:hover { transform: translateY(-4px); border-color: rgba(167,139,250,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.feature .icon { width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #7C3AED, #EC4899); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 24px; }
+.feature h3 { font-size: 18px; margin: 0 0 10px; }
+.feature p { color: var(--muted); margin: 0; font-size: 14px; }
+
+/* Agents grid */
+.agents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 40px; }
+.agent-pill { padding: 14px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; font-size: 13px; font-weight: 500; transition: 0.15s; }
+.agent-pill:hover { background: rgba(167,139,250,0.15); transform: translateY(-2px); }
+.agent-pill .emoji { font-size: 20px; margin-right: 8px; }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 60px 0; }
+.stat { text-align: center; padding: 30px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; }
+.stat .num { font-size: 48px; font-weight: 700; background: linear-gradient(135deg, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1; }
+.stat .label { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+/* Pricing */
+.pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 40px; }
+.price-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 36px 28px; position: relative; transition: 0.2s; }
+.price-card.featured { border: 2px solid rgba(167,139,250,0.5); background: linear-gradient(180deg, rgba(167,139,250,0.12), rgba(236,72,153,0.08)); transform: scale(1.04); }
+.price-card.featured::before { content: '⭐ Recommandé'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; padding: 4px 16px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+.price-card h3 { margin: 0 0 8px; font-size: 22px; }
+.price-card .price { font-size: 56px; font-weight: 700; line-height: 1; margin: 12px 0 8px; }
+.price-card .price-period { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.price-card ul { list-style: none; padding: 0; margin: 0 0 32px; }
+.price-card ul li { padding: 8px 0; color: var(--muted); font-size: 14px; border-bottom: 1px solid rgba(167,139,250,0.1); display: flex; align-items: start; gap: 8px; }
+.price-card ul li::before { content: '✓'; color: #34D399; font-weight: 700; flex-shrink: 0; }
+.price-card .cta { display: block; text-align: center; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.price-card .cta:hover { transform: translateY(-1px); }
+.price-card.ghost .cta { background: transparent; border: 1px solid var(--border); }
+
+/* Testimonials */
+.testimonials { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 40px; }
+.testimonial { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+.testimonial .quote { font-size: 14px; line-height: 1.6; margin: 0 0 16px; color: var(--fg); font-style: italic; }
+.testimonial .author { display: flex; gap: 12px; align-items: center; }
+.testimonial .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #7C3AED, #EC4899); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.testimonial .name { font-weight: 600; font-size: 14px; }
+.testimonial .role { font-size: 12px; color: var(--muted); }
+
+/* CTA final */
+.cta-final { text-align: center; padding: 100px 0; background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(236,72,153,0.10)); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin: 80px 0 0; }
+.cta-final h2 { font-size: 48px; }
+.cta-final p { font-size: 18px; color: var(--muted); max-width: 600px; margin: 0 auto 36px; }
+
+/* Footer */
+footer { padding: 40px 0 60px; text-align: center; color: var(--dim); font-size: 13px; border-top: 1px solid var(--border); }
+footer a { color: var(--muted); margin: 0 12px; }
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 40px; }
+  .hero p.sub { font-size: 16px; }
+  section h2 { font-size: 32px; }
+  .nav-links a:not(.nav-cta) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="nav">
+    <div class="nav-logo">
+      <svg class="mark" viewBox="0 0 200 200">
+        <defs>
+          <linearGradient id="navPetal" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#A78BFA"/></linearGradient>
+        </defs>
+        <path d="M 55 35 Q 45 35 45 50 L 45 170 Q 45 178 55 178 L 75 178 L 75 35 Z" fill="url(#navPetal)"/>
+        <path d="M 82 35 Q 100 35 115 42 Q 135 52 138 78 L 138 90 Q 138 105 128 112 L 75 122 L 75 35 Z" fill="url(#navPetal)"/>
+        <path d="M 82 80 L 122 100 L 82 120 Z" fill="#7C3AED"/>
+      </svg>
+      <span class="nav-brand">PIXEE PLAY</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Fonctions</a>
+      <a href="#agents">Agents</a>
+      <a href="#pricing">Tarifs</a>
+      <a href="https://sales.pixeeplay.com" class="nav-cta">Se connecter</a>
+    </div>
+  </nav>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-pill">🚀 Bêta privée · 22 agents IA actifs · Powered by Gemini 3</div>
+    <h1>L'agent commercial<br><span class="gradient">qui ne dort jamais.</span></h1>
+    <p class="sub">PixeeSales prospecte, qualifie, écrit tes emails, négocie, signe tes devis, suit ta facturation et matche tes encaissements bancaires — pendant que tu dors. 22 agents IA spécialisés : ventes, marketing, finance, juridique, support, ops.</p>
+    <div class="hero-ctas">
+      <a href="https://sales.pixeeplay.com" class="btn-hero-primary">Essayer gratuitement →</a>
+      <a href="#demo" class="btn-hero-ghost">▶ Voir la démo (2 min)</a>
+    </div>
+    <p style="color: var(--dim); font-size: 13px; margin-top: 24px;">Sans CB · Setup en 5 min · Annulation 1 clic</p>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Tout ce dont une <span class="gradient">PME a besoin</span>, en une seule app</h2>
+    <p class="lead">Pas 12 SaaS qui ne se parlent pas. Un seul agent qui pilote tout.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">🎯</div>
+        <h3>Prospection autonome</h3>
+        <p>L'agent trouve tes leads via Google Search (Gemini), qualifie sur 100 points, écrit le cold email parfait.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📄</div>
+        <h3>Devis &amp; factures pro</h3>
+        <p>Catalogue produits, génération PDF avec ton logo, signature électronique PandaDoc, suivi paiement.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🏦</div>
+        <h3>Banque connectée</h3>
+        <p>Bridge API (Indy compatible) : sync auto des transactions, matching factures, cash flow projeté 90j.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🧠</div>
+        <h3>Cerveau RAG</h3>
+        <p>Indexe tes sites, docs, conversations. L'agent répond avec ton contexte propre, pas du blabla générique.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">📊</div>
+        <h3>Projections auto</h3>
+        <p>MRR, ARR, pipeline pondéré, scénarios pessimiste/réaliste/optimiste — recalculé à chaque deal.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🤖</div>
+        <h3>Self-improving</h3>
+        <p>Chaque soir, l'agent te propose 3 améliorations par email. Tu valides en 1 clic, c'est déployé en 30 sec.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="agents">
+  <div class="wrap">
+    <h2><span class="gradient">22 agents IA</span> spécialisés</h2>
+    <p class="lead">Un agent pour chaque fonction de ton entreprise. Tous parlent entre eux.</p>
+    <div class="agents-grid">
+      <div class="agent-pill"><span class="emoji">🎯</span>Prospection</div>
+      <div class="agent-pill"><span class="emoji">✉️</span>Outreach email</div>
+      <div class="agent-pill"><span class="emoji">📱</span>Social Media</div>
+      <div class="agent-pill"><span class="emoji">📰</span>Newsletter</div>
+      <div class="agent-pill"><span class="emoji">🔍</span>SEO &amp; Content</div>
+      <div class="agent-pill"><span class="emoji">🎯</span>Marketing Ads</div>
+      <div class="agent-pill"><span class="emoji">🤝</span>Customer Success</div>
+      <div class="agent-pill"><span class="emoji">📰</span>PR &amp; Presse</div>
+      <div class="agent-pill"><span class="emoji">⭐</span>Influenceurs</div>
+      <div class="agent-pill"><span class="emoji">👤</span>RH / Recrutement</div>
+      <div class="agent-pill"><span class="emoji">💬</span>Support client</div>
+      <div class="agent-pill"><span class="emoji">⚖️</span>Legal / Contrats</div>
+      <div class="agent-pill"><span class="emoji">🛒</span>Procurement</div>
+      <div class="agent-pill"><span class="emoji">💻</span>IT / DevOps</div>
+      <div class="agent-pill"><span class="emoji">💹</span>Finance / CFO</div>
+      <div class="agent-pill"><span class="emoji">⚙️</span>Operations</div>
+      <div class="agent-pill"><span class="emoji">🔬</span>R&amp;D</div>
+      <div class="agent-pill"><span class="emoji">📈</span>BI &amp; Data</div>
+      <div class="agent-pill"><span class="emoji">🛡️</span>Compliance</div>
+      <div class="agent-pill"><span class="emoji">🚨</span>Crisis Mgmt</div>
+      <div class="agent-pill"><span class="emoji">🌱</span>RSE / CSR</div>
+      <div class="agent-pill"><span class="emoji">🌐</span>International</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><div class="num">22</div><div class="label">Agents IA</div></div>
+      <div class="stat"><div class="num">100+</div><div class="label">Actions automatisables</div></div>
+      <div class="stat"><div class="num">24/7</div><div class="label">Autopilote actif</div></div>
+      <div class="stat"><div class="num">5 min</div><div class="label">Setup complet</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <h2>Choisis ton <span class="gradient">plan</span></h2>
+    <p class="lead">Sans engagement, annulable à tout moment. Essai 14 jours gratuit.</p>
+    <div class="pricing">
+      <div class="price-card ghost">
+        <h3>Solo</h3>
+        <div class="price">49 €</div>
+        <div class="price-period">/ mois · HT</div>
+        <ul>
+          <li>1 utilisateur</li>
+          <li>Tous les 22 agents IA</li>
+          <li>500 requêtes Gemini/jour</li>
+          <li>Devis &amp; factures illimités</li>
+          <li>1 connecteur bancaire</li>
+          <li>Support email</li>
+        </ul>
+        <a class="cta" href="https://sales.pixeeplay.com">Essayer 14 jours →</a>
+      </div>
+      <div class="price-card featured">
+        <h3>Business</h3>
+        <div class="price">199 €</div>
+        <div class="price-period">/ mois · HT</div>
+        <ul>
+          <li>Jusqu'à 5 utilisateurs</li>
+          <li>Tous les 22 agents IA</li>
+          <li>Requêtes Gemini illimitées</li>
+          <li>Autopilote 24/7</li>
+          <li>Multi-banques + matching auto</li>
+          <li>Signature électronique PandaDoc</li>
+          <li>Self-improving loop</li>
+          <li>Support prioritaire</li>
+        </ul>
+        <a class="cta" href="https://sales.pixeeplay.com">Démarrer →</a>
+      </div>
+      <div class="price-card ghost">
+        <h3>Enterprise</h3>
+        <div class="price">Sur devis</div>
+        <div class="price-period">à partir de 999 €/mois</div>
+        <ul>
+          <li>Utilisateurs illimités</li>
+          <li>Self-hosted possible</li>
+          <li>Custom agents sur-mesure</li>
+          <li>SLA 99.9%</li>
+          <li>Onboarding dédié</li>
+          <li>SAML / SCIM / SSO</li>
+          <li>Account manager</li>
+        </ul>
+        <a class="cta" href="mailto:smiollis@gmail.com?subject=Demande%20Enterprise%20Pixeeplay">Nous contacter →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Ils nous font <span class="gradient">déjà confiance</span></h2>
+    <div class="testimonials">
+      <div class="testimonial">
+        <p class="quote">"On a divisé par 3 le temps passé sur la prospection. L'agent trouve, qualifie et écrit. On valide juste."</p>
+        <div class="author"><div class="avatar">ML</div><div><div class="name">Marie L.</div><div class="role">CEO · PME e-commerce</div></div></div>
+      </div>
+      <div class="testimonial">
+        <p class="quote">"La facturation auto + matching bancaire, c'est de la magie. Mon DAF a libéré 2 jours/semaine."</p>
+        <div class="author"><div class="avatar">JD</div><div><div class="name">Julien D.</div><div class="role">DG · ETI industrie</div></div></div>
+      </div>
+      <div class="testimonial">
+        <p class="quote">"Les 22 agents IA, c'est ce qu'on cherchait depuis des années. Plus besoin de jongler entre Hubspot, Brevo, Sage..."</p>
+        <div class="author"><div class="avatar">SC</div><div><div class="name">Sophie C.</div><div class="role">COO · Scale-up SaaS</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-final">
+  <div class="wrap">
+    <h2>Prêt à <span style="background: linear-gradient(135deg, #A78BFA, #EC4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">automatiser</span> ton business ?</h2>
+    <p>14 jours gratuits, sans CB. Tu vois la magie opérer dès la première heure.</p>
+    <a href="https://sales.pixeeplay.com" class="btn-hero-primary">Commencer maintenant →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <a href="https://pixeeplay.com">pixeeplay.com</a>
+    <a href="https://pixeepim.com">PixeePIM</a>
+    <a href="https://pixeesite.pixeeplay.com">Pixeesite</a>
+    <a href="https://gld.pixeeplay.com">GLD</a>
+    <br><br>
+    © 2026 Pixeeplay · Sébastien de Miollis · Loos, France · smiollis@gmail.com
+  </div>
+</footer>
+
+</body>
+</html>
