@@ -316,14 +316,95 @@ body.domain-agent .sales-only { display: none !important; }
 .empty { text-align: center; padding: 32px 16px; color: var(--text-3); font-size: 13px; }
 .empty svg { width: 36px; height: 36px; opacity: 0.4; margin-bottom: 8px; }
 
-.kanban { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-.kanban-col { background: var(--surface-2); border-radius: var(--radius-sm); padding: 12px; min-height: 140px; }
-.kanban-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px; color: var(--text-2); }
-.deal-card { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid var(--border); transition: 0.15s; }
-.deal-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
-.deal-name { font-size: 13px; font-weight: 600; margin: 0; }
-.deal-amount { font-size: 13px; color: var(--success); font-weight: 600; margin: 4px 0 0; }
-.kanban-empty { font-size: 11px; color: var(--text-3); text-align: center; padding: 16px 0; }
+/* KANBAN PRO */
+.kanban-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.kanban-stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.kanban-stat-card .label { font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 4px; }
+.kanban-stat-card .value { font-size: 20px; font-weight: 700; }
+.kanban-stat-card .sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+.kanban {
+  display: grid; grid-template-columns: repeat(6, minmax(180px, 1fr));
+  gap: 10px; padding: 4px; overflow-x: auto;
+}
+.kanban-col {
+  background: var(--surface-2); border-radius: 12px;
+  padding: 0; min-height: 320px; display: flex; flex-direction: column;
+  transition: background 0.2s, border 0.2s;
+  border: 2px dashed transparent;
+}
+.kanban-col.drag-over {
+  background: rgba(167, 139, 250, 0.18);
+  border: 2px dashed var(--accent);
+}
+.kanban-col-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  border-top-left-radius: 12px; border-top-right-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  position: relative;
+}
+.kanban-col-header::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-top-left-radius: 12px; border-top-right-radius: 12px;
+}
+.kanban-col[data-stage="prospect"]  .kanban-col-header::before { background: #6366F1; }
+.kanban-col[data-stage="contact"]   .kanban-col-header::before { background: #F59E0B; }
+.kanban-col[data-stage="meeting"]   .kanban-col-header::before { background: #A78BFA; }
+.kanban-col[data-stage="quote"]     .kanban-col-header::before { background: #EC4899; }
+.kanban-col[data-stage="won"]       .kanban-col-header::before { background: #10B981; }
+.kanban-col[data-stage="lost"]      .kanban-col-header::before { background: #EF4444; }
+
+.kanban-col-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.kanban-col-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
+.kanban-col-title-dot { width: 8px; height: 8px; border-radius: 50%; }
+.kanban-col[data-stage="prospect"]  .kanban-col-title-dot { background: #6366F1; }
+.kanban-col[data-stage="contact"]   .kanban-col-title-dot { background: #F59E0B; }
+.kanban-col[data-stage="meeting"]   .kanban-col-title-dot { background: #A78BFA; }
+.kanban-col[data-stage="quote"]     .kanban-col-title-dot { background: #EC4899; }
+.kanban-col[data-stage="won"]       .kanban-col-title-dot { background: #10B981; }
+.kanban-col[data-stage="lost"]      .kanban-col-title-dot { background: #EF4444; }
+.kanban-col[data-stage="prospect"]  .kanban-col-title { color: #818CF8; }
+.kanban-col[data-stage="contact"]   .kanban-col-title { color: #FBBF24; }
+.kanban-col[data-stage="meeting"]   .kanban-col-title { color: #C4B5FD; }
+.kanban-col[data-stage="quote"]     .kanban-col-title { color: #F472B6; }
+.kanban-col[data-stage="won"]       .kanban-col-title { color: #34D399; }
+.kanban-col[data-stage="lost"]      .kanban-col-title { color: #F87171; }
+
+.kanban-col-count { background: var(--surface-3); color: var(--text-2); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+.kanban-col-total { font-size: 13px; font-weight: 600; color: var(--text); }
+.kanban-col-body { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 100px; }
+
+.deal-card {
+  background: var(--surface); border-radius: 10px;
+  padding: 12px 14px; cursor: grab;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+  position: relative;
+}
+.deal-card:hover { border-color: rgba(167, 139, 250, 0.4); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
+.deal-card:active { cursor: grabbing; }
+.deal-card.dragging { opacity: 0.4; transform: rotate(2deg); }
+.deal-card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; gap: 8px; }
+.deal-card-name { font-size: 13px; font-weight: 600; color: var(--text); margin: 0; line-height: 1.3; }
+.deal-card-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+.deal-card:hover .deal-card-actions { opacity: 1; }
+.deal-card-actions button { background: none; border: none; cursor: pointer; padding: 2px; color: var(--text-3); }
+.deal-card-actions button:hover { color: var(--text); }
+.deal-card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+.deal-card-amount { font-size: 14px; font-weight: 700; color: #34D399; }
+.deal-card-amount.high { color: #FCD34D; }
+.deal-card-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 6px; border-radius: 4px; background: var(--surface-2); color: var(--text-2); }
+.deal-card-progress { height: 3px; background: var(--surface-2); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.deal-card-progress-fill { height: 100%; background: linear-gradient(90deg, #7C3AED, #EC4899); }
+
+.kanban-add-btn {
+  width: 100%; padding: 8px; background: transparent; border: 1px dashed var(--border-strong);
+  border-radius: 8px; color: var(--text-3); cursor: pointer; font-size: 12px;
+  transition: 0.15s; margin-top: 4px;
+}
+.kanban-add-btn:hover { background: var(--surface); color: var(--accent); border-color: var(--accent); }
+.kanban-empty { font-size: 11px; color: var(--text-3); text-align: center; padding: 24px 0; font-style: italic; }
 
 .report-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
 .report-card { background: var(--surface-2); border-radius: var(--radius); padding: 16px; text-align: center; }
@@ -971,15 +1052,62 @@ body.domain-agent .sales-only { display: none !important; }
     </div>
   </div>
 
-  <!-- ============ PIPELINE ============ -->
+  <!-- ============ PIPELINE KANBAN PRO ============ -->
   <div class="view" id="view-pipeline">
     <div class="card">
-      <h2 class="card-title">
-        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
-        Pipeline commercial
-      </h2>
-      <p class="card-desc">Clique sur un deal pour le déplacer.</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <h2 class="card-title" style="margin: 0;">
+          <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          Pipeline commercial
+        </h2>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn btn-secondary" onclick="openAddDealModalKanban()">+ Nouveau deal</button>
+          <select id="kanban-filter" class="select" style="max-width: 200px;" onchange="renderKanban()">
+            <option value="all">Tous les deals</option>
+            <option value="month">Ce mois-ci</option>
+            <option value="quarter">Ce trimestre</option>
+            <option value="hot">Hot leads only</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- STATS GLOBALES -->
+      <div class="kanban-stats" id="kanban-stats"></div>
+
+      <!-- KANBAN -->
       <div class="kanban" id="kanban"></div>
+
+      <p style="font-size: 12px; color: var(--text-3); margin-top: 12px; text-align: center;">
+        💡 Tu peux <strong>glisser-déposer</strong> les deals entre colonnes · clic sur un deal pour les actions
+      </p>
+    </div>
+  </div>
+
+  <!-- Modal Add Deal Kanban -->
+  <div id="kanban-add-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="card" style="max-width: 480px; width: 90%; margin: 0;">
+      <h3 style="margin: 0 0 16px;">Ajouter un deal au pipeline</h3>
+      <p class="field-label">Lead / Client</p>
+      <select id="kanban-deal-lead" class="select" style="margin-bottom: 10px;"></select>
+      <div class="input-row">
+        <div>
+          <p class="field-label">Montant TTC (€)</p>
+          <input id="kanban-deal-amount" type="number" class="input" placeholder="0">
+        </div>
+        <div>
+          <p class="field-label">Étape</p>
+          <select id="kanban-deal-stage" class="select">
+            <option value="prospect">🔵 Prospect</option>
+            <option value="contact">🟠 Contacté</option>
+            <option value="meeting">🟣 RDV</option>
+            <option value="quote">🩷 Devis</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top: 16px;">
+        <button class="btn btn-ghost" onclick="closeKanbanAddModal()">Annuler</button>
+        <button class="btn btn-primary" style="flex: 1;" onclick="createDealFromKanban()">Créer le deal</button>
+      </div>
     </div>
   </div>
 
@@ -2153,25 +2281,249 @@ function exportLeads() {
 
 function renderKanban() {
   const stages = [
-    { key:'prospect', label:'Prospect', color:'#6366F1' },
-    { key:'contact',  label:'Contacté', color:'#D97706' },
-    { key:'meeting',  label:'RDV', color:'#7C3AED' },
-    { key:'quote',    label:'Devis', color:'#DB2777' },
-    { key:'won',      label:'Signé', color:'#059669' },
-    { key:'lost',     label:'Perdu', color:'#DC2626' }
+    { key:'prospect', label:'Prospect', icon:'🔵' },
+    { key:'contact',  label:'Contacté', icon:'🟠' },
+    { key:'meeting',  label:'RDV',      icon:'🟣' },
+    { key:'quote',    label:'Devis',    icon:'🩷' },
+    { key:'won',      label:'Signé',    icon:'✅' },
+    { key:'lost',     label:'Perdu',    icon:'❌' }
   ];
   const el = document.getElementById('kanban');
   if (!el) return;
+
+  // Filtre temporel / catégorie
+  const filterVal = document.getElementById('kanban-filter')?.value || 'all';
+  let deals = state.deals.slice();
+  if (filterVal === 'month') {
+    const now = new Date(); const ms = now.getMonth();
+    deals = deals.filter(d => new Date(d.id).getMonth() === ms);
+  } else if (filterVal === 'quarter') {
+    const now = new Date(); const qStart = Math.floor(now.getMonth()/3)*3;
+    deals = deals.filter(d => { const m = new Date(d.id).getMonth(); return m >= qStart && m < qStart+3; });
+  } else if (filterVal === 'hot') {
+    const hotIds = new Set(state.leads.filter(l => l.category === 'hot').map(l => l.id));
+    deals = deals.filter(d => hotIds.has(d.leadId));
+  }
+
+  // Render colonnes
   el.innerHTML = stages.map(s => {
-    const items = state.deals.filter(d => d.stage === s.key);
-    const cards = items.map(d => `
-      <div class="deal-card" onclick="moveDeal(${d.id})">
-        <p class="deal-name">${escapeHtml(d.company)}</p>
-        <p class="deal-amount">${eur(d.amount)}</p>
+    const items = deals.filter(d => d.stage === s.key);
+    const total = items.reduce((sum, d) => sum + (d.amount || 0), 0);
+    const cards = items.length ? items.map(d => renderDealCard(d)).join('') : '<div class="kanban-empty">Aucun deal</div>';
+    const canAdd = s.key !== 'won' && s.key !== 'lost';
+    return `
+      <div class="kanban-col" data-stage="${s.key}"
+           ondragover="kanbanDragOver(event)"
+           ondrop="kanbanDrop(event, '${s.key}')"
+           ondragleave="kanbanDragLeave(event)">
+        <div class="kanban-col-header">
+          <div class="kanban-col-title-row">
+            <div class="kanban-col-title"><span class="kanban-col-title-dot"></span>${s.label}</div>
+            <div class="kanban-col-count">${items.length}</div>
+          </div>
+          <div class="kanban-col-total">${eur(total)}</div>
+        </div>
+        <div class="kanban-col-body" id="col-body-${s.key}">
+          ${cards}
+          ${canAdd ? `<button class="kanban-add-btn" onclick="openAddDealModalKanban('${s.key}')">+ Ajouter ici</button>` : ''}
+        </div>
       </div>
-    `).join('') || '<div class="kanban-empty">vide</div>';
-    return '<div class="kanban-col"><p class="kanban-title" style="color:'+s.color+'">'+s.label+'</p>'+cards+'</div>';
+    `;
   }).join('');
+
+  renderKanbanStats(deals);
+}
+
+function renderDealCard(d) {
+  const lead = state.leads.find(l => l.id === d.leadId);
+  const score = lead ? lead.score : null;
+  const probability = STAGE_PROBABILITIES[d.stage] || 0;
+  const tag = lead ? `<span class="deal-card-tag">${escapeHtml(lead.sector || '')}</span>` : '';
+  const hot = lead && lead.category === 'hot';
+  const dateLabel = d.id ? new Date(d.id).toLocaleDateString('fr-FR', { day:'2-digit', month:'short' }) : '';
+  return `
+    <div class="deal-card" draggable="true"
+         ondragstart="kanbanDragStart(event, ${d.id})"
+         ondragend="kanbanDragEnd(event)"
+         onclick="openDealDetails(${d.id})">
+      <div class="deal-card-header">
+        <p class="deal-card-name">${hot ? '🔥 ' : ''}${escapeHtml(d.company)}</p>
+        <div class="deal-card-actions">
+          <button onclick="event.stopPropagation(); moveDealUp(${d.id})" title="Avancer">→</button>
+          <button onclick="event.stopPropagation(); confirmDeleteDeal(${d.id})" title="Supprimer">🗑</button>
+        </div>
+      </div>
+      ${tag}
+      ${d.contact ? `<div style="font-size: 11px; color: var(--text-3); margin-top: 4px;">${escapeHtml(d.contact)}</div>` : ''}
+      <div class="deal-card-meta">
+        <span class="deal-card-amount${d.amount >= 5000 ? ' high' : ''}">${eur(d.amount)}</span>
+        <span>${score ? '⭐ '+score : ''} ${dateLabel}</span>
+      </div>
+      ${d.stage !== 'won' && d.stage !== 'lost' ? `<div class="deal-card-progress"><div class="deal-card-progress-fill" style="width: ${probability}%"></div></div>` : ''}
+    </div>
+  `;
+}
+
+function renderKanbanStats(deals) {
+  const el = document.getElementById('kanban-stats');
+  if (!el) return;
+  const totalDeals = deals.length;
+  const totalAmount = deals.reduce((s,d) => s + (d.amount || 0), 0);
+  const wonDeals = deals.filter(d => d.stage === 'won');
+  const wonAmount = wonDeals.reduce((s,d) => s+d.amount, 0);
+  const lostDeals = deals.filter(d => d.stage === 'lost');
+  const winRate = wonDeals.length + lostDeals.length > 0 ? Math.round(wonDeals.length / (wonDeals.length + lostDeals.length) * 100) : 0;
+  const weighted = deals.filter(d => d.stage !== 'won' && d.stage !== 'lost')
+    .reduce((s,d) => s + (d.amount * (STAGE_PROBABILITIES[d.stage] || 0) / 100), 0);
+  const avgDeal = totalDeals > 0 ? totalAmount / totalDeals : 0;
+
+  el.innerHTML = `
+    <div class="kanban-stat-card">
+      <p class="label">Total deals</p>
+      <p class="value">${totalDeals}</p>
+      <p class="sub">${eur(totalAmount)} brut</p>
+    </div>
+    <div class="kanban-stat-card">
+      <p class="label">Signé</p>
+      <p class="value" style="color: #34D399;">${eur(wonAmount)}</p>
+      <p class="sub">${wonDeals.length} deals</p>
+    </div>
+    <div class="kanban-stat-card">
+      <p class="label">Pondéré (forecast)</p>
+      <p class="value" style="color: var(--accent);">${eur(weighted)}</p>
+      <p class="sub">Σ deals × proba</p>
+    </div>
+    <div class="kanban-stat-card">
+      <p class="label">Win rate</p>
+      <p class="value" style="color: ${winRate >= 50 ? '#34D399' : winRate >= 30 ? '#FBBF24' : '#F87171'};">${winRate}%</p>
+      <p class="sub">${wonDeals.length}W / ${lostDeals.length}L</p>
+    </div>
+    <div class="kanban-stat-card">
+      <p class="label">Deal moyen</p>
+      <p class="value">${eur(avgDeal)}</p>
+      <p class="sub">tous deals</p>
+    </div>
+  `;
+}
+
+/* === DRAG & DROP === */
+let _dragDealId = null;
+function kanbanDragStart(e, dealId) {
+  _dragDealId = dealId;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function kanbanDragEnd(e) {
+  e.target.classList.remove('dragging');
+  document.querySelectorAll('.kanban-col').forEach(c => c.classList.remove('drag-over'));
+}
+function kanbanDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('drag-over');
+}
+function kanbanDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function kanbanDrop(e, newStage) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!_dragDealId) return;
+  const deal = state.deals.find(d => d.id === _dragDealId);
+  if (!deal || deal.stage === newStage) { _dragDealId = null; return; }
+  const oldStage = deal.stage;
+  deal.stage = newStage;
+  // Si lost : demander la raison
+  if (newStage === 'lost' && oldStage !== 'lost') {
+    const reason = window.prompt('Raison de la perte (optionnel) :', '');
+    deal.lostReason = reason || '';
+    deal.lostAt = new Date().toISOString();
+    if (state.geminiKey && reason) analyzeLostDeal(deal).catch(()=>{});
+  }
+  // Si won : célébration
+  if (newStage === 'won' && oldStage !== 'won') {
+    deal.wonAt = new Date().toISOString();
+    logAct('🎉 Deal signé : '+deal.company+' ('+eur(deal.amount)+')', 'success');
+  }
+  save(); refresh();
+  _dragDealId = null;
+}
+
+function moveDealUp(id) {
+  const stages = ['prospect','contact','meeting','quote','won'];
+  const deal = state.deals.find(d => d.id === id);
+  if (!deal) return;
+  const idx = stages.indexOf(deal.stage);
+  if (idx < 0 || idx >= stages.length - 1) return;
+  deal.stage = stages[idx + 1];
+  if (deal.stage === 'won') deal.wonAt = new Date().toISOString();
+  save(); refresh();
+}
+
+function confirmDeleteDeal(id) {
+  const deal = state.deals.find(d => d.id === id);
+  if (!deal) return;
+  if (confirm('Supprimer définitivement le deal "'+deal.company+'" ?')) {
+    state.deals = state.deals.filter(d => d.id !== id);
+    save(); refresh();
+  }
+}
+
+function openDealDetails(id) {
+  const deal = state.deals.find(d => d.id === id);
+  if (!deal) return;
+  const lead = state.leads.find(l => l.id === deal.leadId);
+  alert([
+    '═══ '+deal.company+' ═══',
+    '',
+    'Étape : '+deal.stage,
+    'Montant : '+eur(deal.amount),
+    deal.contact ? 'Contact : '+deal.contact : null,
+    lead ? 'Score lead : '+lead.score+'/100 ('+lead.category+')' : null,
+    lead && lead.sector ? 'Secteur : '+lead.sector : null,
+    lead && lead.painPoints?.length ? '\nDouleurs :\n- '+lead.painPoints.join('\n- ') : null,
+    deal.wonAt ? '\n✅ Signé le '+new Date(deal.wonAt).toLocaleDateString('fr-FR') : null,
+    deal.lostReason ? '\n❌ Perdu : '+deal.lostReason : null
+  ].filter(Boolean).join('\n'));
+}
+
+/* === Modal add deal === */
+function openAddDealModalKanban(presetStage) {
+  const modal = document.getElementById('kanban-add-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  const sel = document.getElementById('kanban-deal-lead');
+  sel.innerHTML = '<option value="">— Sélectionner lead/client —</option>' +
+    state.leads.map(l => `<option value="lead-${l.id}">${escapeHtml(l.company)} (lead, score ${l.score})</option>`).join('') +
+    state.clients.map(c => `<option value="client-${c.id}">${escapeHtml(c.name)} (client)</option>`).join('');
+  if (presetStage) document.getElementById('kanban-deal-stage').value = presetStage;
+  document.getElementById('kanban-deal-amount').value = '';
+}
+function closeKanbanAddModal() {
+  document.getElementById('kanban-add-modal').style.display = 'none';
+}
+function createDealFromKanban() {
+  const sel = document.getElementById('kanban-deal-lead');
+  const choice = sel.value;
+  if (!choice) { alert('Sélectionne un lead ou client'); return; }
+  const amount = parseFloat(document.getElementById('kanban-deal-amount').value);
+  if (!amount || amount <= 0) { alert('Montant requis'); return; }
+  const stage = document.getElementById('kanban-deal-stage').value;
+  const [type, id] = choice.split('-');
+  let company = '';
+  let leadId = null;
+  if (type === 'lead') {
+    const lead = state.leads.find(l => l.id == id);
+    company = lead?.company || ''; leadId = lead?.id;
+  } else {
+    const client = state.clients.find(c => c.id == id);
+    company = client?.name || '';
+  }
+  state.deals.push({
+    id: Date.now(), leadId, company, amount, stage,
+    createdAt: new Date().toISOString()
+  });
+  save(); refresh(); closeKanbanAddModal();
+  logAct('Deal ajouté : '+company+' ('+eur(amount)+')', 'success');
 }
 
 function refreshLeadDropdown() {
