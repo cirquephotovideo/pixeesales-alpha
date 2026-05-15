@@ -3213,16 +3213,139 @@ function renderLeads() {
     list.innerHTML = '<div class="empty"><div>Aucun lead. Active l\'autopilote ou clique "Trouver des leads maintenant".</div></div>';
     return;
   }
-  list.innerHTML = items.map(l => `
-    <div class="lead-row">
-      <div class="score-circle">${l.score}</div>
-      <div class="lead-info">
-        <p class="lead-name">${escapeHtml(l.company)} <span class="badge ${badgeClass(l.category)}">${escapeHtml(l.category)}</span></p>
-        <p class="lead-meta">${escapeHtml(l.sector)} · ${escapeHtml(l.size)} · ${eur(l.basketEur)}${l.url?' · <a href="'+escapeHtml(l.url)+'" target="_blank" style="color: var(--accent-2);">'+escapeHtml(l.url.replace(/^https?:\/\//,'').substring(0,40))+'</a>':''}</p>
+  list.innerHTML = items.map(l => {
+    const idJs = JSON.stringify(l.id);
+    const plan = buildLeadActionPlan(l);
+    return `
+    <div class="lead-card" style="background: var(--surface); border: 1px solid var(--glass-border-strong); border-left: 4px solid ${planColor(l.category)}; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; backdrop-filter: blur(20px) saturate(180%);">
+      <div style="display: flex; gap: 14px; align-items: start;">
+        <div class="score-circle" style="background: linear-gradient(135deg, ${planColor(l.category)}, ${planColor2(l.category)}); flex-shrink: 0;">${l.score}</div>
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+            <strong style="font-size: 15px;">${escapeHtml(l.company)}</strong>
+            <span class="badge ${badgeClass(l.category)}" style="font-size: 10px; padding: 2px 8px;">${escapeHtml(l.category)}</span>
+          </div>
+          <div style="font-size: 12px; color: var(--text-2); line-height: 1.5;">
+            ${l.sector?escapeHtml(l.sector)+' · ':''}${l.size?escapeHtml(l.size)+' · ':''}${l.basketEur?eur(l.basketEur)+' · ':''}${l.url?'<a href="'+escapeHtml(l.url)+'" target="_blank" style="color: var(--accent-2); text-decoration: none;">'+escapeHtml(l.url.replace(/^https?:\/\//,'').substring(0,40))+' ↗</a>':''}
+          </div>
+          ${l.pitch?'<div style="font-size: 12px; color: var(--text-3); margin-top: 6px; font-style: italic; line-height: 1.5;">"'+escapeHtml(l.pitch)+'"</div>':''}
+          ${l.painPoints?.length ? '<div style="font-size: 11px; color: var(--text-3); margin-top: 6px;"><strong>Pain points :</strong> '+l.painPoints.slice(0,3).map(escapeHtml).join(' · ')+'</div>' : ''}
+        </div>
       </div>
-      <button class="btn btn-ghost" style="padding: 6px 12px; font-size: 12px;" onclick="addToPipeline(${l.id})">+ Pipeline</button>
-    </div>
-  `).join('');
+
+      <!-- Plan d'action contextuel -->
+      <div style="margin-top: 12px; padding: 10px 12px; background: var(--glass-bg); border-radius: 10px; border: 1px solid var(--glass-border);">
+        <div style="font-size: 11px; color: var(--text-3); margin-bottom: 6px; font-weight: 600;">📌 PLAN D'ACTION SUGGÉRÉ</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          ${plan.map(p => `<button class="btn ${p.cls||'btn-ghost'}" style="padding: 6px 12px; font-size: 11px;" onclick="${p.onclick}">${p.label}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function planColor(cat) {
+  return cat === 'hot' ? '#ef4444' : cat === 'warm' ? '#f59e0b' : '#3b82f6';
+}
+function planColor2(cat) {
+  return cat === 'hot' ? '#dc2626' : cat === 'warm' ? '#d97706' : '#2563eb';
+}
+
+function buildLeadActionPlan(lead) {
+  // Génère 4-6 actions selon catégorie + données dispo
+  const id = JSON.stringify(lead.id);
+  const cat = lead.category;
+  const actions = [];
+
+  // Action 1 : ajouter au pipeline (toujours)
+  actions.push({ label: '➕ Pipeline', cls: 'btn-primary', onclick: `addToPipeline(${id})` });
+
+  // Action 2 : selon catégorie
+  if (cat === 'hot') {
+    actions.push({ label: '📞 Appeler maintenant', cls: 'btn-success', onclick: `alert('☎️ Appelle ${escapeHtml((lead.company||'').replace(/'/g,""))} : ${lead.phone||lead.email||'pas de tel'}');logAct('Action call : ${escapeHtml((lead.company||'').replace(/'/g,""))}', 'info')` });
+  }
+
+  // Action 3 : Email cold/relance via outreach
+  if (lead.email || lead.url) {
+    actions.push({ label: '✉️ Cold email IA', cls: 'btn-secondary', onclick: `quickGenerateOutreachFor(${id}, 'cold-email')` });
+  }
+
+  // Action 4 : LinkedIn
+  actions.push({ label: '💼 LinkedIn IA', cls: 'btn-ghost', onclick: `quickGenerateOutreachFor(${id}, 'linkedin')` });
+
+  // Action 5 : Recherche info / scraping
+  if (lead.url) {
+    actions.push({ label: '🔍 Analyser site', cls: 'btn-ghost', onclick: `quickAnalyzeUrl('${escapeHtml(lead.url).replace(/'/g,"")}')` });
+  }
+
+  // Action 6 : Script appel
+  actions.push({ label: '📞 Script appel', cls: 'btn-ghost', onclick: `quickGenerateOutreachFor(${id}, 'call-script')` });
+
+  // Action 7 : Convertir en client
+  actions.push({ label: '✅ Convertir client', cls: 'btn-ghost', onclick: `convertLeadToClient(${id})` });
+
+  return actions;
+}
+
+function quickGenerateOutreachFor(leadId, type) {
+  // Switch vers Outreach onglet adéquat + pré-sélectionne le lead
+  const lead = state.leads.find(l => l.id == leadId);
+  if (!lead) return;
+  const tabMap = { 'cold-email': 'cold', 'linkedin': 'linkedin', 'call-script': 'scripts' };
+  const tab = tabMap[type] || 'cold';
+  navTo('outreach', null, tab);
+  setTimeout(() => {
+    const product = (lead.products && lead.products[0]) || 'PixeePIM';
+    const tone = lead.category === 'hot' ? 'Direct et data-driven' : 'Conversationnel et chaleureux';
+    generateOutreachForLead(lead, type, product, tone, tab);
+  }, 500);
+}
+
+async function generateOutreachForLead(lead, type, product, tone, tab) {
+  const resultId = ({ cold: 'out-result', relances: 're-result', linkedin: 'li-result', scripts: 'sc-result' })[tab] || 'out-result';
+  const out = document.getElementById(resultId);
+  if (out) out.innerHTML = '<div class="loading"><div class="spinner"></div>Génération en cours pour '+escapeHtml(lead.company)+'…</div>';
+  try {
+    const text = await generateOutreachFor(lead, type, product, tone);
+    if (out) out.innerHTML = `
+      <div style="margin-bottom: 8px; font-size: 12px; color: var(--accent);">✓ Généré pour <strong>${escapeHtml(lead.company)}</strong></div>
+      <div class="output">${escapeHtml(text)}</div>
+      <div class="btn-row" style="margin-top: 10px;">
+        <button class="btn btn-ghost" onclick='copyText(${JSON.stringify(text)}, this)'>Copier</button>
+        ${lead.email ? '<button class="btn btn-primary" onclick=\"sendOutreachAsEmail(\''+escapeHtml(lead.email).replace(/'/g,'')+'\', '+JSON.stringify(text).replace(/"/g,'&quot;')+')\">📤 Envoyer à '+escapeHtml(lead.email)+'</button>' : ''}
+      </div>
+    `;
+  } catch(e) {
+    if (out) out.innerHTML = '<div class="error">Erreur : '+escapeHtml(e.message)+'</div>';
+  }
+}
+
+async function quickAnalyzeUrl(url) {
+  if (!url) { alert('Pas d\'URL'); return; }
+  if (typeof jinaRead !== 'function') { window.open(url, '_blank'); return; }
+  alert('🔍 Analyse en cours du site '+url+' (résultat dans la console F12)');
+  try {
+    const txt = await jinaRead(url);
+    console.log('=== '+url+' ===\n', txt.slice(0, 3000));
+    alert('✓ Site analysé : '+txt.length+' chars récupérés. Voir console F12 pour le contenu.');
+  } catch(e) { alert('Erreur : '+e.message); }
+}
+
+function convertLeadToClient(leadId) {
+  const lead = state.leads.find(l => l.id == leadId);
+  if (!lead) return;
+  if (!confirm('Convertir "'+lead.company+'" en client ?')) return;
+  if (!Array.isArray(state.clients)) state.clients = [];
+  const client = {
+    id: Date.now(),
+    name: lead.company, contact: lead.contact || '', email: lead.email || '',
+    phone: lead.phone || '', siret: '', address: '',
+    fromLeadId: lead.id, createdAt: Date.now()
+  };
+  state.clients.unshift(client);
+  if (typeof saveBiz === 'function') saveBiz();
+  if (typeof logAct === 'function') logAct('Lead converti en client : '+lead.company, 'success');
+  alert('✓ Client créé : '+lead.company);
 }
 function filterLeads(cat, el) {
   state.filter = cat;
@@ -3709,7 +3832,7 @@ async function callGemini(prompt, opts) {
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+k;
   const body = {
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: opts.temperature || 0.7, maxOutputTokens: 4096 }
+    generationConfig: { temperature: opts.temperature || 0.7, maxOutputTokens: opts.maxTokens || 8192 }
   };
   if (opts.search) body.tools = [{ google_search: {} }];
   let res;
@@ -3761,34 +3884,57 @@ async function findLeadsNow() {
 }
 
 async function findLeads(sector, count) {
-  const prompt = `Tu es PixeeSales-Alpha, expert commercial B2B pour Pixeeplay (PixeePIM gestion produit, Pixeesite sites web, GLD logistique, IA SaaS).
+  const promptSearch = `Tu es PixeeSales-Alpha, expert commercial B2B pour Pixeeplay (PixeePIM gestion produit, Pixeesite sites web, GLD logistique, IA SaaS).
 
-Trouve ${count} entreprises réelles correspondant à cet ICP : "${sector}"
+Recherche sur le web ${count} entreprises FRANÇAISES RÉELLES correspondant à cet ICP : "${sector}"
 
-Pour chacune, retourne UNIQUEMENT un JSON array valide (sans markdown, sans préambule) :
-[
-  {
-    "company": "nom exact",
-    "url": "https://...",
-    "sector": "secteur précis",
-    "size": "TPE|PME|ETI|GE",
-    "digital_maturity": "low|medium|high",
-    "score": <entier 1-100>,
-    "category": "hot|warm|cold",
-    "recommended_products": ["PixeePIM"|"Pixeesite"|"GLD"|"AI SaaS"],
-    "basket_eur": <entier>,
-    "pain_points": ["..."],
-    "pitch": "2-3 phrases ultra-personnalisées"
-  }
-]
+Pour chacune, recherche son site web et identifie ses pain points business concrets.
 
-Barème score : site obsolète/lent (+30), catalogue produit complexe (+25), pas d ecom moderne (+20), PME/ETI (+15), retail/industrie (+10).
+RÉPONDS UNIQUEMENT par un JSON array valide. Pas de markdown, pas de \`\`\`json, pas de préambule, pas de citations entre crochets, juste le JSON brut commençant par [ et finissant par ].
 
-Privilégie de vraies entreprises françaises avec sites web vérifiables. Pour chaque : pitch concret exploitant les vraies douleurs business.`;
+Format :
+[{"company":"nom","url":"https://...","sector":"secteur","size":"TPE|PME|ETI|GE","digital_maturity":"low|medium|high","score":75,"category":"hot|warm|cold","recommended_products":["PixeePIM","Pixeesite","GLD","AI SaaS"],"basket_eur":15000,"pain_points":["..."],"pitch":"2-3 phrases ultra-personnalisées"}]
 
-  const resp = await callGemini(prompt, { search: state.config.search, temperature: 0.8 });
-  const arr = parseJsonFromAI(resp, 'array');
-  if (!Array.isArray(arr) || !arr.length) throw new Error('Aucun lead trouvé dans la réponse IA');
+Score : site obsolète (+30) · catalogue produit complexe (+25) · pas e-com moderne (+20) · PME/ETI (+15) · retail/industrie (+10).`;
+
+  const promptNoSearch = `Génère ${count} entreprises françaises B2B fictives mais réalistes correspondant à l'ICP : "${sector}".
+
+RÉPONDS UNIQUEMENT par un JSON array valide. Pas de markdown, pas de préambule, juste le JSON brut.
+
+Format :
+[{"company":"nom","url":"https://...","sector":"secteur","size":"TPE|PME|ETI|GE","digital_maturity":"low|medium|high","score":75,"category":"hot|warm|cold","recommended_products":["PixeePIM"],"basket_eur":15000,"pain_points":["..."],"pitch":"2-3 phrases personnalisées"}]`;
+
+  let resp, lastError, lastResp;
+  // Tentative 1 : avec Google Search activé
+  try {
+    resp = await callGemini(promptSearch, { search: state.config.search, temperature: 0.8, maxTokens: 8192 });
+    lastResp = resp;
+    let arr = parseJsonFromAI(resp, 'array');
+    if (Array.isArray(arr) && arr.length) return await _ingestLeads(arr);
+  } catch(e) { lastError = e; console.warn('[findLeads] search attempt failed:', e.message); }
+
+  // Tentative 2 : sans Google Search
+  try {
+    resp = await callGemini(promptSearch, { search: false, temperature: 0.7, maxTokens: 8192 });
+    lastResp = resp;
+    let arr = parseJsonFromAI(resp, 'array');
+    if (Array.isArray(arr) && arr.length) return await _ingestLeads(arr);
+  } catch(e) { lastError = e; console.warn('[findLeads] no-search attempt failed:', e.message); }
+
+  // Tentative 3 : prompt simplifié (sans search, fictif)
+  try {
+    resp = await callGemini(promptNoSearch, { search: false, temperature: 0.9, maxTokens: 8192 });
+    lastResp = resp;
+    let arr = parseJsonFromAI(resp, 'array');
+    if (Array.isArray(arr) && arr.length) return await _ingestLeads(arr);
+  } catch(e) { lastError = e; }
+
+  // Echec — log de la réponse pour debug
+  console.error('[findLeads] AI raw response :', lastResp?.slice(0, 800));
+  throw new Error('Aucun lead trouvé dans la réponse IA. Réponse Gemini : "'+ (lastResp || lastError?.message || 'vide').slice(0,200) + '..." (ouvre la console pour voir la réponse complète)');
+}
+
+async function _ingestLeads(arr) {
   const added = [];
   arr.forEach(p => {
     const exists = state.leads.find(l => l.company.toLowerCase() === (p.company||'').toLowerCase());
