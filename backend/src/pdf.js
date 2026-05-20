@@ -27,8 +27,8 @@ export function pdfRoutes(db) {
 function generateDocPDF(stream, doc, type) {
   const branding = doc.branding || {
     company: 'PIXEEPLAY',
-    address: 'Sébastien de Miollis · Loos · France',
-    email: 'smiollis@gmail.com',
+    address: 'Pixeeplay · France',
+    email: 'contact@pixeeplay.com',
     phone: '+33 6 73 18 82 96',
     color: '#7C3AED'
   };
