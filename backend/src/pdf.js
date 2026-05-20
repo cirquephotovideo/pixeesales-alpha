@@ -29,7 +29,7 @@ function generateDocPDF(stream, doc, type) {
     company: 'PIXEEPLAY',
     address: 'Pixeeplay · France',
     email: 'contact@pixeeplay.com',
-    phone: '+33 6 73 18 82 96',
+    phone: '',
     color: '#7C3AED'
   };
 
